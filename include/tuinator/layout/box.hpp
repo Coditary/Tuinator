@@ -30,9 +30,12 @@ public:
     Size preferred_size() const override;
     void layout(Rect bounds) override;
     void paint(Canvas& canvas) const override;
+    Widget* hit_test(Point point) override;
+    Widget* hit_test_focusable(Point point) override;
     bool handle_event(const Event& event) override;
 
 private:
+    Widget* focusable_child_at(Point point) const;
     int gap_;
     int padding_;
 };

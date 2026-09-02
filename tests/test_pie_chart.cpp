@@ -1,7 +1,7 @@
 #include "render_helper.hpp"
 #include "test_harness.hpp"
 
-#include <tuinator/widgets/pie_chart.hpp>
+#include <tuinator/widgets/charts/pie_chart.hpp>
 
 #include <cmath>
 

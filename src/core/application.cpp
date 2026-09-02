@@ -2,10 +2,10 @@
 
 #include <tuinator/debug/startup_profiler.hpp>
 #include <tuinator/render/theme.hpp>
-#include <tuinator/widgets/scroll_view.hpp>
-#include <tuinator/widgets/panel.hpp>
-#include <tuinator/widgets/split_pane.hpp>
-#include <tuinator/widgets/tabs.hpp>
+#include <tuinator/widgets/containers/scroll_view.hpp>
+#include <tuinator/widgets/containers/panel.hpp>
+#include <tuinator/widgets/containers/split_pane.hpp>
+#include <tuinator/widgets/containers/tabs.hpp>
 
 #include <algorithm>
 #include <cstdio>
@@ -26,6 +26,8 @@ const char* mouse_action_name(MouseAction action) {
     case MouseAction::Move:    return "move";
     case MouseAction::WheelUp:   return "wheel_up";
     case MouseAction::WheelDown: return "wheel_down";
+    case MouseAction::WheelLeft: return "wheel_left";
+    case MouseAction::WheelRight: return "wheel_right";
     }
     return "unknown";
 }
@@ -170,7 +172,8 @@ Widget* find_pointer_active_widget(Widget* node) {
 MouseEvent adjust_mouse_for_widget(Widget* root, Widget* target, const MouseEvent& mouse) {
     MouseEvent adjusted = mouse;
     if (ScrollView* scroll = find_scroll_view_for_widget(root, target)) {
-        adjusted.position.y += scroll->scroll_y();
+        adjusted.position.x = mouse.position.x - scroll->bounds().x + scroll->scroll_x();
+        adjusted.position.y = mouse.position.y - scroll->bounds().y + scroll->scroll_y();
     }
     return adjusted;
 }
@@ -670,14 +673,14 @@ void Application::handle_event(const Event& event) {
                             return;
                         }
 
-                        scroll->scroll_by(delta);
+                        scroll->scroll_by(0, delta);
                         request_redraw();
                         return;
                     }
                 }
 
                 if (ScrollView* any_scroll = find_first_scroll_view(root_.get())) {
-                    any_scroll->scroll_by(delta);
+                    any_scroll->scroll_by(0, delta);
                     request_redraw();
                     return;
                 }

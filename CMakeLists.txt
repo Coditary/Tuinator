@@ -82,41 +82,51 @@ add_library(tuinator
     src/render/graphics_encode.cpp
     src/render/graphics_protocol.cpp
     src/render/glyphs.cpp
+    src/render/scrollbar/core.cpp
+    src/render/scrollbar/behavior.cpp
+    src/render/scrollbar/style.cpp
+    src/render/scrollbar/scrollbar.cpp
     src/render/terminal_image.cpp
     src/render/text.cpp
     src/render/theme.cpp
-    src/widgets/button.cpp
-    src/widgets/chart_common.cpp
-    src/widgets/bar_chart.cpp
-    src/widgets/checkbox.cpp
-    src/widgets/combo_box.cpp
-    src/widgets/dialog.cpp
-    src/widgets/image_view.cpp
-    src/widgets/label.cpp
-    src/widgets/line_chart.cpp
-    src/widgets/list_view.cpp
-    src/widgets/menu_bar.cpp
-    src/widgets/menu_common.cpp
-    src/widgets/context_menu.cpp
-    src/widgets/command_palette.cpp
-    src/widgets/panel.cpp
-    src/widgets/pie_chart.cpp
-    src/widgets/progress_bar.cpp
-    src/widgets/scroll_view.cpp
-    src/widgets/separator.cpp
-    src/widgets/slider.cpp
-    src/widgets/spinner.cpp
-    src/widgets/split_pane.cpp
-    src/widgets/status_bar.cpp
-    src/widgets/tabs.cpp
-    src/widgets/table.cpp
-    src/widgets/text_input.cpp
-    src/widgets/text_area.cpp
-    src/widgets/throbber.cpp
-    src/widgets/big_text.cpp
-    src/widgets/toggle.cpp
-    src/widgets/tree_view.cpp
     src/widgets/widget.cpp
+    src/widgets/controls/button.cpp
+    src/widgets/controls/checkbox.cpp
+    src/widgets/controls/combo_box.cpp
+    src/widgets/controls/slider.cpp
+    src/widgets/controls/text_area.cpp
+    src/widgets/controls/text_input.cpp
+    src/widgets/controls/toggle.cpp
+    src/widgets/display/big_text.cpp
+    src/widgets/display/image_view.cpp
+    src/widgets/display/label.cpp
+    src/widgets/display/progress_bar.cpp
+    src/widgets/display/separator.cpp
+    src/widgets/display/spinner.cpp
+    src/widgets/display/throbber.cpp
+    src/widgets/containers/panel.cpp
+    src/widgets/containers/scroll_view.cpp
+    src/widgets/containers/split_pane.cpp
+    src/widgets/containers/tabs.cpp
+    src/widgets/views/list_view.cpp
+    src/widgets/views/table.cpp
+    src/widgets/views/tree_view.cpp
+    src/widgets/charts/bar_chart.cpp
+    src/widgets/charts/candlestick_chart.cpp
+    src/widgets/charts/chart_common.cpp
+    src/widgets/charts/gauge_chart.cpp
+    src/widgets/charts/heatmap.cpp
+    src/widgets/charts/histogram.cpp
+    src/widgets/charts/line_chart.cpp
+    src/widgets/charts/pie_chart.cpp
+    src/widgets/charts/stacked_area_chart.cpp
+    src/widgets/charts/waterfall_chart.cpp
+    src/widgets/menu/command_palette.cpp
+    src/widgets/menu/context_menu.cpp
+    src/widgets/menu/menu_bar.cpp
+    src/widgets/menu/menu_common.cpp
+    src/widgets/chrome/dialog.cpp
+    src/widgets/chrome/status_bar.cpp
     src/window/desktop.cpp
     src/window/window.cpp
     src/window/window_host.cpp
@@ -164,11 +174,13 @@ if(TUINATOR_BUILD_TESTS)
         tests/test_checkbox.cpp
         tests/test_menu_bar.cpp
         tests/test_text_area.cpp
+        tests/test_scrollbar.cpp
         tests/test_throbber.cpp
         tests/test_big_text.cpp
         tests/test_pie_chart.cpp
         tests/test_bar_chart.cpp
         tests/test_line_chart.cpp
+        tests/test_advanced_charts.cpp
     )
     target_link_libraries(tuinator-tests PRIVATE tuinator::tuinator)
     target_include_directories(tuinator-tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)

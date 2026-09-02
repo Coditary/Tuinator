@@ -1,6 +1,6 @@
 #include <tuinator/core/action_registry.hpp>
 
-#include <tuinator/widgets/menu_bar.hpp>
+#include <tuinator/widgets/menu/menu_bar.hpp>
 
 #include <algorithm>
 #include <cctype>

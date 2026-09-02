@@ -3,10 +3,10 @@
 
 #include <tuinator/core/action_registry.hpp>
 #include <tuinator/render/theme.hpp>
-#include <tuinator/widgets/command_palette.hpp>
-#include <tuinator/widgets/context_menu.hpp>
-#include <tuinator/widgets/menu_bar.hpp>
-#include <tuinator/widgets/menu_common.hpp>
+#include <tuinator/widgets/menu/command_palette.hpp>
+#include <tuinator/widgets/menu/context_menu.hpp>
+#include <tuinator/widgets/menu/menu_bar.hpp>
+#include <tuinator/widgets/menu/menu_common.hpp>
 
 TUINATOR_TEST(menu_mnemonic_parsing) {
     const tuinator::ParsedMenuText parsed = tuinator::parse_menu_mnemonic("&File");

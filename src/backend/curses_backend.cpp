@@ -240,6 +240,18 @@ MouseAction mouse_action_from_state(mmask_t state) {
     }
 #endif
 
+#ifdef BUTTON6_PRESSED
+    if (state & (BUTTON6_PRESSED | BUTTON6_RELEASED | BUTTON6_CLICKED)) {
+        return MouseAction::WheelLeft;
+    }
+#endif
+
+#ifdef BUTTON7_PRESSED
+    if (state & (BUTTON7_PRESSED | BUTTON7_RELEASED | BUTTON7_CLICKED)) {
+        return MouseAction::WheelRight;
+    }
+#endif
+
     if (state & (BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED | BUTTON1_TRIPLE_CLICKED)) {
         if (state & REPORT_MOUSE_POSITION) {
             return MouseAction::Move;
@@ -621,6 +633,11 @@ std::optional<Event> CursesBackend::read_event(bool block) {
         return KeyPress{Key::Escape, '\0'};
     }
 
+    const Key mapped = map_key(ch);
+    if (mapped != Key::Unknown) {
+        return KeyPress{mapped, '\0'};
+    }
+
     if (ch >= 1 && ch <= 26) {
         KeyPress ctrl_press{};
         ctrl_press.key = Key::Unknown;
@@ -630,8 +647,8 @@ std::optional<Event> CursesBackend::read_event(bool block) {
     }
 
     KeyPress press{};
-    press.key = map_key(ch);
-    if (press.key == Key::Unknown && ch >= 32 && ch <= 126) {
+    press.key = Key::Unknown;
+    if (ch >= 32 && ch <= 126) {
         press.character = static_cast<char>(ch);
     }
 
@@ -649,10 +666,7 @@ std::optional<Event> CursesBackend::poll_event_nonblocking() {
 void CursesBackend::begin_frame() {
     pending_ansi_draws_.clear();
     pending_image_draws_.clear();
-    erase();
-#if defined(TUINATOR_BACKEND_NCURSES)
-    touchwin(stdscr);
-#endif
+    clear();
 }
 
 void CursesBackend::end_frame() {

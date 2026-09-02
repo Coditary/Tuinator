@@ -152,6 +152,10 @@ void VBox::layout(Rect bounds) {
 }
 
 void VBox::paint(Canvas& canvas) const {
+    if (bounds_.width > 0 && bounds_.height > 0) {
+        canvas.fill_rect({{0, 0}, bounds_.size()}, ' ');
+    }
+
     for (const auto& child : children_) {
         const Rect local{
             child->bounds().x - bounds_.x,
@@ -206,6 +210,10 @@ void HBox::layout(Rect bounds) {
 }
 
 void HBox::paint(Canvas& canvas) const {
+    if (bounds_.width > 0 && bounds_.height > 0) {
+        canvas.fill_rect({{0, 0}, bounds_.size()}, ' ');
+    }
+
     for (const auto& child : children_) {
         const Rect local{
             child->bounds().x - bounds_.x,
@@ -220,9 +228,80 @@ void HBox::paint(Canvas& canvas) const {
     }
 }
 
+Widget* HBox::focusable_child_at(Point point) const {
+    for (auto it = children_.rbegin(); it != children_.rend(); ++it) {
+        if (Widget* hit = (*it)->hit_test_focusable(point)) {
+            return hit;
+        }
+    }
+
+    if (!bounds_.contains(point)) {
+        return nullptr;
+    }
+
+    for (const auto& child : children_) {
+        if (child->is_focusable()) {
+            return child.get();
+        }
+    }
+
+    return nullptr;
+}
+
+Widget* HBox::hit_test(Point point) {
+    if (!bounds_.contains(point)) {
+        return nullptr;
+    }
+
+    for (auto it = children_.rbegin(); it != children_.rend(); ++it) {
+        if (Widget* hit = (*it)->hit_test(point)) {
+            if (hit->is_focusable()) {
+                return hit;
+            }
+            if (focusable_child_at(point) != nullptr) {
+                return this;
+            }
+            return hit;
+        }
+    }
+
+    return this;
+}
+
+Widget* HBox::hit_test_focusable(Point point) {
+    return focusable_child_at(point);
+}
+
 bool HBox::handle_event(const Event& event) {
-    if (std::holds_alternative<MouseEvent>(event)) {
-        return Widget::handle_event(event);
+    if (const auto* mouse = std::get_if<MouseEvent>(&event)) {
+        if (!bounds_.contains(mouse->position)) {
+            return false;
+        }
+
+        switch (mouse->action) {
+        case MouseAction::WheelUp:
+        case MouseAction::WheelDown:
+        case MouseAction::WheelLeft:
+        case MouseAction::WheelRight:
+            for (auto it = children_.rbegin(); it != children_.rend(); ++it) {
+                if ((*it)->bounds().contains(mouse->position)) {
+                    return (*it)->handle_event(event);
+                }
+            }
+            return false;
+        default:
+            break;
+        }
+
+        if (Widget* target = focusable_child_at(mouse->position)) {
+            MouseEvent adjusted = *mouse;
+            if (!target->contains_point(mouse->position)) {
+                adjusted.position = {target->bounds().x, target->bounds().y};
+            }
+            return target->handle_event(adjusted);
+        }
+
+        return false;
     }
 
     for (auto& child : children_) {

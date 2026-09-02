@@ -1,7 +1,7 @@
 #include "render_helper.hpp"
 #include "test_harness.hpp"
 
-#include <tuinator/widgets/line_chart.hpp>
+#include <tuinator/widgets/charts/line_chart.hpp>
 
 #include <cmath>
 #include <vector>

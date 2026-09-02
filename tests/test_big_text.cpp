@@ -1,7 +1,7 @@
 #include "render_helper.hpp"
 #include "test_harness.hpp"
 
-#include <tuinator/widgets/big_text.hpp>
+#include <tuinator/widgets/display/big_text.hpp>
 
 TUINATOR_TEST(big_text_block_has_area) {
     tuinator::BigText text("A", tuinator::BigTextKind::Block);

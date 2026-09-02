@@ -2,8 +2,8 @@
 #include "test_harness.hpp"
 
 #include <tuinator/render/theme.hpp>
-#include <tuinator/widgets/checkbox.hpp>
-#include <tuinator/widgets/panel.hpp>
+#include <tuinator/widgets/controls/checkbox.hpp>
+#include <tuinator/widgets/containers/panel.hpp>
 
 TUINATOR_TEST(checkbox_named_style_exists) {
     TUINATOR_CHECK(tuinator::checkbox_style_named("ascii") != nullptr);

@@ -3,7 +3,7 @@
 
 #include <tuinator/layout/box.hpp>
 #include <tuinator/render/theme.hpp>
-#include <tuinator/widgets/label.hpp>
+#include <tuinator/widgets/display/label.hpp>
 
 TUINATOR_TEST(label_centers_in_vbox) {
     tuinator::MemoryTerminalBackend backend({80, 8});

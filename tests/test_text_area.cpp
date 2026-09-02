@@ -2,7 +2,7 @@
 #include "test_harness.hpp"
 
 #include <tuinator/core/event.hpp>
-#include <tuinator/widgets/text_area.hpp>
+#include <tuinator/widgets/controls/text_area.hpp>
 
 #include <string>
 
@@ -118,6 +118,16 @@ TUINATOR_TEST(text_area_custom_gutter_paints_symbols) {
 
     TUINATOR_CHECK(tuinator::test::row_contains(backend, 0, ">1"));
     TUINATOR_CHECK(tuinator::test::row_contains(backend, 1, "*2"));
+}
+
+TUINATOR_TEST(text_area_inserts_tab) {
+    tuinator::TextArea area;
+    area.set_focused(true);
+    area.layout({0, 0, 40, 10});
+
+    area.handle_event(key(tuinator::Key::Tab));
+
+    TUINATOR_CHECK_EQ(area.value(), std::string("\t"));
 }
 
 TUINATOR_TEST(text_area_relative_gutter_uses_cursor_distance) {

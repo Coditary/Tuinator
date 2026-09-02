@@ -1,7 +1,7 @@
 #pragma once
 
 #include <tuinator/core/event.hpp>
-#include <tuinator/widgets/menu_bar.hpp>
+#include <tuinator/widgets/menu/menu_bar.hpp>
 
 #include <functional>
 #include <string>

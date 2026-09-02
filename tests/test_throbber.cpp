@@ -1,7 +1,7 @@
 #include "test_harness.hpp"
 #include "render_helper.hpp"
 
-#include <tuinator/widgets/throbber.hpp>
+#include <tuinator/widgets/display/throbber.hpp>
 
 #include <string>
 

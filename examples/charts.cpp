@@ -424,13 +424,211 @@ int main() {
         content->add_child(std::move(row));
     }
 
+    add_section_header(*content, "8. Histogram", theme);
+    {
+        auto row = std::make_unique<tuinator::HBox>(tuinator::BoxOptions{.gap = 2});
+        row->add_child(panel(
+            "Latency distribution",
+            theme,
+            std::make_unique<tuinator::Histogram>(
+                std::vector<tuinator::HistogramBin>{
+                    {"0-10", 12, color(tuinator::Color::Green)},
+                    {"10-20", 28, color(tuinator::Color::Cyan)},
+                    {"20-30", 45, color(tuinator::Color::Blue)},
+                    {"30-40", 31, color(tuinator::Color::Yellow)},
+                    {"40-50", 18, color(tuinator::Color::Magenta)},
+                    {"50+", 7, color(tuinator::Color::Red)},
+                },
+                tuinator::HistogramOptions{
+                    .style = tuinator::ChartGlyphStyle::Blocks,
+                    .show_counts = true,
+                    .min_width = 34,
+                    .min_height = 10,
+                    .axis_style = theme.muted,
+                    .grid_style = theme.muted,
+                    .count_style = theme.label,
+                })));
+        row->add_child(panel(
+            "Braille histogram",
+            theme,
+            std::make_unique<tuinator::Histogram>(
+                std::vector<tuinator::HistogramBin>{
+                    {"A", 8, color(tuinator::Color::Cyan)},
+                    {"B", 22, color(tuinator::Color::Green)},
+                    {"C", 35, color(tuinator::Color::Yellow)},
+                    {"D", 19, color(tuinator::Color::Magenta)},
+                    {"E", 11, color(tuinator::Color::Red)},
+                },
+                tuinator::HistogramOptions{
+                    .style = tuinator::ChartGlyphStyle::Braille,
+                    .min_width = 28,
+                    .min_height = 10,
+                    .axis_style = theme.muted,
+                    .grid_style = theme.muted,
+                })));
+        content->add_child(std::move(row));
+    }
+
+    add_section_header(*content, "9. Heatmap", theme);
+    {
+        std::vector<std::vector<double>> activity;
+        for (int row = 0; row < 7; ++row) {
+            std::vector<double> line;
+            for (int col = 0; col < 12; ++col) {
+                line.push_back(static_cast<double>((row + 1) * (col + 2) % 17));
+            }
+            activity.push_back(std::move(line));
+        }
+
+        content->add_child(panel(
+            "Weekly activity",
+            theme,
+            std::make_unique<tuinator::Heatmap>(
+                activity,
+                std::vector<std::string>{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"},
+                std::vector<std::string>{"W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8", "W9", "W10", "W11", "W12"},
+                tuinator::HeatmapOptions{
+                    .min_width = 48,
+                    .min_height = 12,
+                    .title_style = theme.heading,
+                    .label_style = theme.muted,
+                    .low_style = style_fg(tuinator::Rgb::hex(0x1D4ED8)),
+                    .high_style = style_fg(tuinator::Rgb::hex(0xEF4444)),
+                })));
+    }
+
+    add_section_header(*content, "10. Gauge / Radial", theme);
+    {
+        auto row = std::make_unique<tuinator::HBox>(tuinator::BoxOptions{.gap = 2});
+        row->add_child(panel(
+            "CPU",
+            theme,
+            std::make_unique<tuinator::GaugeChart>(
+                72.0,
+                tuinator::GaugeChartOptions{
+                    .style = tuinator::GaugeStyle::Arc,
+                    .glyph = tuinator::ChartGlyphStyle::Blocks,
+                    .unit = "%",
+                    .diameter = 16,
+                    .track_style = theme.muted,
+                    .fill_style = color(tuinator::Color::Green),
+                    .value_style = theme.heading,
+                })));
+        row->add_child(panel(
+            "RAM",
+            theme,
+            std::make_unique<tuinator::GaugeChart>(
+                64.0,
+                tuinator::GaugeChartOptions{
+                    .style = tuinator::GaugeStyle::Arc,
+                    .glyph = tuinator::ChartGlyphStyle::Dots,
+                    .unit = "%",
+                    .diameter = 16,
+                    .track_style = theme.muted,
+                    .fill_style = color(tuinator::Color::Cyan),
+                    .value_style = theme.heading,
+                })));
+        row->add_child(panel(
+            "Disk",
+            theme,
+            std::make_unique<tuinator::GaugeChart>(
+                81.0,
+                tuinator::GaugeChartOptions{
+                    .style = tuinator::GaugeStyle::Horizontal,
+                    .glyph = tuinator::ChartGlyphStyle::Blocks,
+                    .unit = "%",
+                    .diameter = 24,
+                    .track_style = theme.muted,
+                    .fill_style = color(tuinator::Color::Yellow),
+                    .value_style = theme.label,
+                })));
+        content->add_child(std::move(row));
+    }
+
+    add_section_header(*content, "11. Stacked area", theme);
+    {
+        content->add_child(panel(
+            "Memory breakdown",
+            theme,
+            std::make_unique<tuinator::StackedAreaChart>(
+                std::vector<tuinator::StackedAreaSeries>{
+                    {"Used", {20, 24, 28, 32, 30, 35, 40, 38}, color(tuinator::Color::Red)},
+                    {"Cached", {10, 12, 11, 14, 15, 13, 16, 18}, color(tuinator::Color::Yellow)},
+                    {"Free", {30, 28, 26, 24, 25, 22, 20, 19}, color(tuinator::Color::Green)},
+                },
+                tuinator::StackedAreaChartOptions{
+                    .style = tuinator::ChartGlyphStyle::Blocks,
+                    .min_width = 48,
+                    .min_height = 10,
+                    .axis_style = theme.muted,
+                    .grid_style = theme.muted,
+                    .legend_style = theme.label,
+                })));
+    }
+
+    add_section_header(*content, "12. Waterfall", theme);
+    {
+        content->add_child(panel(
+            "Revenue bridge",
+            theme,
+            std::make_unique<tuinator::WaterfallChart>(
+                std::vector<tuinator::WaterfallStep>{
+                    {"Start", 100.0, color(tuinator::Color::Cyan), color(tuinator::Color::Red)},
+                    {"Product A", 35.0, color(tuinator::Color::Green), color(tuinator::Color::Red)},
+                    {"Product B", -12.0, color(tuinator::Color::Green), color(tuinator::Color::Red)},
+                    {"Costs", -28.0, color(tuinator::Color::Green), color(tuinator::Color::Red)},
+                    {"Tax", -8.0, color(tuinator::Color::Green), color(tuinator::Color::Red)},
+                },
+                tuinator::WaterfallChartOptions{
+                    .baseline = 0.0,
+                    .bar_width = 2,
+                    .bar_gap = 1,
+                    .compact_layout = true,
+                    .min_width = 28,
+                    .min_height = 12,
+                    .axis_style = theme.muted,
+                    .grid_style = theme.muted,
+                    .connector_style = theme.muted,
+                    .total_style = color(tuinator::Color::Cyan),
+                })));
+    }
+
+    add_section_header(*content, "13. Candlestick / OHLC", theme);
+    {
+        content->add_child(panel(
+            "Price + volume",
+            theme,
+            std::make_unique<tuinator::CandlestickChart>(
+                std::vector<tuinator::OhlcBar>{
+                    {"03/01", 271, 296, 268, 288, 120, {}, {}},
+                    {"03/08", 288, 305, 280, 298, 180, {}, {}},
+                    {"03/15", 298, 320, 292, 315, 220, {}, {}},
+                    {"03/22", 315, 330, 308, 322, 160, {}, {}},
+                    {"03/29", 322, 346, 318, 340, 240, {}, {}},
+                    {"04/05", 340, 355, 332, 348, 210, {}, {}},
+                    {"04/12", 348, 371, 342, 365, 190, {}, {}},
+                },
+                tuinator::CandlestickChartOptions{
+                    .show_volume = true,
+                    .bar_width = 2,
+                    .bar_gap = 1,
+                    .compact_layout = true,
+                    .min_width = 24,
+                    .min_height = 14,
+                    .axis_style = theme.muted,
+                    .grid_style = theme.muted,
+                    .up_style = color(tuinator::Color::Green),
+                    .down_style = color(tuinator::Color::Red),
+                })));
+    }
+
     auto scroll = std::make_unique<tuinator::ScrollView>(
         std::move(content),
         tuinator::ScrollViewOptions{.width = 100, .height = 24});
     scroll->set_flex(1);
 
     auto status = std::make_unique<tuinator::StatusBar>(
-        "Charts gallery • drag temperature bars • scroll with mouse wheel / arrows",
+        "Charts gallery • histogram, heatmap, gauge, stacked, waterfall, OHLC • scroll to explore",
         theme.muted);
 
     auto root = std::make_unique<ChartsRoot>(tuinator::BoxOptions{.gap = 0, .padding = 0});

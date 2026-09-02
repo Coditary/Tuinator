@@ -1,9 +1,9 @@
 #include <tuinator/window/desktop.hpp>
 
 #include <tuinator/core/action_registry.hpp>
-#include <tuinator/widgets/command_palette.hpp>
-#include <tuinator/widgets/context_menu.hpp>
-#include <tuinator/widgets/menu_bar.hpp>
+#include <tuinator/widgets/menu/command_palette.hpp>
+#include <tuinator/widgets/menu/context_menu.hpp>
+#include <tuinator/widgets/menu/menu_bar.hpp>
 
 #include <algorithm>
 

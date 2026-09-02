@@ -3,7 +3,7 @@
 
 #include <tuinator/render/glyphs.hpp>
 #include <tuinator/render/theme.hpp>
-#include <tuinator/widgets/panel.hpp>
+#include <tuinator/widgets/containers/panel.hpp>
 
 TUINATOR_TEST(border_glyphs_for_each_set) {
     TUINATOR_CHECK_EQ(tuinator::border_glyphs_for(tuinator::GlyphSet::Ascii).horizontal, "-");

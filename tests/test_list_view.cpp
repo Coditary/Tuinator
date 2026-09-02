@@ -3,7 +3,7 @@
 
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/theme.hpp>
-#include <tuinator/widgets/list_view.hpp>
+#include <tuinator/widgets/views/list_view.hpp>
 
 TUINATOR_TEST(list_view_select_with_keys) {
     const tuinator::Theme theme = tuinator::dark_theme();

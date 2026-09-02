@@ -4,7 +4,7 @@
 #include <tuinator/render/graphics_encode.hpp>
 #include <tuinator/render/graphics_protocol.hpp>
 #include <tuinator/render/terminal_image.hpp>
-#include <tuinator/widgets/image_view.hpp>
+#include <tuinator/widgets/display/image_view.hpp>
 
 #include <string>
 #include <vector>

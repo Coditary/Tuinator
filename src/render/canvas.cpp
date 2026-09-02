@@ -57,16 +57,32 @@ void Canvas::draw_text(Point position, std::string_view text, Style style) {
         }
 
         const std::string_view line(text.data() + start, end - start);
-        if (!line.empty() && is_visible({x, y})) {
+        if (!line.empty()) {
             const Point terminal = to_terminal({x, y});
-            if (terminal.x < 0 || terminal.y < 0) {
-                break;
-            }
-            const int available = clip_.right() - terminal.x;
-            if (available > 0) {
-                const std::size_t length =
-                    text_byte_length_for_width(line, std::max(0, available));
-                backend_.draw_text(terminal.x, terminal.y, line.substr(0, length), style);
+            if (terminal.y >= clip_.y && terminal.y < clip_.bottom()) {
+                int draw_x = terminal.x;
+                std::string_view visible = line;
+
+                if (draw_x < clip_.x) {
+                    const int hidden_columns = clip_.x - draw_x;
+                    const std::size_t skip_bytes = text_byte_length_for_width(line, hidden_columns);
+                    if (skip_bytes < line.size()) {
+                        visible = line.substr(skip_bytes);
+                        draw_x = clip_.x;
+                    } else {
+                        visible = {};
+                    }
+                }
+
+                if (!visible.empty() && draw_x < clip_.right()) {
+                    const int available = clip_.right() - draw_x;
+                    if (available > 0) {
+                        const std::size_t length = text_byte_length_for_width(visible, available);
+                        if (length > 0) {
+                            backend_.draw_text(draw_x, terminal.y, visible.substr(0, length), style);
+                        }
+                    }
+                }
             }
         }
 
@@ -158,6 +174,10 @@ void Canvas::with_clip(Rect rect, const std::function<void(Canvas&)>& draw) cons
     const Point child_origin{origin_.x + rect.x, origin_.y + rect.y};
     const Rect child_clip =
         intersect(clip_, {child_origin.x, child_origin.y, rect.width, rect.height});
+    if (child_clip.width <= 0 || child_clip.height <= 0) {
+        return;
+    }
+
     Canvas child(backend_, child_origin, rect.size(), child_clip, glyphs_);
     draw(child);
 }

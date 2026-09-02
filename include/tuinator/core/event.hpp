@@ -53,6 +53,8 @@ enum class MouseAction : std::uint8_t {
     Move,
     WheelUp,
     WheelDown,
+    WheelLeft,
+    WheelRight,
 };
 
 struct MouseEvent {

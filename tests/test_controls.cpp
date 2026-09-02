@@ -2,12 +2,12 @@
 #include "test_harness.hpp"
 
 #include <tuinator/render/theme.hpp>
-#include <tuinator/widgets/combo_box.hpp>
-#include <tuinator/widgets/menu_bar.hpp>
-#include <tuinator/widgets/progress_bar.hpp>
-#include <tuinator/widgets/slider.hpp>
-#include <tuinator/widgets/spinner.hpp>
-#include <tuinator/widgets/tree_view.hpp>
+#include <tuinator/widgets/controls/combo_box.hpp>
+#include <tuinator/widgets/menu/menu_bar.hpp>
+#include <tuinator/widgets/display/progress_bar.hpp>
+#include <tuinator/widgets/controls/slider.hpp>
+#include <tuinator/widgets/display/spinner.hpp>
+#include <tuinator/widgets/views/tree_view.hpp>
 
 TUINATOR_TEST(progress_bar_plain_renders_arrow) {
     tuinator::MemoryTerminalBackend backend({20, 3});
