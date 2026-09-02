@@ -186,41 +186,49 @@ target_compile_options(tuinator PRIVATE
 option(TUINATOR_BUILD_TESTS "Build unit tests" ON)
 
 if(TUINATOR_BUILD_TESTS)
-    add_executable(tuinator-tests
-        tests/test_main.cpp
-        tests/test_text.cpp
-        tests/test_label.cpp
-        tests/test_list_view.cpp
-        tests/test_memory_backend.cpp
-        tests/test_dirty_region.cpp
-        tests/test_file_icon.cpp
-        tests/test_git_change_status.cpp
-        tests/test_ui_icon.cpp
-        tests/test_line_icon.cpp
-        tests/test_weather_icon.cpp
-        tests/test_nerd_icon_catalog.cpp
-        tests/test_nerd_glyph_matrix.cpp
-        tests/test_block_element.cpp
-        tests/test_box_drawing.cpp
-        tests/test_glyphs.cpp
-        tests/test_border_style.cpp
-        tests/test_image.cpp
-        tests/test_controls.cpp
-        tests/test_checkbox.cpp
-        tests/test_menu_bar.cpp
-        tests/test_text_area.cpp
-        tests/test_scrollbar.cpp
-        tests/test_source_control_panel.cpp
-        tests/test_status_line.cpp
-        tests/test_throbber.cpp
-        tests/test_big_text.cpp
-        tests/test_pie_chart.cpp
-        tests/test_bar_chart.cpp
-        tests/test_line_chart.cpp
-        tests/test_advanced_charts.cpp
+    set(TUINATOR_TEST_SOURCES
+        # Core
+        tests/core/test_main.cpp
+        tests/core/test_text.cpp
+        tests/core/test_memory_backend.cpp
+        tests/core/test_dirty_region.cpp
+        # Render
+        tests/render/test_glyphs.cpp
+        tests/render/test_border_style.cpp
+        tests/render/test_block_element.cpp
+        tests/render/test_box_drawing.cpp
+        tests/render/test_file_icon.cpp
+        tests/render/test_git_change_status.cpp
+        tests/render/test_ui_icon.cpp
+        tests/render/test_line_icon.cpp
+        tests/render/test_weather_icon.cpp
+        tests/render/test_nerd_icon_catalog.cpp
+        tests/render/test_nerd_glyph_matrix.cpp
+        # Widgets
+        tests/widgets/test_label.cpp
+        tests/widgets/test_list_view.cpp
+        tests/widgets/test_controls.cpp
+        tests/widgets/test_checkbox.cpp
+        tests/widgets/test_menu_bar.cpp
+        tests/widgets/test_text_area.cpp
+        tests/widgets/test_scrollbar.cpp
+        tests/widgets/test_throbber.cpp
+        tests/widgets/test_big_text.cpp
+        tests/widgets/test_image.cpp
+        tests/widgets/charts/test_pie_chart.cpp
+        tests/widgets/charts/test_bar_chart.cpp
+        tests/widgets/charts/test_line_chart.cpp
+        tests/widgets/charts/test_advanced_charts.cpp
+        tests/widgets/chrome/test_source_control_panel.cpp
+        tests/widgets/chrome/test_status_line.cpp
     )
+
+    add_executable(tuinator-tests ${TUINATOR_TEST_SOURCES})
     target_link_libraries(tuinator-tests PRIVATE tuinator::tuinator)
-    target_include_directories(tuinator-tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    target_include_directories(tuinator-tests PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/support
+    )
     target_compile_definitions(tuinator-tests PRIVATE TUINATOR_DATA_DIR="${CMAKE_SOURCE_DIR}/data")
     add_test(NAME tuinator-tests COMMAND tuinator-tests)
 endif()
