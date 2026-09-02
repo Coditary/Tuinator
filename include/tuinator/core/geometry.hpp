@@ -96,4 +96,19 @@ inline Rect intersect(Rect a, Rect b) {
     return {x, y, right - x, bottom - y};
 }
 
+inline Rect unite(Rect a, Rect b) {
+    if (a.width <= 0 || a.height <= 0) {
+        return b;
+    }
+    if (b.width <= 0 || b.height <= 0) {
+        return a;
+    }
+
+    const int x = std::min(a.x, b.x);
+    const int y = std::min(a.y, b.y);
+    const int right = std::max(a.right(), b.right());
+    const int bottom = std::max(a.bottom(), b.bottom());
+    return {x, y, right - x, bottom - y};
+}
+
 } // namespace tuinator

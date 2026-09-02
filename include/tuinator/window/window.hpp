@@ -37,7 +37,7 @@ public:
 
     Size preferred_size() const override;
     void layout(Rect bounds) override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
     void collect_focusable(std::vector<Widget*>& out) override;
     bool handle_event(const Event& event) override;
     bool captures_pointer() const override;

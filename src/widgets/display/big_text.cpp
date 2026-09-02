@@ -948,7 +948,8 @@ Size BigText::preferred_size() const {
     return {std::max(1, cache_width_), std::max(1, cache_height_)};
 }
 
-void BigText::paint(Canvas& canvas) const {
+void BigText::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     rebuild();
     if (cache_width_ <= 0 || cache_height_ <= 0) {
         return;

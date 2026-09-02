@@ -100,7 +100,8 @@ void GaugeChart::paint_horizontal(Canvas& canvas, int x, int y, int width) const
     }
 }
 
-void GaugeChart::paint(Canvas& canvas) const {
+void GaugeChart::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

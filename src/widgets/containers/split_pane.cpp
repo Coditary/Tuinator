@@ -61,7 +61,8 @@ void SplitPane::layout(Rect bounds) {
     }
 }
 
-void SplitPane::paint(Canvas& canvas) const {
+void SplitPane::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     auto paint_child = [&](const Widget* child) {
         if (!child) {
             return;
@@ -74,9 +75,7 @@ void SplitPane::paint(Canvas& canvas) const {
             child->bounds().height,
         };
 
-        canvas.with_clip(local, [&](Canvas& clipped) {
-            child->paint(clipped);
-        });
+        ctx.with_clip(local, [&](PaintContext& child_ctx) { child->paint(child_ctx); });
     };
 
     paint_child(first_.get());
@@ -131,6 +130,15 @@ void SplitPane::collect_focusable(std::vector<Widget*>& out) {
     }
     if (second_) {
         second_->collect_focusable(out);
+    }
+}
+
+void SplitPane::for_each_child(const std::function<void(Widget*)>& visitor) {
+    if (first_) {
+        visitor(first_.get());
+    }
+    if (second_) {
+        visitor(second_.get());
     }
 }
 

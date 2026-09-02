@@ -71,7 +71,8 @@ Size WaterfallChart::preferred_size() const {
     };
 }
 
-void WaterfallChart::paint(Canvas& canvas) const {
+void WaterfallChart::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0 || steps_.empty()) {
         return;
     }

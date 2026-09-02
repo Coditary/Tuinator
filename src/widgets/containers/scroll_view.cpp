@@ -163,7 +163,8 @@ void ScrollView::layout_content() {
     });
 }
 
-void ScrollView::paint(Canvas& canvas) const {
+void ScrollView::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (!content_) {
         return;
     }
@@ -173,14 +174,12 @@ void ScrollView::paint(Canvas& canvas) const {
 
     canvas.fill_rect(viewport, ' ', options_.background);
 
-    canvas.with_clip(viewport, [&](Canvas& clipped) {
-        clipped.with_clip(
+    ctx.with_clip(viewport, [&](PaintContext& clipped_ctx) {
+        clipped_ctx.with_clip(
             {{-scroll_x_, -scroll_y_},
              {std::max(content_width_, layout.metrics.viewport_width),
               std::max(content_height_, layout.metrics.viewport_height)}},
-            [&](Canvas& content_canvas) {
-                content_->paint(content_canvas);
-            });
+            [&](PaintContext& content_ctx) { content_->paint(content_ctx); });
     });
 
     paint_scrollbars(canvas, options_.scrollbars, layout);
@@ -221,6 +220,12 @@ Widget* ScrollView::hit_test_focusable(Point point) {
 void ScrollView::collect_focusable(std::vector<Widget*>& out) {
     if (content_) {
         content_->collect_focusable(out);
+    }
+}
+
+void ScrollView::for_each_child(const std::function<void(Widget*)>& visitor) {
+    if (content_) {
+        visitor(content_.get());
     }
 }
 

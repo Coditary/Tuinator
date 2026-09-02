@@ -103,7 +103,8 @@ int Table::visible_row_capacity() const {
     return std::max(0, bounds_.height - 1);
 }
 
-void Table::paint(Canvas& canvas) const {
+void Table::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0 || columns_.empty()) {
         return;
     }

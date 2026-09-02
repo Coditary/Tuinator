@@ -33,7 +33,8 @@ Size ImageView::preferred_size() const {
     return {width, height};
 }
 
-void ImageView::paint(Canvas& canvas) const {
+void ImageView::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (image_.empty() || bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

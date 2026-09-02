@@ -15,7 +15,7 @@ public:
 
     Size preferred_size() const override;
     void layout(Rect bounds) override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
     bool handle_event(const Event& event) override;
 
 private:
@@ -29,7 +29,7 @@ public:
 
     Size preferred_size() const override;
     void layout(Rect bounds) override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
     Widget* hit_test(Point point) override;
     Widget* hit_test_focusable(Point point) override;
     bool handle_event(const Event& event) override;

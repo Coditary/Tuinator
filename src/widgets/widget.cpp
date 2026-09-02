@@ -22,7 +22,7 @@ void Widget::layout(Rect bounds) {
     }
 }
 
-void Widget::paint(Canvas& canvas) const {
+void Widget::paint(PaintContext& ctx) const {
     for (const auto& child : children_) {
         const Rect local{
             child->bounds().x - bounds_.x,
@@ -31,9 +31,7 @@ void Widget::paint(Canvas& canvas) const {
             child->bounds().height,
         };
 
-        canvas.with_clip(local, [&](Canvas& clipped) {
-            child->paint(clipped);
-        });
+        ctx.with_clip(local, [&](PaintContext& child_ctx) { child->paint(child_ctx); });
     }
 }
 
@@ -124,7 +122,7 @@ void Widget::set_focused(bool focused) {
     mark_dirty();
 }
 
-void Widget::set_on_dirty(std::function<void()> callback) {
+void Widget::set_on_dirty(std::function<void(Rect)> callback) {
     on_dirty_ = std::move(callback);
 
     for (auto& child : children_) {
@@ -145,9 +143,16 @@ void Widget::set_flex(int flex) {
 }
 
 void Widget::mark_dirty() {
-    if (on_dirty_) {
-        on_dirty_();
+    if (!on_dirty_) {
+        return;
     }
+
+    if (bounds_.width <= 0 || bounds_.height <= 0) {
+        on_dirty_({});
+        return;
+    }
+
+    on_dirty_(bounds_);
 }
 
 void Widget::mark_layout_dirty() {
@@ -164,6 +169,12 @@ void Widget::collect_focusable(std::vector<Widget*>& out) {
 
     for (auto& child : children_) {
         child->collect_focusable(out);
+    }
+}
+
+void Widget::for_each_child(const std::function<void(Widget*)>& visitor) {
+    for (auto& child : children_) {
+        visitor(child.get());
     }
 }
 

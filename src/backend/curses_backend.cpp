@@ -157,16 +157,13 @@ int pair_slot_for_codes(int fg_code, int bg_code) {
     return 1 + kColorCount + kColorCount + (fg_index * kColorCount) + bg_index;
 }
 
-void send_tty_sequence(const char* sequence) {
-    if (sequence == nullptr || sequence[0] == '\0') {
+void send_tty_sequence_to(FILE* output, const char* sequence) {
+    if (output == nullptr || sequence == nullptr || sequence[0] == '\0') {
         return;
     }
 
-    if (FILE* tty = open_tty_output()) {
-        fputs(sequence, tty);
-        fflush(tty);
-        fclose(tty);
-    }
+    fputs(sequence, output);
+    fflush(output);
 }
 
 bool terminal_name_suggests_xterm_mouse() {
@@ -360,6 +357,52 @@ CursesBackend::~CursesBackend() {
     shutdown();
 }
 
+FILE* CursesBackend::output_stream() const {
+    if (tty_out_ != nullptr) {
+        return tty_out_;
+    }
+
+    return stdout;
+}
+
+void CursesBackend::write_tty_sequence(const char* sequence) {
+    send_tty_sequence_to(output_stream(), sequence);
+}
+
+void CursesBackend::close_terminal_streams() {
+    if (tty_in_ != nullptr) {
+        std::fclose(tty_in_);
+        tty_in_ = nullptr;
+    }
+
+    if (tty_out_ != nullptr) {
+        std::fclose(tty_out_);
+        tty_out_ = nullptr;
+    }
+
+    unified_output_ = false;
+}
+
+void CursesBackend::init_curses_screen() {
+#if TUINATOR_PLATFORM_POSIX && defined(TUINATOR_BACKEND_NCURSES)
+    tty_out_ = std::fopen("/dev/tty", "w");
+    tty_in_ = std::fopen("/dev/tty", "r");
+    if (tty_out_ != nullptr && tty_in_ != nullptr) {
+        const char* term = std::getenv("TERM");
+        screen_ = newterm(term != nullptr ? term : "xterm-256color", tty_out_, tty_in_);
+        if (screen_ != nullptr) {
+            set_term(screen_);
+            unified_output_ = true;
+            return;
+        }
+    }
+
+    close_terminal_streams();
+#endif
+
+    initscr();
+}
+
 void CursesBackend::init() {
     if (initialized_) {
         return;
@@ -371,7 +414,7 @@ void CursesBackend::init() {
     use_env(TRUE);
     use_extended_names(TRUE);
 #endif
-    initscr();
+    init_curses_screen();
     startup_profile_mark("curses.after_initscr");
 
     cbreak();
@@ -438,7 +481,7 @@ void CursesBackend::enable_mouse() {
     if (terminal_name_suggests_xterm_mouse()) {
         // Reset then enable SGR + drag tracking. Write to /dev/tty — not stdout/endwin.
         // Default mode 1003 (all motion). Override: TUINATOR_MOUSE_TRACK=1002
-        send_tty_sequence("\033[?1000l\033[?1002l\033[?1003l\033[?1006l");
+        write_tty_sequence("\033[?1000l\033[?1002l\033[?1003l\033[?1006l");
 
         char enable[40];
         const int mode = mouse_tracking_mode();
@@ -447,7 +490,7 @@ void CursesBackend::enable_mouse() {
         } else {
             std::snprintf(enable, sizeof(enable), "\033[?%dh", mode);
         }
-        send_tty_sequence(enable);
+        write_tty_sequence(enable);
 
         xterm_mouse_enabled_ = true;
         mouse_enabled_ = true;
@@ -474,7 +517,7 @@ void CursesBackend::enable_mouse() {
 
 void CursesBackend::disable_mouse() {
     if (xterm_mouse_enabled_) {
-        send_tty_sequence("\033[?1000l\033[?1002l\033[?1003l\033[?1006l");
+        write_tty_sequence("\033[?1000l\033[?1002l\033[?1003l\033[?1006l");
         xterm_mouse_enabled_ = false;
     }
 }
@@ -500,9 +543,13 @@ void CursesBackend::set_poll_timeout_ms(int timeout_ms) {
     timeout(timeout_ms);
 }
 
-void CursesBackend::position_hardware_mouse_cursor() {
-    if (!initialized_ || !mouse_cursor_visible_ || !last_mouse_position_.has_value()) {
-        send_tty_sequence("\033[?25l");
+void CursesBackend::position_hardware_mouse_cursor(FILE* output) {
+    if (!initialized_ || output == nullptr) {
+        return;
+    }
+
+    if (!mouse_cursor_visible_ || !last_mouse_position_.has_value()) {
+        send_tty_sequence_to(output, "\033[?25l");
         return;
     }
 
@@ -510,25 +557,24 @@ void CursesBackend::position_hardware_mouse_cursor() {
     const Size term = terminal_size();
     if (position.x < 0 || position.y < 0
         || position.x >= term.width || position.y >= term.height) {
-        send_tty_sequence("\033[?25l");
+        send_tty_sequence_to(output, "\033[?25l");
         return;
     }
 
     char sequence[48];
     std::snprintf(sequence, sizeof(sequence), "\033[%d;%dH\033[?25h",
                   position.y + 1, position.x + 1);
-    send_tty_sequence(sequence);
+    send_tty_sequence_to(output, sequence);
 }
 
 void CursesBackend::refresh_mouse_cursor() {
-    position_hardware_mouse_cursor();
+    position_hardware_mouse_cursor(output_stream());
 }
 
 void CursesBackend::cleanup_kitty_graphics() {
-    if (FILE* tty = open_tty_output()) {
-        cleanup_kitty_graphics_on_tty(tty);
-        std::fflush(tty);
-        std::fclose(tty);
+    if (FILE* output = output_stream()) {
+        cleanup_kitty_graphics_on_tty(output);
+        std::fflush(output);
     }
     kitty_image_ready_ = false;
     kitty_cached_hash_ = 0;
@@ -545,6 +591,13 @@ void CursesBackend::shutdown() {
     cleanup_kitty_graphics();
     reset_tty_attributes();
     endwin();
+#if defined(TUINATOR_BACKEND_NCURSES)
+    if (screen_ != nullptr) {
+        delscreen(screen_);
+        screen_ = nullptr;
+    }
+#endif
+    close_terminal_streams();
     restore_terminal_state();
     initialized_ = false;
     colors_enabled_ = false;
@@ -584,6 +637,7 @@ std::optional<Event> CursesBackend::read_event(bool block) {
     }
 
     if (ch == KEY_RESIZE) {
+        invalidate_graphics();
         const auto size = terminal_size();
         return Resize{size.width, size.height};
     }
@@ -663,21 +717,57 @@ std::optional<Event> CursesBackend::poll_event_nonblocking() {
     return read_event(false);
 }
 
-void CursesBackend::begin_frame() {
+void CursesBackend::begin_frame(BeginFrameOptions options) {
     pending_ansi_draws_.clear();
     pending_image_draws_.clear();
-    clear();
+
+    if (options.full_redraw) {
+        clear();
+        return;
+    }
+
+    clear_region(options.dirty_region);
+}
+
+void CursesBackend::clear_region(Rect region) {
+    const Size term = terminal_size();
+    region = intersect(region, {{0, 0}, term});
+    if (region.width <= 0 || region.height <= 0) {
+        return;
+    }
+
+    const attr_t attrs = has_colors() ? COLOR_PAIR(1) : A_NORMAL;
+    for (int y = region.y; y < region.bottom(); ++y) {
+        for (int x = region.x; x < region.right(); ++x) {
+            mvaddch(y, x, ' ' | attrs);
+        }
+    }
+}
+
+void CursesBackend::invalidate_graphics() {
+    cleanup_kitty_graphics();
+}
+
+void CursesBackend::prepare_refresh(FILE* output) {
+    if (output != nullptr) {
+        send_tty_sequence_to(output, "\033[?25l\033[H");
+    }
+
+    // Keep ncurses' logical cursor aligned with the physical home position.
+    move(0, 0);
+}
+
+void CursesBackend::present_frame() {
+    FILE* output = output_stream();
+    prepare_refresh(output);
+    refresh();
+    flush_ansi_draws(output);
+    flush_image_draws(output);
+    position_hardware_mouse_cursor(output);
 }
 
 void CursesBackend::end_frame() {
-    // Hover moves the hardware cursor via raw CUP on /dev/tty. ncurses then
-    // emits relative motion (VPA/CUD) from that physical column, so the next
-    // refresh paints a vertical stripe of glyphs under the mouse. Home first.
-    send_tty_sequence("\033[?25l\033[H");
-    refresh();
-    flush_ansi_draws();
-    flush_image_draws();
-    position_hardware_mouse_cursor();
+    present_frame();
 }
 
 void CursesBackend::setup_default_color_pair() {
@@ -838,33 +928,30 @@ void CursesBackend::draw_text_ansi(FILE* output, int x, int y, std::string_view 
     std::fputs("\033[0m", output);
 }
 
-void CursesBackend::flush_ansi_draws() {
+void CursesBackend::flush_ansi_draws(FILE* output) {
     if (pending_ansi_draws_.empty()) {
         return;
     }
 
-    FILE* tty = open_tty_output();
-    if (tty == nullptr) {
+    if (output == nullptr) {
         pending_ansi_draws_.clear();
         return;
     }
 
     for (const AnsiDraw& draw : pending_ansi_draws_) {
-        draw_text_ansi(tty, draw.x, draw.y, draw.text, draw.style);
+        draw_text_ansi(output, draw.x, draw.y, draw.text, draw.style);
     }
 
-    std::fflush(tty);
-    std::fclose(tty);
+    std::fflush(output);
     pending_ansi_draws_.clear();
 }
 
-void CursesBackend::flush_image_draws() {
+void CursesBackend::flush_image_draws(FILE* output) {
     if (pending_image_draws_.empty()) {
         return;
     }
 
-    FILE* tty = open_tty_output();
-    if (tty == nullptr) {
+    if (output == nullptr) {
         pending_image_draws_.clear();
         return;
     }
@@ -878,7 +965,7 @@ void CursesBackend::flush_image_draws() {
                 || draw.rows != last_kitty_placement_.rows;
 
             if (!draw.transmit.empty()) {
-                std::fwrite(draw.transmit.data(), 1, draw.transmit.size(), tty);
+                std::fwrite(draw.transmit.data(), 1, draw.transmit.size(), output);
                 last_kitty_placement_.hash = kitty_cached_hash_;
             }
 
@@ -886,20 +973,19 @@ void CursesBackend::flush_image_draws() {
                 continue;
             }
 
-            std::fprintf(tty, "\033[%d;%dH", draw.y + 1, draw.x + 1);
-            std::fwrite(draw.place.data(), 1, draw.place.size(), tty);
+            std::fprintf(output, "\033[%d;%dH", draw.y + 1, draw.x + 1);
+            std::fwrite(draw.place.data(), 1, draw.place.size(), output);
             last_kitty_placement_ = {draw.x, draw.y, draw.cols, draw.rows, kitty_cached_hash_};
             continue;
         }
 
         if (!draw.transmit.empty()) {
-            std::fprintf(tty, "\033[%d;%dH", draw.y + 1, draw.x + 1);
-            std::fwrite(draw.transmit.data(), 1, draw.transmit.size(), tty);
+            std::fprintf(output, "\033[%d;%dH", draw.y + 1, draw.x + 1);
+            std::fwrite(draw.transmit.data(), 1, draw.transmit.size(), output);
         }
     }
 
-    std::fflush(tty);
-    std::fclose(tty);
+    std::fflush(output);
     pending_image_draws_.clear();
 }
 
@@ -1012,19 +1098,18 @@ void CursesBackend::draw_text(int x, int y, std::string_view text, Style style) 
     }
 
     const int pair = color_pair_for(style);
-    const bool extended_pair =
-        extended_colors_available_
-        && (style.foreground_rgb.has_value() || style.background_rgb.has_value());
+    const bool has_rgb =
+        style.foreground_rgb.has_value() || style.background_rgb.has_value();
+    const bool extended_pair = extended_colors_available_ && has_rgb;
+    const bool ansi_only = true_color_enabled_ && has_rgb && !extended_pair;
 
-    draw_text_cells(y, x, text, attributes, pair, extended_pair);
-
-    const bool rgb_overlay_needed =
-        true_color_enabled_
-        && (style.foreground_rgb.has_value() || style.background_rgb.has_value())
-        && !(extended_colors_available_ && extended_pair);
-    if (rgb_overlay_needed) {
+    if (ansi_only) {
         queue_ansi_draw(x, y, text, style);
+        return;
     }
+
+    const bool extended_draw = extended_pair;
+    draw_text_cells(y, x, text, attributes, pair, extended_draw);
 }
 
 } // namespace tuinator::detail

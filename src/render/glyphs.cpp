@@ -69,21 +69,24 @@ BorderGlyphs make_glyphs(
 } // namespace
 
 GlyphSet detect_glyph_set() {
-    const GlyphSet override = glyph_set_from_env_override();
-    if (override != GlyphSet::Auto) {
-        return override;
-    }
+    static const GlyphSet cached = []() {
+        const GlyphSet override = glyph_set_from_env_override();
+        if (override != GlyphSet::Auto) {
+            return override;
+        }
 
-    const char* force_ascii = std::getenv("TUINATOR_ASCII");
-    if (force_ascii != nullptr && force_ascii[0] != '\0' && std::strcmp(force_ascii, "0") != 0) {
-        return GlyphSet::Ascii;
-    }
+        const char* force_ascii = std::getenv("TUINATOR_ASCII");
+        if (force_ascii != nullptr && force_ascii[0] != '\0' && std::strcmp(force_ascii, "0") != 0) {
+            return GlyphSet::Ascii;
+        }
 
-    if (!locale_supports_utf8() || !terminal_looks_utf8_capable()) {
-        return GlyphSet::Ascii;
-    }
+        if (!locale_supports_utf8() || !terminal_looks_utf8_capable()) {
+            return GlyphSet::Ascii;
+        }
 
-    return GlyphSet::Unicode;
+        return GlyphSet::Unicode;
+    }();
+    return cached;
 }
 
 BorderGlyphs ascii_border_glyphs() {

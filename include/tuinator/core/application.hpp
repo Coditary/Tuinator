@@ -3,6 +3,7 @@
 #include <tuinator/backend/terminal_backend.hpp>
 #include <tuinator/core/geometry.hpp>
 #include <tuinator/render/canvas.hpp>
+#include <tuinator/render/dirty_region.hpp>
 #include <tuinator/render/theme.hpp>
 #include <tuinator/widgets/widget.hpp>
 
@@ -58,6 +59,7 @@ private:
 
     void ensure_terminal();
     void request_redraw();
+    void request_redraw(Rect region);
     int run_headless();
     bool should_run_headless() const;
     void layout_root();
@@ -79,7 +81,7 @@ private:
     TimerId next_timer_id_ = 1;
     std::size_t focus_index_ = 0;
     bool running_ = false;
-    bool dirty_ = true;
+    DirtyRegion dirty_region_;
     bool terminal_ready_ = false;
 };
 

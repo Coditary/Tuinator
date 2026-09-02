@@ -2,6 +2,7 @@
 
 #include <tuinator/render/scrollbar.hpp>
 #include <tuinator/render/style.hpp>
+#include <tuinator/widgets/capabilities.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <memory>
@@ -15,27 +16,28 @@ struct ScrollViewOptions {
     Style background{};
 };
 
-class ScrollView : public Widget {
+class ScrollView : public Widget, public Scrollable {
 public:
     explicit ScrollView(std::unique_ptr<Widget> content, ScrollViewOptions options = {});
 
     Widget* content() const { return content_.get(); }
-    int scroll_x() const { return scroll_x_; }
-    int scroll_y() const { return scroll_y_; }
+    int scroll_x() const override { return scroll_x_; }
+    int scroll_y() const override { return scroll_y_; }
     int max_scroll_x() const;
     int max_scroll_y() const;
 
     void scroll_to(int x, int y);
-    void scroll_by(int dx, int dy);
+    void scroll_by(int dx, int dy) override;
     void refresh_content();
 
-    bool contains_widget(const Widget* widget) const;
-    void ensure_visible(const Widget* widget);
-    bool try_scroll(const Event& event);
+    bool contains_widget(const Widget* widget) const override;
+    void ensure_visible(const Widget* widget) override;
+    bool try_scroll(const Event& event) override;
+    Widget* scroll_content() const override { return content(); }
 
     Size preferred_size() const override;
     void layout(Rect bounds) override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return false; }
     bool pointer_active() const override;
@@ -43,6 +45,7 @@ public:
     void collect_focusable(std::vector<Widget*>& out) override;
     Widget* hit_test(Point point) override;
     Widget* hit_test_focusable(Point point) override;
+    void for_each_child(const std::function<void(Widget*)>& visitor) override;
 
 private:
     void clamp_scroll();

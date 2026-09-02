@@ -197,53 +197,56 @@ void paint_menu_panel(
     }
 
     const Rect box{layout.x, layout.y, layout.width, layout.height};
-    canvas.draw_box(box, look.border_style, look.glyphs);
+    canvas.with_clip(box, [&](Canvas& clipped) {
+        const Rect inner{0, 0, layout.width, layout.height};
+        clipped.draw_box(inner, look.border_style, look.glyphs);
 
-    const int inner_width = std::max(0, layout.width - 2);
-    for (int row = 0; row < static_cast<int>(items.size()); ++row) {
-        const MenuItem& item = items[static_cast<std::size_t>(row)];
-        const int y = layout.y + 1 + row;
+        const int inner_width = std::max(0, layout.width - 2);
+        for (int row = 0; row < static_cast<int>(items.size()); ++row) {
+            const MenuItem& item = items[static_cast<std::size_t>(row)];
+            const int y = 1 + row;
 
-        if (item.kind == MenuItemKind::Separator) {
-            Style line_style = look.border_style;
-            line_style.dim = true;
-            canvas.draw_text(
-                {layout.x + 1, y},
-                std::string(static_cast<std::size_t>(inner_width), look.glyphs.horizontal[0]),
-                line_style);
-            continue;
+            if (item.kind == MenuItemKind::Separator) {
+                Style line_style = look.border_style;
+                line_style.dim = true;
+                clipped.draw_text(
+                    {1, y},
+                    std::string(static_cast<std::size_t>(inner_width), look.glyphs.horizontal[0]),
+                    line_style);
+                continue;
+            }
+
+            const bool selected = row == active_item;
+            Style row_style = selected ? look.active_style : look.submenu_style;
+            if (!item.enabled) {
+                row_style = look.disabled_style;
+            }
+
+            int column = 1;
+            std::string prefix = selected ? "> " : "  ";
+            if (item.kind == MenuItemKind::Checkbox) {
+                prefix += item.checked ? "[x] " : "[ ] ";
+            }
+            clipped.draw_text({column, y}, prefix, row_style);
+            column += text_display_width(prefix);
+
+            if (!item.icon.empty()) {
+                clipped.draw_text({column, y}, item.icon + " ", row_style);
+                column += text_display_width(item.icon) + 1;
+            }
+
+            paint_menu_label(clipped, column, y, item.label, row_style);
+            column += text_display_width(parse_menu_mnemonic(item.label).text);
+
+            if (!item.shortcut.empty()) {
+                const int shortcut_x = layout.width - 1 - text_display_width(item.shortcut);
+                clipped.draw_text({shortcut_x, y}, item.shortcut, look.shortcut_style);
+            } else if (menu_item_has_submenu(item)) {
+                const int arrow_x = layout.width - 2;
+                clipped.draw_text({arrow_x, y}, ">", row_style);
+            }
         }
-
-        const bool selected = row == active_item;
-        Style row_style = selected ? look.active_style : look.submenu_style;
-        if (!item.enabled) {
-            row_style = look.disabled_style;
-        }
-
-        int column = layout.x + 1;
-        std::string prefix = selected ? "> " : "  ";
-        if (item.kind == MenuItemKind::Checkbox) {
-            prefix += item.checked ? "[x] " : "[ ] ";
-        }
-        canvas.draw_text({column, y}, prefix, row_style);
-        column += text_display_width(prefix);
-
-        if (!item.icon.empty()) {
-            canvas.draw_text({column, y}, item.icon + " ", row_style);
-            column += text_display_width(item.icon) + 1;
-        }
-
-        paint_menu_label(canvas, column, y, item.label, row_style);
-        column += text_display_width(parse_menu_mnemonic(item.label).text);
-
-        if (!item.shortcut.empty()) {
-            const int shortcut_x = layout.x + layout.width - 1 - text_display_width(item.shortcut);
-            canvas.draw_text({shortcut_x, y}, item.shortcut, look.shortcut_style);
-        } else if (menu_item_has_submenu(item)) {
-            const int arrow_x = layout.x + layout.width - 2;
-            canvas.draw_text({arrow_x, y}, ">", row_style);
-        }
-    }
+    });
 }
 
 } // namespace tuinator

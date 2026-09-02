@@ -43,13 +43,14 @@ TUINATOR_TEST(throbber_short_frame_clears_previous_cells) {
     tuinator::MemoryTerminalBackend backend({8, 1});
     backend.init();
     tuinator::Canvas canvas(backend);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
     throbber.set_frame(0);
-    throbber.paint(canvas);
+    throbber.paint(ctx);
     TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 0, 0), 'x');
     TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 3, 0), 'x');
 
     throbber.set_frame(1);
-    throbber.paint(canvas);
+    throbber.paint(ctx);
     TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 0, 0), 'y');
     TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 1, 0), ' ');
     TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 3, 0), ' ');

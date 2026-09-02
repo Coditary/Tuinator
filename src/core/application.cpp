@@ -1,11 +1,10 @@
 #include <tuinator/core/application.hpp>
 
 #include <tuinator/debug/startup_profiler.hpp>
+#include <tuinator/render/graphics_protocol.hpp>
+#include <tuinator/render/paint_context.hpp>
 #include <tuinator/render/theme.hpp>
-#include <tuinator/widgets/containers/scroll_view.hpp>
-#include <tuinator/widgets/containers/panel.hpp>
-#include <tuinator/widgets/containers/split_pane.hpp>
-#include <tuinator/widgets/containers/tabs.hpp>
+#include <tuinator/widgets/capabilities.hpp>
 
 #include <algorithm>
 #include <cstdio>
@@ -56,28 +55,6 @@ bool is_mouse_interaction(const MouseEvent& mouse) {
         || mouse.action == MouseAction::Click;
 }
 
-void ensure_focus_visible(Widget* node, Widget* target) {
-    if (node == nullptr || target == nullptr) {
-        return;
-    }
-
-    if (auto* scroll = dynamic_cast<ScrollView*>(node)) {
-        if (scroll->contains_widget(target)) {
-            scroll->ensure_visible(target);
-            return;
-        }
-
-        if (Widget* content = scroll->content()) {
-            ensure_focus_visible(content, target);
-        }
-        return;
-    }
-
-    for (const auto& child : node->children()) {
-        ensure_focus_visible(child.get(), target);
-    }
-}
-
 bool is_viewport_scroll_key(const KeyPress& key) {
     switch (key.key) {
     case Key::PageUp:
@@ -90,146 +67,13 @@ bool is_viewport_scroll_key(const KeyPress& key) {
     }
 }
 
-ScrollView* find_scroll_view_for_widget(Widget* node, const Widget* target) {
-    if (node == nullptr || target == nullptr) {
-        return nullptr;
-    }
-
-    if (auto* scroll = dynamic_cast<ScrollView*>(node)) {
-        if (scroll->contains_widget(target)) {
-            return scroll;
-        }
-
-        if (Widget* content = scroll->content()) {
-            if (ScrollView* nested = find_scroll_view_for_widget(content, target)) {
-                return nested;
-            }
-        }
-        return nullptr;
-    }
-
-    for (const auto& child : node->children()) {
-        if (ScrollView* found = find_scroll_view_for_widget(child.get(), target)) {
-            return found;
-        }
-    }
-
-    return nullptr;
-}
-
-ScrollView* find_first_scroll_view(Widget* node) {
-    if (node == nullptr) {
-        return nullptr;
-    }
-
-    if (auto* scroll = dynamic_cast<ScrollView*>(node)) {
-        return scroll;
-    }
-
-    for (const auto& child : node->children()) {
-        if (ScrollView* found = find_first_scroll_view(child.get())) {
-            return found;
-        }
-    }
-
-    return nullptr;
-}
-
-Widget* find_pointer_active_widget(Widget* node) {
-    if (node == nullptr) {
-        return nullptr;
-    }
-
-    if (node->pointer_active()) {
-        return node;
-    }
-
-    if (auto* panel = dynamic_cast<Panel*>(node)) {
-        if (Widget* content = panel->content()) {
-            if (Widget* found = find_pointer_active_widget(content)) {
-                return found;
-            }
-        }
-    }
-
-    if (auto* scroll = dynamic_cast<ScrollView*>(node)) {
-        if (Widget* content = scroll->content()) {
-            if (Widget* found = find_pointer_active_widget(content)) {
-                return found;
-            }
-        }
-    }
-
-    for (const auto& child : node->children()) {
-        if (Widget* found = find_pointer_active_widget(child.get())) {
-            return found;
-        }
-    }
-
-    return nullptr;
-}
-
-MouseEvent adjust_mouse_for_widget(Widget* root, Widget* target, const MouseEvent& mouse) {
-    MouseEvent adjusted = mouse;
-    if (ScrollView* scroll = find_scroll_view_for_widget(root, target)) {
-        adjusted.position.x = mouse.position.x - scroll->bounds().x + scroll->scroll_x();
-        adjusted.position.y = mouse.position.y - scroll->bounds().y + scroll->scroll_y();
-    }
-    return adjusted;
-}
-
-bool dispatch_scroll_keys(Widget* root, Widget* focused, const Event& event) {
-    ScrollView* scroll = find_scroll_view_for_widget(root, focused);
-    if (scroll == nullptr) {
-        scroll = find_first_scroll_view(root);
-    }
-
-    return scroll != nullptr && scroll->try_scroll(event);
-}
-
-bool dispatch_tab_number(Widget* node, int index) {
-    if (node == nullptr || index < 0) {
+bool widget_wants_hover_redraw(Widget* root, Point position) {
+    if (root == nullptr) {
         return false;
     }
 
-    Tabs* tabs = nullptr;
-
-    const auto visit = [&](Widget* current, const auto& visit_ref) -> void {
-        if (current == nullptr || tabs != nullptr) {
-            return;
-        }
-
-        if (auto* found = dynamic_cast<Tabs*>(current)) {
-            tabs = found;
-            return;
-        }
-
-        for (const auto& child : current->children()) {
-            visit_ref(child.get(), visit_ref);
-        }
-
-        if (auto* panel = dynamic_cast<Panel*>(current)) {
-            visit_ref(panel->content(), visit_ref);
-        }
-
-        if (auto* split = dynamic_cast<SplitPane*>(current)) {
-            visit_ref(split->first(), visit_ref);
-            visit_ref(split->second(), visit_ref);
-        }
-
-        if (auto* scroll = dynamic_cast<ScrollView*>(current)) {
-            visit_ref(scroll->content(), visit_ref);
-        }
-    };
-
-    visit(node, visit);
-
-    if (tabs == nullptr || index >= static_cast<int>(tabs->tab_count())) {
-        return false;
-    }
-
-    tabs->set_selected_index(index);
-    return true;
+    Widget* target = root->hit_test(position);
+    return target != nullptr && target->wants_hover_redraw();
 }
 
 } // namespace
@@ -268,7 +112,7 @@ void Application::set_root(std::unique_ptr<Widget> root) {
     root_ = std::move(root);
 
     if (root_) {
-        root_->set_on_dirty([this]() { request_redraw(); });
+        root_->set_on_dirty([this](Rect region) { request_redraw(region); });
         root_->set_on_layout([this]() {
             layout_root();
             request_redraw();
@@ -402,7 +246,16 @@ void Application::refresh_focus() {
 }
 
 void Application::request_redraw() {
-    dirty_ = true;
+    dirty_region_.mark_full();
+}
+
+void Application::request_redraw(Rect region) {
+    if (region.width <= 0 || region.height <= 0) {
+        dirty_region_.mark_full();
+        return;
+    }
+
+    dirty_region_.mark_rect(region);
 }
 
 void Application::layout_root() {
@@ -571,6 +424,7 @@ void Application::focus_widget(Widget* widget) {
 void Application::handle_event(const Event& event) {
     if (const auto* resize = std::get_if<Resize>(&event)) {
         (void)resize;
+        backend_->invalidate_graphics();
         layout_root();
         request_redraw();
         return;
@@ -597,8 +451,13 @@ void Application::handle_event(const Event& event) {
         // flickers text and re-places Kitty graphics on every pixel of movement.
         const bool motion_while_dragging =
             mouse->action == MouseAction::Move && mouse->left_pressed;
+        const bool hover_needs_redraw =
+            mouse->action == MouseAction::Move && widget_wants_hover_redraw(root_.get(), mouse->position);
         const bool needs_redraw =
-            mouse->action != MouseAction::Move || motion_while_dragging || handled;
+            mouse->action != MouseAction::Move
+            || motion_while_dragging
+            || handled
+            || hover_needs_redraw;
         if (needs_redraw) {
             request_redraw();
         } else if (mouse->action == MouseAction::Move) {
@@ -659,11 +518,13 @@ void Application::handle_event(const Event& event) {
 
             if (key->key == Key::Up || key->key == Key::Down) {
                 const int delta = key->key == Key::Down ? 1 : -1;
-                ScrollView* scroll = find_scroll_view_for_widget(root_.get(), focused);
+                Scrollable* scroll = find_scrollable_for_widget(root_.get(), focused);
 
                 if (scroll != nullptr && focused != nullptr && scroll->contains_widget(focused)) {
                     std::vector<Widget*> items;
-                    scroll->collect_focusable(items);
+                    if (Widget* content = scroll->scroll_content()) {
+                        content->collect_focusable(items);
+                    }
                     const auto it = std::find(items.begin(), items.end(), focused);
                     if (it != items.end()) {
                         const int index = static_cast<int>(it - items.begin());
@@ -679,7 +540,7 @@ void Application::handle_event(const Event& event) {
                     }
                 }
 
-                if (ScrollView* any_scroll = find_first_scroll_view(root_.get())) {
+                if (Scrollable* any_scroll = find_first_scrollable(root_.get())) {
                     any_scroll->scroll_by(0, delta);
                     request_redraw();
                     return;
@@ -697,23 +558,49 @@ void Application::handle_event(const Event& event) {
 }
 
 void Application::render() {
-    if (!terminal_ready_ || !dirty_) {
+    if (!terminal_ready_ || !dirty_region_.needs_render()) {
         return;
     }
 
+    const Size term = terminal_size();
+    const Rect terminal_bounds{{0, 0}, term};
+
+    BeginFrameOptions frame;
+    frame.full_redraw = true;
+    frame.dirty_region = terminal_bounds;
+    Rect paint_clip = terminal_bounds;
+
+    const bool use_partial =
+        !dirty_region_.is_full()
+        && active_graphics_protocol() == GraphicsProtocol::None;
+
+    if (use_partial) {
+        paint_clip = intersect(dirty_region_.bounds(), terminal_bounds);
+        if (paint_clip.width <= 0 || paint_clip.height <= 0) {
+            dirty_region_.clear();
+            return;
+        }
+
+        frame.full_redraw = false;
+        frame.dirty_region = paint_clip;
+    }
+
     startup_profile_mark("render.begin_frame");
-    backend_->begin_frame();
+    backend_->begin_frame(frame);
 
     if (root_) {
         Canvas canvas(*backend_);
         canvas.set_glyphs(theme_.glyphs);
-        root_->paint(canvas);
+        canvas.with_clip(paint_clip, [&](Canvas& clipped) {
+            PaintContext clipped_ctx{clipped, theme_};
+            root_->paint(clipped_ctx);
+        });
     }
 
     startup_profile_mark("render.before_refresh");
     backend_->end_frame();
     startup_profile_mark("render.after_refresh");
-    dirty_ = false;
+    dirty_region_.clear();
 }
 
 } // namespace tuinator

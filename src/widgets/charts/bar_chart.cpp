@@ -302,7 +302,8 @@ void BarChart::paint_horizontal(Canvas& canvas, const PlotArea& plot) const {
     }
 }
 
-void BarChart::paint(Canvas& canvas) const {
+void BarChart::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

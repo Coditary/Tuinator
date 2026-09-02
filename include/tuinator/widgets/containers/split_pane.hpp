@@ -29,10 +29,11 @@ public:
 
     Size preferred_size() const override;
     void layout(Rect bounds) override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
     bool handle_event(const Event& event) override;
     bool has_focused_descendant() const override;
     void collect_focusable(std::vector<Widget*>& out) override;
+    void for_each_child(const std::function<void(Widget*)>& visitor) override;
 
 private:
     std::unique_ptr<Widget> first_;

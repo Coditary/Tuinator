@@ -30,7 +30,8 @@ Size Button::preferred_size() const {
     };
 }
 
-void Button::paint(Canvas& canvas) const {
+void Button::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

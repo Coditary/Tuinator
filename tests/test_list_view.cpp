@@ -45,9 +45,8 @@ TUINATOR_TEST(list_view_renders_selection_marker) {
 
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    canvas.with_clip({0, 0, 24, 6}, [&](tuinator::Canvas& clipped) {
-        list.paint(clipped);
-    });
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    ctx.with_clip({0, 0, 24, 6}, [&](tuinator::PaintContext& clipped) { list.paint(clipped); });
     backend.end_frame();
 
     TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 0, 0), '>');

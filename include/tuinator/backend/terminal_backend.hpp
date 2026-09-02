@@ -13,6 +13,11 @@ namespace tuinator {
 
 class TerminalImage;
 
+struct BeginFrameOptions {
+    bool full_redraw = true;
+    Rect dirty_region{};
+};
+
 class TerminalBackend {
 public:
     virtual ~TerminalBackend() = default;
@@ -24,8 +29,11 @@ public:
     virtual std::optional<Event> poll_event() = 0;
     virtual std::optional<Event> poll_event_nonblocking() { return std::nullopt; }
 
-    virtual void begin_frame() = 0;
+    virtual void begin_frame(BeginFrameOptions options = {}) = 0;
     virtual void end_frame() = 0;
+
+    /// Drop cached terminal graphics (Kitty/Sixel) after resize or terminal reset.
+    virtual void invalidate_graphics() {}
 
     /// Move the hardware mouse cursor without a full frame erase/repaint.
     virtual void refresh_mouse_cursor() {}

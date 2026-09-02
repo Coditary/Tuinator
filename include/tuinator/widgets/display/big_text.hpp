@@ -115,7 +115,7 @@ public:
     void set_shadow_style(Style style);
 
     Size preferred_size() const override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
 
 private:
     void rebuild() const;

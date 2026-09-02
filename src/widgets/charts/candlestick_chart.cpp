@@ -75,7 +75,8 @@ Size CandlestickChart::preferred_size() const {
     };
 }
 
-void CandlestickChart::paint(Canvas& canvas) const {
+void CandlestickChart::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0 || bars_.empty()) {
         return;
     }

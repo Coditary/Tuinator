@@ -158,16 +158,13 @@ void Canvas::draw_image(Point position, Size cell_size, const TerminalImage& ima
         return;
     }
 
-    if (!is_visible(position)) {
-        return;
-    }
-
     const Point terminal = to_terminal(position);
-    if (terminal.x < 0 || terminal.y < 0) {
+    const Rect visible = intersect(clip_, Rect{terminal, cell_size});
+    if (visible.width <= 0 || visible.height <= 0) {
         return;
     }
 
-    backend_.draw_image(terminal.x, terminal.y, cell_size, image);
+    backend_.draw_image(visible.x, visible.y, visible.size(), image);
 }
 
 void Canvas::with_clip(Rect rect, const std::function<void(Canvas&)>& draw) const {

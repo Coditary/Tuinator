@@ -86,7 +86,8 @@ void Window::layout(Rect bounds) {
     }
 }
 
-void Window::paint(Canvas& canvas) const {
+void Window::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     const int width = frame_bounds_.width;
     const int height = frame_bounds_.height;
     if (width < 2 || height < 2) {
@@ -116,9 +117,7 @@ void Window::paint(Canvas& canvas) const {
     }
 
     if (content_) {
-        canvas.with_clip(content_area, [&](Canvas& clipped) {
-            content_->paint(clipped);
-        });
+        ctx.with_clip(content_area, [&](PaintContext& child_ctx) { content_->paint(child_ctx); });
     }
 }
 

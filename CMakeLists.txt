@@ -90,6 +90,7 @@ add_library(tuinator
     src/render/text.cpp
     src/render/theme.cpp
     src/widgets/widget.cpp
+    src/widgets/capabilities.cpp
     src/widgets/controls/button.cpp
     src/widgets/controls/checkbox.cpp
     src/widgets/controls/combo_box.cpp
@@ -129,6 +130,7 @@ add_library(tuinator
     src/widgets/chrome/status_bar.cpp
     src/window/desktop.cpp
     src/window/window.cpp
+    src/window/window_manager.cpp
     src/window/window_host.cpp
 )
 
@@ -168,6 +170,7 @@ if(TUINATOR_BUILD_TESTS)
         tests/test_label.cpp
         tests/test_list_view.cpp
         tests/test_memory_backend.cpp
+        tests/test_dirty_region.cpp
         tests/test_glyphs.cpp
         tests/test_image.cpp
         tests/test_controls.cpp

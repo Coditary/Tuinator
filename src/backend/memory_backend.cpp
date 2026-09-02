@@ -53,13 +53,28 @@ std::optional<Event> MemoryTerminalBackend::poll_event_nonblocking() {
     return event;
 }
 
-void MemoryTerminalBackend::begin_frame() {
-    for (auto& row : cells_) {
-        for (Cell& cell : row) {
-            cell = Cell{};
+void MemoryTerminalBackend::begin_frame(BeginFrameOptions options) {
+    image_draws_.clear();
+
+    if (options.full_redraw) {
+        for (auto& row : cells_) {
+            for (Cell& cell : row) {
+                cell = Cell{};
+            }
+        }
+        return;
+    }
+
+    Rect region = intersect(options.dirty_region, {{0, 0}, size_});
+    if (region.width <= 0 || region.height <= 0) {
+        return;
+    }
+
+    for (int y = region.y; y < region.bottom(); ++y) {
+        for (int x = region.x; x < region.right(); ++x) {
+            cells_[static_cast<std::size_t>(y)][static_cast<std::size_t>(x)] = Cell{};
         }
     }
-    image_draws_.clear();
 }
 
 void MemoryTerminalBackend::end_frame() {}

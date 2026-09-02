@@ -19,7 +19,8 @@ Size StatusBar::preferred_size() const {
     return {std::max(1, text_display_width(text_)), 1};
 }
 
-void StatusBar::paint(Canvas& canvas) const {
+void StatusBar::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

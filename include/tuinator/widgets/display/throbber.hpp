@@ -36,7 +36,7 @@ public:
     void tick(int dt_ms = 0);
 
     Size preferred_size() const override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
 
 private:
     void advance();

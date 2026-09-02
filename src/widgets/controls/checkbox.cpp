@@ -286,7 +286,8 @@ Size Checkbox::preferred_size() const {
     };
 }
 
-void Checkbox::paint(Canvas& canvas) const {
+void Checkbox::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

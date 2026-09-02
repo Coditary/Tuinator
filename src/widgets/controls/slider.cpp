@@ -47,7 +47,8 @@ Size Slider::preferred_size() const {
     return {min_width_, 1};
 }
 
-void Slider::paint(Canvas& canvas) const {
+void Slider::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

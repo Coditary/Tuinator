@@ -272,7 +272,8 @@ Size Throbber::preferred_size() const {
     return {std::max(1, width_), 1};
 }
 
-void Throbber::paint(Canvas& canvas) const {
+void Throbber::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0 || set_.frames.empty()) {
         return;
     }

@@ -77,7 +77,8 @@ void Grid::layout(Rect bounds) {
     }
 }
 
-void Grid::paint(Canvas& canvas) const {
+void Grid::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     for (const auto& child : children_) {
         const Rect local{
             child->bounds().x - bounds_.x,
@@ -86,9 +87,7 @@ void Grid::paint(Canvas& canvas) const {
             child->bounds().height,
         };
 
-        canvas.with_clip(local, [&](Canvas& clipped) {
-            child->paint(clipped);
-        });
+        ctx.with_clip(local, [&](PaintContext& child_ctx) { child->paint(child_ctx); });
     }
 }
 

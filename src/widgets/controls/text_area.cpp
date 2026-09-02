@@ -411,7 +411,8 @@ bool TextArea::handle_mouse(const MouseEvent& mouse) {
     return true;
 }
 
-void TextArea::paint(Canvas& canvas) const {
+void TextArea::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

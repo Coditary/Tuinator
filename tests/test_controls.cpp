@@ -21,7 +21,8 @@ TUINATOR_TEST(progress_bar_plain_renders_arrow) {
 
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    bar.paint(canvas);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    bar.paint(ctx);
     backend.end_frame();
 
     TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 0, 0), '=');
@@ -45,7 +46,8 @@ TUINATOR_TEST(progress_bar_filled_label_centers_text) {
 
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    bar.paint(canvas);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    bar.paint(ctx);
     backend.end_frame();
 
     TUINATOR_CHECK(tuinator::test::row_contains(backend, 0, "Working"));
@@ -66,7 +68,8 @@ TUINATOR_TEST(progress_bar_pulse_renders_placeholders) {
 
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    bar.paint(canvas);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    bar.paint(ctx);
     backend.end_frame();
 
     TUINATOR_CHECK(tuinator::test::row_contains(backend, 0, "--%"));
@@ -86,7 +89,8 @@ TUINATOR_TEST(progress_bar_shimmer_renders_label) {
 
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    bar.paint(canvas);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    bar.paint(ctx);
     backend.end_frame();
 
     TUINATOR_CHECK(tuinator::test::row_contains(backend, 0, "Loading..."));
@@ -105,7 +109,8 @@ TUINATOR_TEST(progress_bar_bounce_renders_brackets) {
 
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    bar.paint(canvas);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    bar.paint(ctx);
     backend.end_frame();
 
     TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 0, 0), '[');
@@ -127,7 +132,8 @@ TUINATOR_TEST(progress_bar_task_row_renders_percent_and_eta) {
 
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    bar.paint(canvas);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    bar.paint(ctx);
     backend.end_frame();
 
     TUINATOR_CHECK(tuinator::test::row_contains(backend, 0, "50%"));
@@ -151,14 +157,15 @@ TUINATOR_TEST(progress_bar_filled_label_indeterminate_animates) {
 
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    bar.paint(canvas);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    bar.paint(ctx);
     backend.end_frame();
 
     const tuinator::Color start_bg = backend.cells()[0][0].style.background;
 
     bar.set_animation_phase(22);
     backend.begin_frame();
-    bar.paint(canvas);
+    bar.paint(ctx);
     backend.end_frame();
 
     const tuinator::Color later_bg = backend.cells()[0][0].style.background;
@@ -183,7 +190,8 @@ TUINATOR_TEST(progress_bar_tqdm_contains_fraction) {
 
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    bar.paint(canvas);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    bar.paint(ctx);
     backend.end_frame();
 
     TUINATOR_CHECK(tuinator::test::row_contains(backend, 0, "42/100"));
@@ -210,7 +218,8 @@ TUINATOR_TEST(progress_bar_gradient_varies_across_columns) {
 
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    bar.paint(canvas);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    bar.paint(ctx);
     backend.end_frame();
 
     const auto& left = backend.cells()[0][2].style.foreground_rgb;
@@ -232,7 +241,8 @@ TUINATOR_TEST(progress_bar_bracketed_renders_caps) {
 
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    bar.paint(canvas);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    bar.paint(ctx);
     backend.end_frame();
 
     TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 0, 0), '[');

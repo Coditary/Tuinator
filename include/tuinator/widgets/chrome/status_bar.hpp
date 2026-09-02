@@ -15,7 +15,7 @@ public:
     void set_text(std::string text);
 
     Size preferred_size() const override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
 
 private:
     std::string text_;

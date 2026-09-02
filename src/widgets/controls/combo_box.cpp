@@ -89,7 +89,8 @@ void ComboBox::layout(Rect bounds) {
     }
 }
 
-void ComboBox::paint(Canvas& canvas) const {
+void ComboBox::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0 || items_.empty()) {
         return;
     }

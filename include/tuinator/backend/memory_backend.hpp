@@ -34,7 +34,7 @@ public:
     std::optional<Event> poll_event() override;
     std::optional<Event> poll_event_nonblocking() override;
 
-    void begin_frame() override;
+    void begin_frame(BeginFrameOptions options = {}) override;
     void end_frame() override;
 
     void draw_text(int x, int y, std::string_view text, Style style) override;

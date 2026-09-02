@@ -1,6 +1,7 @@
 #include <tuinator/widgets/containers/tabs.hpp>
 
 #include <tuinator/core/event.hpp>
+#include <tuinator/render/text.hpp>
 
 #include <algorithm>
 #include <string>
@@ -37,10 +38,18 @@ void Tabs::set_selected_index(int index) {
     mark_dirty();
 }
 
+Widget* Tabs::active_content() const {
+    if (tabs_.empty() || selected_index_ < 0 || selected_index_ >= static_cast<int>(tabs_.size())) {
+        return nullptr;
+    }
+    return tabs_[static_cast<std::size_t>(selected_index_)].content.get();
+}
+
 Size Tabs::preferred_size() const {
     int tab_bar_width = 0;
     for (const TabEntry& tab : tabs_) {
-        tab_bar_width += static_cast<int>(tab.title.size()) + 4;
+        const std::string label = " " + tab.title + " ";
+        tab_bar_width += text_display_width(label) + 1;
     }
 
     Size content_size{};
@@ -77,7 +86,8 @@ void Tabs::layout(Rect bounds) {
     layout_active_content(content_area);
 }
 
-void Tabs::paint(Canvas& canvas) const {
+void Tabs::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     Style normal = options_.tab_style;
     Style selected = options_.selected_tab_style;
     if (selected.foreground == Color::Default) {
@@ -94,8 +104,11 @@ void Tabs::paint(Canvas& canvas) const {
         if (is_focused() && i == selected_index_) {
             style.bold = true;
         }
+        if (x >= bounds_.width) {
+            break;
+        }
         canvas.draw_text({x, 0}, label, style);
-        x += static_cast<int>(label.size()) + 1;
+        x += text_display_width(label) + 1;
     }
 
     if (is_focused()) {
@@ -118,9 +131,7 @@ void Tabs::paint(Canvas& canvas) const {
         content->bounds().height,
     };
 
-    canvas.with_clip(local, [&](Canvas& clipped) {
-        content->paint(clipped);
-    });
+    ctx.with_clip(local, [&](PaintContext& child_ctx) { content->paint(child_ctx); });
 }
 
 int Tabs::tab_at_position(Point position) const {
@@ -131,7 +142,7 @@ int Tabs::tab_at_position(Point position) const {
     int x = bounds_.x;
     for (int i = 0; i < static_cast<int>(tabs_.size()); ++i) {
         const std::string label = " " + tabs_[static_cast<std::size_t>(i)].title + " ";
-        const int width = static_cast<int>(label.size()) + 1;
+        const int width = text_display_width(label) + 1;
         if (position.x >= x && position.x < x + width) {
             return i;
         }
@@ -248,6 +259,12 @@ void Tabs::collect_focusable(std::vector<Widget*>& out) {
     Widget* content = tabs_[static_cast<std::size_t>(selected_index_)].content.get();
     if (content != nullptr) {
         content->collect_focusable(out);
+    }
+}
+
+void Tabs::for_each_child(const std::function<void(Widget*)>& visitor) {
+    if (Widget* content = active_content()) {
+        visitor(content);
     }
 }
 

@@ -20,7 +20,7 @@ public:
     void set_value(int value);
 
     Size preferred_size() const override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
 

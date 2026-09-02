@@ -397,7 +397,8 @@ void PieChart::paint_legend(Canvas& canvas, const Layout& layout) const {
     }
 }
 
-void PieChart::paint(Canvas& canvas) const {
+void PieChart::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

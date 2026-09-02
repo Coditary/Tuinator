@@ -188,6 +188,9 @@ std::vector<MenuPanelLayout> MenuBar::open_panels() const {
         if (panel.x + panel.width > bounds_.width) {
             panel.x = std::max(0, parent_panel.x - panel.width + 1);
         }
+        if (bounds_.height > 0 && panel.y + panel.height > bounds_.height) {
+            panel.y = std::max(0, bounds_.height - panel.height);
+        }
         panels.push_back(panel);
     }
 
@@ -207,6 +210,9 @@ MenuBar::DropdownLayout MenuBar::dropdown_layout() const {
 
     if (layout.x + layout.width > bounds_.width) {
         layout.x = std::max(0, bounds_.width - layout.width);
+    }
+    if (bounds_.height > 0 && layout.y + layout.height > bounds_.height) {
+        layout.y = std::max(1, bounds_.height - layout.height);
     }
 
     return layout;
@@ -247,7 +253,8 @@ void MenuBar::paint_menu_label(Canvas& canvas, int x, int y, std::string_view la
     tuinator::paint_menu_label(canvas, x, y, label, style);
 }
 
-void MenuBar::paint(Canvas& canvas) const {
+void MenuBar::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

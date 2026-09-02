@@ -9,6 +9,7 @@
 #include <tuinator/layout/box.hpp>
 #include <tuinator/layout/grid.hpp>
 #include <tuinator/render/canvas.hpp>
+#include <tuinator/render/paint_context.hpp>
 #include <tuinator/render/color.hpp>
 #include <tuinator/render/style.hpp>
 #include <tuinator/render/glyphs.hpp>
@@ -69,6 +70,8 @@
 #include <tuinator/widgets/chrome/status_bar.hpp>
 
 #include <tuinator/widgets/widget.hpp>
+#include <tuinator/widgets/capabilities.hpp>
 #include <tuinator/window/desktop.hpp>
 #include <tuinator/window/window.hpp>
 #include <tuinator/window/window_host.hpp>
+#include <tuinator/window/window_manager.hpp>

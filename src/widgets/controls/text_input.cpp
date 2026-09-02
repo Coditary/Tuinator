@@ -38,7 +38,8 @@ Size TextInput::preferred_size() const {
     return {min_width_ + 2, 1};
 }
 
-void TextInput::paint(Canvas& canvas) const {
+void TextInput::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

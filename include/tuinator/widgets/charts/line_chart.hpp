@@ -55,7 +55,7 @@ public:
     void push_value(std::size_t series_index, double value, std::size_t max_points = 0);
 
     Size preferred_size() const override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
 
 private:
     struct PlotArea {

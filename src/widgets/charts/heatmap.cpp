@@ -75,7 +75,8 @@ Size Heatmap::preferred_size() const {
     };
 }
 
-void Heatmap::paint(Canvas& canvas) const {
+void Heatmap::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0 || values_.empty()) {
         return;
     }
@@ -108,7 +109,8 @@ void Heatmap::paint(Canvas& canvas) const {
     const int grid_height = std::max(1, bounds_.height - top - legend_row);
     const int cell_h = std::max(1, grid_height / std::max(1, rows));
     const int grid_left = label_width;
-    const int cell_w = std::max(1, (bounds_.width - grid_left) / std::max(1, cols));
+    const int grid_right = bounds_.width;
+    const int cell_w = std::max(1, (grid_right - grid_left) / std::max(1, cols));
 
     const double min_v = value_min();
     const double max_v = value_max();
@@ -125,32 +127,45 @@ void Heatmap::paint(Canvas& canvas) const {
 
     if (options_.show_col_labels) {
         for (int col = 0; col < cols; ++col) {
+            const int col_x = grid_left + col * cell_w;
+            if (col_x >= grid_right) {
+                break;
+            }
             const std::string label = col < static_cast<int>(col_labels_.size())
                 ? col_labels_[static_cast<std::size_t>(col)]
                 : std::to_string(col);
             canvas.draw_text(
-                {grid_left + col * cell_w, grid_top - col_label_row},
-                label.substr(0, static_cast<std::size_t>(cell_w)),
+                {col_x, grid_top - col_label_row},
+                label.substr(0, static_cast<std::size_t>(std::min(cell_w, grid_right - col_x))),
                 options_.label_style);
         }
     }
 
     for (int row = 0; row < rows; ++row) {
         const int y = grid_top + row * cell_h;
+        if (y >= bounds_.height - legend_row) {
+            break;
+        }
         if (options_.show_row_labels && row < static_cast<int>(row_labels_.size())) {
             canvas.draw_text({0, y}, row_labels_[static_cast<std::size_t>(row)], options_.label_style);
         }
 
         for (int col = 0; col < cols && col < static_cast<int>(values_[static_cast<std::size_t>(row)].size()); ++col) {
+            const int cell_x = grid_left + col * cell_w;
+            if (cell_x >= grid_right) {
+                break;
+            }
             const double value = values_[static_cast<std::size_t>(row)][static_cast<std::size_t>(col)];
             const double t = (value - min_v) / span;
             const Style cell_style = chart_blend_styles(low, high, t);
 
-            for (int dy = 0; dy < cell_h; ++dy) {
-                for (int dx = 0; dx < cell_w; ++dx) {
+            const int max_dx = std::min(cell_w, grid_right - cell_x);
+            const int max_dy = std::min(cell_h, bounds_.height - legend_row - y);
+            for (int dy = 0; dy < max_dy; ++dy) {
+                for (int dx = 0; dx < max_dx; ++dx) {
                     chart_paint_glyph_cell(
                         canvas,
-                        grid_left + col * cell_w + dx,
+                        cell_x + dx,
                         y + dy,
                         options_.style,
                         {},

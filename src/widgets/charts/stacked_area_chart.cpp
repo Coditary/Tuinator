@@ -60,7 +60,8 @@ Size StackedAreaChart::preferred_size() const {
     return {options_.min_width, options_.min_height + (options_.title.empty() ? 0 : 1)};
 }
 
-void StackedAreaChart::paint(Canvas& canvas) const {
+void StackedAreaChart::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0 || series_.empty()) {
         return;
     }

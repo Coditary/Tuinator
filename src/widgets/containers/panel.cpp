@@ -60,7 +60,8 @@ void Panel::layout(Rect bounds) {
     }
 }
 
-void Panel::paint(Canvas& canvas) const {
+void Panel::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }
@@ -89,9 +90,7 @@ void Panel::paint(Canvas& canvas) const {
         content_->bounds().height,
     };
 
-    canvas.with_clip(inner, [&](Canvas& clipped) {
-        content_->paint(clipped);
-    });
+    ctx.with_clip(inner, [&](PaintContext& child_ctx) { content_->paint(child_ctx); });
 }
 
 bool Panel::handle_event(const Event& event) {
@@ -150,6 +149,12 @@ bool Panel::has_focused_descendant() const {
 void Panel::collect_focusable(std::vector<Widget*>& out) {
     if (content_) {
         content_->collect_focusable(out);
+    }
+}
+
+void Panel::for_each_child(const std::function<void(Widget*)>& visitor) {
+    if (content_) {
+        visitor(content_.get());
     }
 }
 

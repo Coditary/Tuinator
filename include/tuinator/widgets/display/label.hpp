@@ -19,7 +19,7 @@ public:
 
     Size preferred_size() const override;
     void layout(Rect bounds) override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
 
 private:
     std::string text_;

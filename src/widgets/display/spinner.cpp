@@ -46,7 +46,8 @@ Size Spinner::preferred_size() const {
     return {12, 1};
 }
 
-void Spinner::paint(Canvas& canvas) const {
+void Spinner::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

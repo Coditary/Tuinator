@@ -43,7 +43,7 @@ public:
     void set_options(HistogramOptions options);
 
     Size preferred_size() const override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
 
 private:
     std::vector<HistogramBin> bins_;

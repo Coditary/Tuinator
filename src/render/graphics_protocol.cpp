@@ -68,15 +68,18 @@ GraphicsProtocol detect_graphics_protocol() {
 }
 
 GraphicsProtocol active_graphics_protocol() {
-    const char* override_value = std::getenv("TUINATOR_GRAPHICS");
-    if (override_value != nullptr && override_value[0] != '\0' && std::strcmp(override_value, "auto") != 0) {
-        const GraphicsProtocol forced = protocol_from_name(override_value);
-        if (forced != GraphicsProtocol::None || std::strcmp(override_value, "none") == 0) {
-            return forced;
+    static const GraphicsProtocol cached = []() {
+        const char* override_value = std::getenv("TUINATOR_GRAPHICS");
+        if (override_value != nullptr && override_value[0] != '\0' && std::strcmp(override_value, "auto") != 0) {
+            const GraphicsProtocol forced = protocol_from_name(override_value);
+            if (forced != GraphicsProtocol::None || std::strcmp(override_value, "none") == 0) {
+                return forced;
+            }
         }
-    }
 
-    return detect_graphics_protocol();
+        return detect_graphics_protocol();
+    }();
+    return cached;
 }
 
 std::string graphics_protocol_name(GraphicsProtocol protocol) {

@@ -973,7 +973,8 @@ void ProgressBar::paint_glyph_bar(Canvas& canvas) const {
     }
 }
 
-void ProgressBar::paint(Canvas& canvas) const {
+void ProgressBar::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "backend/curses_config.hpp"
+
 #include <tuinator/backend/terminal_backend.hpp>
 
 #include <array>
@@ -22,9 +24,11 @@ public:
     std::optional<Event> poll_event() override;
     std::optional<Event> poll_event_nonblocking() override;
 
-    void begin_frame() override;
+    void begin_frame(BeginFrameOptions options = {}) override;
     void end_frame() override;
     void refresh_mouse_cursor() override;
+
+    void invalidate_graphics() override;
 
     void draw_text(int x, int y, std::string_view text, Style style) override;
     void draw_image(int x, int y, Size cell_size, const TerminalImage& image) override;
@@ -59,9 +63,15 @@ private:
     int extended_color_pair_for(Style style);
     bool style_uses_rgb(const Style& style) const;
     void queue_ansi_draw(int x, int y, std::string_view text, Style style);
-    void flush_ansi_draws();
-    void flush_image_draws();
+    void flush_ansi_draws(FILE* output);
+    void flush_image_draws(FILE* output);
     void draw_text_ansi(FILE* output, int x, int y, std::string_view text, Style style);
+    FILE* output_stream() const;
+    void write_tty_sequence(const char* sequence);
+    void prepare_refresh(FILE* output);
+    void present_frame();
+    void init_curses_screen();
+    void close_terminal_streams();
     int ensure_color_pair(int fg_code, int bg_code);
     int ensure_extended_color(Rgb rgb);
     int ensure_extended_pair(int fg_id, int bg_id);
@@ -71,9 +81,10 @@ private:
     void disable_mouse();
     bool detect_true_color() const;
     std::optional<Event> read_event(bool block);
-    void position_hardware_mouse_cursor();
+    void position_hardware_mouse_cursor(FILE* output);
     int mouse_tracking_mode() const;
     void cleanup_kitty_graphics();
+    void clear_region(Rect region);
 
     bool initialized_ = false;
     bool colors_enabled_ = false;
@@ -104,6 +115,13 @@ private:
         std::uint32_t hash = 0;
     };
     KittyPlacement last_kitty_placement_{};
+
+    FILE* tty_out_ = nullptr;
+    FILE* tty_in_ = nullptr;
+#if defined(TUINATOR_BACKEND_NCURSES)
+    SCREEN* screen_ = nullptr;
+#endif
+    bool unified_output_ = false;
 };
 
 } // namespace tuinator::detail

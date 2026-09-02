@@ -1,7 +1,8 @@
 #pragma once
 
 #include <tuinator/backend/memory_backend.hpp>
-#include <tuinator/render/canvas.hpp>
+#include <tuinator/render/paint_context.hpp>
+#include <tuinator/render/theme.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 namespace tuinator::test {
@@ -17,8 +18,15 @@ inline void render_root(Widget& root, MemoryTerminalBackend& backend, BorderGlyp
     backend.begin_frame();
     Canvas canvas(backend);
     canvas.set_glyphs(std::move(glyphs));
-    root.paint(canvas);
+    const Theme theme = dark_theme();
+    PaintContext ctx{canvas, theme};
+    root.paint(ctx);
     backend.end_frame();
+}
+
+inline PaintContext make_paint_context(Canvas& canvas, const Theme& theme = dark_theme()) {
+    canvas.set_glyphs(theme.glyphs);
+    return PaintContext{canvas, theme};
 }
 
 inline char cell_at(const MemoryTerminalBackend& backend, int x, int y) {

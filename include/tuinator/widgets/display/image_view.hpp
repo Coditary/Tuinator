@@ -16,7 +16,7 @@ public:
     void set_display_cells(Size cells);
 
     Size preferred_size() const override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
 
 private:
     TerminalImage image_;

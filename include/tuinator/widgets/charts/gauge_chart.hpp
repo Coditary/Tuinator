@@ -41,7 +41,7 @@ public:
     void set_options(GaugeChartOptions options);
 
     Size preferred_size() const override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
 
 private:
     void paint_arc(Canvas& canvas, int cx, int cy, int radius) const;

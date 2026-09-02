@@ -18,7 +18,8 @@ TUINATOR_TEST(image_view_records_draw_request) {
 
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    view.paint(canvas);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    view.paint(ctx);
     backend.end_frame();
 
     TUINATOR_CHECK_EQ(backend.image_draws().size(), 1U);

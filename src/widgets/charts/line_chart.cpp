@@ -278,7 +278,8 @@ void LineChart::paint_series(Canvas& canvas, const PlotArea& plot, const LineCha
     }
 }
 
-void LineChart::paint(Canvas& canvas) const {
+void LineChart::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0 || series_.empty()) {
         return;
     }

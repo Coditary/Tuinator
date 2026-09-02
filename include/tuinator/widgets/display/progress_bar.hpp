@@ -119,7 +119,7 @@ public:
     void set_completed(bool completed);
 
     Size preferred_size() const override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
 
 private:
     int bar_column_count() const;

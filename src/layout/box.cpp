@@ -151,7 +151,8 @@ void VBox::layout(Rect bounds) {
     layout_vertical_children(bounds, gap_, padding_, children_);
 }
 
-void VBox::paint(Canvas& canvas) const {
+void VBox::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width > 0 && bounds_.height > 0) {
         canvas.fill_rect({{0, 0}, bounds_.size()}, ' ');
     }
@@ -164,9 +165,7 @@ void VBox::paint(Canvas& canvas) const {
             child->bounds().height,
         };
 
-        canvas.with_clip(local, [&](Canvas& clipped) {
-            child->paint(clipped);
-        });
+        ctx.with_clip(local, [&](PaintContext& child_ctx) { child->paint(child_ctx); });
     }
 }
 
@@ -209,7 +208,8 @@ void HBox::layout(Rect bounds) {
     layout_horizontal_children(bounds, gap_, padding_, children_);
 }
 
-void HBox::paint(Canvas& canvas) const {
+void HBox::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width > 0 && bounds_.height > 0) {
         canvas.fill_rect({{0, 0}, bounds_.size()}, ' ');
     }
@@ -222,9 +222,7 @@ void HBox::paint(Canvas& canvas) const {
             child->bounds().height,
         };
 
-        canvas.with_clip(local, [&](Canvas& clipped) {
-            child->paint(clipped);
-        });
+        ctx.with_clip(local, [&](PaintContext& child_ctx) { child->paint(child_ctx); });
     }
 }
 

@@ -116,7 +116,8 @@ std::vector<MenuPanelLayout> ContextMenu::open_panels() const {
     return panels;
 }
 
-void ContextMenu::paint(Canvas& canvas) const {
+void ContextMenu::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (!open_) {
         return;
     }

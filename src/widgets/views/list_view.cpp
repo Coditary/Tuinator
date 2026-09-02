@@ -78,7 +78,8 @@ void ListView::layout(Rect bounds) {
     ensure_selected_visible();
 }
 
-void ListView::paint(Canvas& canvas) const {
+void ListView::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

@@ -86,7 +86,8 @@ void TreeView::layout(Rect bounds) {
     scroll_y_ = std::clamp(scroll_y_, 0, max_scroll);
 }
 
-void TreeView::paint(Canvas& canvas) const {
+void TreeView::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

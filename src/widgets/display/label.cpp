@@ -49,7 +49,8 @@ void Label::layout(Rect bounds) {
     bounds_ = bounds;
 }
 
-void Label::paint(Canvas& canvas) const {
+void Label::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (text_.empty() || bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

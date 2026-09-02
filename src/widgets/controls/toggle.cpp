@@ -57,7 +57,8 @@ Size Toggle::preferred_size() const {
     };
 }
 
-void Toggle::paint(Canvas& canvas) const {
+void Toggle::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }

@@ -28,9 +28,8 @@ TUINATOR_TEST(canvas_draw_box_ascii_corners) {
 
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    canvas.with_clip({0, 0, 12, 6}, [&](tuinator::Canvas& clipped) {
-        panel.paint(clipped);
-    });
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    ctx.with_clip({0, 0, 12, 6}, [&](tuinator::PaintContext& clipped) { panel.paint(clipped); });
     backend.end_frame();
 
     TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 0, 0), '+');

@@ -135,7 +135,8 @@ void CommandPalette::activate_selection() {
     }
 }
 
-void CommandPalette::paint(Canvas& canvas) const {
+void CommandPalette::paint(PaintContext& ctx) const {
+    Canvas& canvas = ctx.canvas;
     if (!open_) {
         return;
     }

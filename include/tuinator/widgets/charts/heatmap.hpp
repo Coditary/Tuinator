@@ -39,7 +39,7 @@ public:
     void set_options(HeatmapOptions options);
 
     Size preferred_size() const override;
-    void paint(Canvas& canvas) const override;
+    void paint(PaintContext& ctx) const override;
 
 private:
     double value_min() const;
