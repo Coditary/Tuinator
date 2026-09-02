@@ -1,7 +1,10 @@
 #pragma once
 
+#include <tuinator/render/border_style.hpp>
 #include <tuinator/render/glyphs.hpp>
 #include <tuinator/render/style.hpp>
+
+#include <optional>
 
 namespace tuinator {
 
@@ -22,6 +25,7 @@ struct Theme {
 
 struct ThemeOptions {
     GlyphSet glyphs = GlyphSet::Auto;
+    std::optional<BorderStyle> border_style = std::nullopt;
 };
 
 Theme dark_theme(ThemeOptions options = {});

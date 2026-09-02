@@ -39,7 +39,7 @@ public:
 
     virtual bool has_focused_descendant() const;
 
-    void set_on_dirty(std::function<void(Rect)> callback);
+    virtual void set_on_dirty(std::function<void(Rect)> callback);
     void set_on_layout(std::function<void()> callback);
     void mark_dirty();
     void mark_layout_dirty();

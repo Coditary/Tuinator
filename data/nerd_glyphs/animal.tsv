@@ -1,0 +1,13 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Frog	Animal	Amphibian	frog	fa-animal-frog	EDF8	A	fa
+Spider	Animal	Arachnid	spider	fa-animal-spider	EF10	A	fa
+KiwiBird	Animal	Bird	kiwi_bird	fa-animal-kiwi-bird	EDFF	A	fa
+Fish	Animal	Fish	fish	fa-animal-fish	EE41	A	fa
+DrumstickBite	Animal	Generic	drumstick_bite	fa-animal-drumstick-bite	EEF9	A	fa
+Bug	Animal	Insect	bug	fa-animal-bug	F188	A	fa
+Cat	Animal	Mammal	cat	fa-animal-cat	EEED	A	fa
+Dog	Animal	Mammal	dog	fa-animal-dog	EEF7	A	fa
+Horse	Animal	Mammal	horse	fa-animal-horse	EF04	A	fa
+HorseHead	Animal	Mammal	horse_head	fa-animal-horse-head	EF51	A	fa
+Otter	Animal	Mammal	otter	fa-animal-otter	EF0A	A	fa
+Paw	Animal	Mammal	paw	fa-animal-paw	F1B0	A	fa

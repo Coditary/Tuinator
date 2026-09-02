@@ -1,0 +1,10 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Codeberg	TechCommunity	Git	codeberg	tech-community-codeberg	F330	G	logos
+Forgejo	TechCommunity	Git	forgejo	tech-community-forgejo	F335	G	logos
+Gitea	TechCommunity	Git	gitea	tech-community-gitea	F339	G	logos
+Ferris	TechCommunity	Mascot	ferris	tech-community-ferris	F323	@	logos
+Tux	TechCommunity	Mascot	tux	tech-community-tux	F31A	@	logos
+Fdroid	TechCommunity	Organization	fdroid	tech-community-fdroid	F36A	O	logos
+Fosdem	TechCommunity	Organization	fosdem	tech-community-fosdem	F36B	O	logos
+Osi	TechCommunity	Organization	osi	tech-community-osi	F36C	O	logos
+Wikimedia	TechCommunity	Organization	wikimedia	tech-community-wikimedia	F36D	O	logos

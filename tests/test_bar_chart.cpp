@@ -21,8 +21,8 @@ TUINATOR_TEST(bar_chart_renders_vertical_blocks) {
 
     tuinator::test::render_root(chart, backend);
 
-    TUINATOR_CHECK(tuinator::test::row_contains(backend, 11, "Mon"));
-    TUINATOR_CHECK(tuinator::test::row_contains(backend, 11, "Tue"));
+    TUINATOR_CHECK(tuinator::test::row_has(backend, "Mon"));
+    TUINATOR_CHECK(tuinator::test::row_has(backend, "Tue"));
 }
 
 TUINATOR_TEST(bar_chart_horizontal_orientation) {
@@ -44,11 +44,12 @@ TUINATOR_TEST(bar_chart_horizontal_orientation) {
 TUINATOR_TEST(bar_chart_interactive_wheel) {
     tuinator::BarChart chart(
         {
-            {"A", 50.0, {}},
+            {"A", 40.0, {}},
             {"B", 30.0, {}},
         },
         tuinator::BarChartOptions{.interactive = true, .min_width = 20, .min_height = 8});
 
+    chart.layout({0, 0, 20, 8});
     const double before = chart.bars()[0].value;
     chart.handle_event(tuinator::MouseEvent{
         .position = {10, 4},

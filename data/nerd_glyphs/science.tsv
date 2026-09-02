@@ -1,0 +1,15 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Biohazard	Science	Biology	biohazard	fa-science-biohazard	EF35	R	fa
+Microscope	Science	Biology	microscope	fa-science-microscope	EEAC	R	fa
+Flask	Science	Chemistry	flask	fa-science-flask	F0C3	R	fa
+BezierCurve	Science	Math	bezier_curve	fa-science-bezier-curve	EE24	R	fa
+DrawPolygon	Science	Math	draw_polygon	fa-science-draw-polygon	EEA3	R	fa
+VectorSquare	Science	Math	vector_square	fa-science-vector-square	EE92	R	fa
+Radiation	Science	Physics	radiation	fa-science-radiation	EF5A	R	fa
+Binoculars	Science	Technology	binoculars	fa-science-binoculars	F1E5	R	fa
+LayerGroup	Science	Technology	layer_group	fa-science-layer-group	EEA8	R	fa
+OilCan	Science	Technology	oil_can	fa-science-oil-can	EEAE	R	fa
+Robot	Science	Technology	robot	fa-science-robot	EE0D	R	fa
+Splotch	Science	Technology	splotch	fa-science-splotch	EE83	R	fa
+SprayCan	Science	Technology	spray_can	fa-science-spray-can	EE84	R	fa
+SprayCanSparkles	Science	Technology	spray_can_sparkles	fa-science-spray-can-sparkles	EE97	R	fa

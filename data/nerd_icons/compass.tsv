@@ -1,0 +1,9 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+DirectionDown	Compass	Direction	direction_down	compass-direction-down	E340	>	weather
+DirectionDownLeft	Compass	Direction	direction_down_left	compass-direction-down-left	E33F	>	weather
+DirectionDownRight	Compass	Direction	direction_down_right	compass-direction-down-right	E380	>	weather
+DirectionLeft	Compass	Direction	direction_left	compass-direction-left	E344	>	weather
+DirectionRight	Compass	Direction	direction_right	compass-direction-right	E349	>	weather
+DirectionUp	Compass	Direction	direction_up	compass-direction-up	E353	>	weather
+DirectionUpLeft	Compass	Direction	direction_up_left	compass-direction-up-left	E37F	>	weather
+DirectionUpRight	Compass	Direction	direction_up_right	compass-direction-up-right	E352	>	weather

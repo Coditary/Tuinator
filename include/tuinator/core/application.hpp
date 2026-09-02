@@ -83,6 +83,7 @@ private:
     bool running_ = false;
     DirtyRegion dirty_region_;
     bool terminal_ready_ = false;
+    bool clear_framebuffer_ = false;
 };
 
 } // namespace tuinator

@@ -1,0 +1,13 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+CallIncoming	EditorCommunication	Call	call_incoming	editor-communication-call-incoming	EB92	.	cod
+CallOutgoing	EditorCommunication	Call	call_outgoing	editor-communication-call-outgoing	EB93	.	cod
+Broadcast	EditorCommunication	Feed	broadcast	editor-communication-broadcast	EAAD	.	cod
+Broadcast	EditorCommunication	Feed	broadcast	editor-communication-broadcast	F43C	.	oct
+Rss	EditorCommunication	Feed	rss	editor-communication-rss	EB47	.	cod
+Rss	EditorCommunication	Feed	rss	editor-communication-rss	F428	.	oct
+Send	EditorCommunication	Feed	send	editor-communication-send	EC0F	.	cod
+Inbox	EditorCommunication	Mail	inbox	editor-communication-inbox	EB09	.	cod
+Inbox	EditorCommunication	Mail	inbox	editor-communication-inbox	F48D	.	oct
+Mail	EditorCommunication	Mail	mail	editor-communication-mail	EB1C	.	cod
+Mail	EditorCommunication	Mail	mail	editor-communication-mail	F42F	.	oct
+MailRead	EditorCommunication	Mail	mail_read	editor-communication-mail-read	EB1B	.	cod

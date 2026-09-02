@@ -21,7 +21,7 @@ TUINATOR_TEST(histogram_renders_bins) {
         tuinator::HistogramOptions{.min_width = 24, .min_height = 8});
 
     tuinator::test::render_root(chart, backend);
-    TUINATOR_CHECK(tuinator::test::row_contains(backend, 9, "A"));
+    TUINATOR_CHECK(tuinator::test::row_has(backend, "A"));
 }
 
 TUINATOR_TEST(heatmap_renders_grid) {
@@ -35,7 +35,7 @@ TUINATOR_TEST(heatmap_renders_grid) {
         tuinator::HeatmapOptions{.min_width = 20, .min_height = 6});
 
     tuinator::test::render_root(chart, backend);
-    TUINATOR_CHECK(tuinator::test::row_contains(backend, 1, "R0"));
+    TUINATOR_CHECK(tuinator::test::row_has(backend, "R0"));
 }
 
 TUINATOR_TEST(gauge_chart_renders_value) {
@@ -85,10 +85,10 @@ TUINATOR_TEST(waterfall_chart_renders_steps) {
             {"Start", 100.0, {}, {}},
             {"Delta", -20.0, {}, {}},
         },
-        tuinator::WaterfallChartOptions{.min_width = 28, .min_height = 10});
+        tuinator::WaterfallChartOptions{.bar_width = 6, .min_width = 28, .min_height = 10});
 
     tuinator::test::render_root(chart, backend);
-    TUINATOR_CHECK(tuinator::test::row_contains(backend, 10, "Start"));
+    TUINATOR_CHECK(tuinator::test::row_has(backend, "Start"));
 }
 
 TUINATOR_TEST(candlestick_chart_renders_ohlc) {

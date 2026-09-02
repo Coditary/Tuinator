@@ -1,0 +1,4 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Dust	AirQuality	AirQuality	dust	air-quality-dust	E35D	*	weather
+Smog	AirQuality	AirQuality	smog	air-quality-smog	E36D	*	weather
+Smoke	AirQuality	AirQuality	smoke	air-quality-smoke	E35C	*	weather

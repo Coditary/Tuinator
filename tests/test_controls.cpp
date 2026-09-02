@@ -174,7 +174,8 @@ TUINATOR_TEST(progress_bar_filled_label_indeterminate_animates) {
 }
 
 TUINATOR_TEST(progress_bar_tqdm_contains_fraction) {
-    tuinator::MemoryTerminalBackend backend({60, 3});
+    // tqdm line uses multi-byte bar glyphs; 60 columns truncates the "42/100" suffix.
+    tuinator::MemoryTerminalBackend backend({80, 3});
     backend.init();
 
     auto options = tuinator::progress_bar_preset(
@@ -186,7 +187,7 @@ TUINATOR_TEST(progress_bar_tqdm_contains_fraction) {
     options.stats.rate = 9.5;
 
     tuinator::ProgressBar bar(0.42, options);
-    bar.layout({0, 0, 60, 1});
+    bar.layout({0, 0, 80, 1});
 
     backend.begin_frame();
     tuinator::Canvas canvas(backend);

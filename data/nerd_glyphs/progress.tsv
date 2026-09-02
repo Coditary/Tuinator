@@ -1,0 +1,13 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+ProgressEmptyLeft	Progress	Bar	progress_empty_left	progress-progress-empty-left	EE00	|	extra
+ProgressEmptyMid	Progress	Bar	progress_empty_mid	progress-progress-empty-mid	EE01	|	extra
+ProgressEmptyRight	Progress	Bar	progress_empty_right	progress-progress-empty-right	EE02	|	extra
+ProgressFullLeft	Progress	Bar	progress_full_left	progress-progress-full-left	EE03	|	extra
+ProgressFullMid	Progress	Bar	progress_full_mid	progress-progress-full-mid	EE04	|	extra
+ProgressFullRight	Progress	Bar	progress_full_right	progress-progress-full-right	EE05	|	extra
+ProgressSpinner1	Progress	Bar	progress_spinner_1	progress-progress-spinner-1	EE06	|	extra
+ProgressSpinner2	Progress	Bar	progress_spinner_2	progress-progress-spinner-2	EE07	|	extra
+ProgressSpinner3	Progress	Bar	progress_spinner_3	progress-progress-spinner-3	EE08	|	extra
+ProgressSpinner4	Progress	Bar	progress_spinner_4	progress-progress-spinner-4	EE09	|	extra
+ProgressSpinner5	Progress	Bar	progress_spinner_5	progress-progress-spinner-5	EE0A	|	extra
+ProgressSpinner6	Progress	Bar	progress_spinner_6	progress-progress-spinner-6	EE0B	|	extra

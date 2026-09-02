@@ -11,6 +11,15 @@ namespace tuinator {
 
 Tabs::Tabs(TabsOptions options) : options_(options) {}
 
+void Tabs::set_on_dirty(std::function<void(Rect)> callback) {
+    Widget::set_on_dirty(std::move(callback));
+    for (TabEntry& tab : tabs_) {
+        if (tab.content) {
+            tab.content->set_on_dirty(on_dirty_);
+        }
+    }
+}
+
 void Tabs::add_tab(std::string title, std::unique_ptr<Widget> content) {
     if (content && on_dirty_) {
         content->set_on_dirty(on_dirty_);

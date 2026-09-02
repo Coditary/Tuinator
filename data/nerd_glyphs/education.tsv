@@ -1,0 +1,12 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Book	Education	Book	book	fa-education-book	F02D	E	fa
+BookAtlas	Education	Book	book_atlas	fa-education-book-atlas	EE21	E	fa
+BookMedical	Education	Book	book_medical	fa-education-book-medical	EF78	E	fa
+BookOpen	Education	Book	book_open	fa-education-book-open	EDE2	E	fa
+BookOpenReader	Education	Book	book_open_reader	fa-education-book-open-reader	EE9B	E	fa
+BookSkull	Education	Book	book_skull	fa-education-book-skull	EEEB	E	fa
+ChalkboardUser	Education	Book	chalkboard_user	fa-education-chalkboard-user	EDE6	E	fa
+Highlighter	Education	Learning	highlighter	fa-education-highlighter	EE5A	E	fa
+Marker	Education	Learning	marker	fa-education-marker	EE6A	E	fa
+GraduationCap	Education	School	graduation_cap	fa-education-graduation-cap	F19D	E	fa
+School	Education	School	school	fa-education-school	EE12	E	fa

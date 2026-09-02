@@ -1,0 +1,5 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Bug	EditorTesting	Debug	bug	editor-testing-bug	F46F	.	oct
+Beaker	EditorTesting	Lab	beaker	editor-testing-beaker	EA79	.	cod
+Beaker	EditorTesting	Lab	beaker	editor-testing-beaker	F499	.	oct
+BeakerStop	EditorTesting	Lab	beaker_stop	editor-testing-beaker-stop	EBE1	.	cod

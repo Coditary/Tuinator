@@ -81,6 +81,24 @@ add_library(tuinator
     src/render/color.cpp
     src/render/graphics_encode.cpp
     src/render/graphics_protocol.cpp
+    src/render/file_icon.cpp
+    src/render/git_change_status.cpp
+    src/render/ui_icon.cpp
+    src/render/line_icon.cpp
+    src/render/nerd_icon_set.cpp
+    src/render/weather_icon.cpp
+    src/render/moon_icon.cpp
+    src/render/clock_icon.cpp
+    src/render/compass_icon.cpp
+    src/render/measurement_icon.cpp
+    src/render/astronomy_icon.cpp
+    src/render/air_quality_icon.cpp
+    src/render/hazard_icon.cpp
+    src/render/marine_alert_icon.cpp
+    src/render/action_icon.cpp
+    src/render/nerd_glyph_catalog.cpp
+    src/render/block_element.cpp
+    src/render/box_drawing.cpp
     src/render/glyphs.cpp
     src/render/scrollbar/core.cpp
     src/render/scrollbar/behavior.cpp
@@ -101,6 +119,8 @@ add_library(tuinator
     src/widgets/display/big_text.cpp
     src/widgets/display/image_view.cpp
     src/widgets/display/label.cpp
+    src/widgets/display/nerd_icon_catalog_gallery.cpp
+    src/widgets/display/nerd_glyph_matrix_gallery.cpp
     src/widgets/display/progress_bar.cpp
     src/widgets/display/separator.cpp
     src/widgets/display/spinner.cpp
@@ -127,7 +147,9 @@ add_library(tuinator
     src/widgets/menu/menu_bar.cpp
     src/widgets/menu/menu_common.cpp
     src/widgets/chrome/dialog.cpp
+    src/widgets/chrome/source_control_panel.cpp
     src/widgets/chrome/status_bar.cpp
+    src/widgets/chrome/status_line.cpp
     src/window/desktop.cpp
     src/window/window.cpp
     src/window/window_manager.cpp
@@ -171,13 +193,25 @@ if(TUINATOR_BUILD_TESTS)
         tests/test_list_view.cpp
         tests/test_memory_backend.cpp
         tests/test_dirty_region.cpp
+        tests/test_file_icon.cpp
+        tests/test_git_change_status.cpp
+        tests/test_ui_icon.cpp
+        tests/test_line_icon.cpp
+        tests/test_weather_icon.cpp
+        tests/test_nerd_icon_catalog.cpp
+        tests/test_nerd_glyph_matrix.cpp
+        tests/test_block_element.cpp
+        tests/test_box_drawing.cpp
         tests/test_glyphs.cpp
+        tests/test_border_style.cpp
         tests/test_image.cpp
         tests/test_controls.cpp
         tests/test_checkbox.cpp
         tests/test_menu_bar.cpp
         tests/test_text_area.cpp
         tests/test_scrollbar.cpp
+        tests/test_source_control_panel.cpp
+        tests/test_status_line.cpp
         tests/test_throbber.cpp
         tests/test_big_text.cpp
         tests/test_pie_chart.cpp
@@ -187,6 +221,7 @@ if(TUINATOR_BUILD_TESTS)
     )
     target_link_libraries(tuinator-tests PRIVATE tuinator::tuinator)
     target_include_directories(tuinator-tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    target_compile_definitions(tuinator-tests PRIVATE TUINATOR_DATA_DIR="${CMAKE_SOURCE_DIR}/data")
     add_test(NAME tuinator-tests COMMAND tuinator-tests)
 endif()
 
@@ -195,7 +230,7 @@ endif()
 option(TUINATOR_BUILD_EXAMPLES "Build example programs" ON)
 
 if(TUINATOR_BUILD_EXAMPLES)
-    set(TUINATOR_DEMOS hello form colors layout counter buttons windows mouse-test scroll theme startup-profile dashboard data controls menu image textarea throbber bigtext checkbox piechart charts)
+    set(TUINATOR_DEMOS hello form colors layout counter buttons windows mouse-test scroll theme startup-profile dashboard data controls menu image textarea throbber bigtext checkbox piechart charts diffview weather glyphs)
     foreach(demo IN LISTS TUINATOR_DEMOS)
         add_executable(tuinator-${demo} examples/${demo}.cpp)
         target_link_libraries(tuinator-${demo} PRIVATE tuinator::tuinator)

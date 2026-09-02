@@ -1,0 +1,10 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Graph	EditorChart	Chart	graph	editor-chart-graph	EB03	.	cod
+Graph	EditorChart	Chart	graph	editor-chart-graph	F437	.	oct
+GraphLeft	EditorChart	Chart	graph_left	editor-chart-graph-left	EBAD	.	cod
+GraphLine	EditorChart	Chart	graph_line	editor-chart-graph-line	EBE2	.	cod
+GraphScatter	EditorChart	Chart	graph_scatter	editor-chart-graph-scatter	EBE3	.	cod
+Organization	EditorChart	Chart	organization	editor-chart-organization	F42B	.	oct
+PieChart	EditorChart	Chart	pie_chart	editor-chart-pie-chart	EBE4	.	cod
+Pulse	EditorChart	Chart	pulse	editor-chart-pulse	EB31	.	cod
+Pulse	EditorChart	Chart	pulse	editor-chart-pulse	F469	.	oct

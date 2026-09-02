@@ -1,0 +1,16 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+EarthAfrica	Geo	Earth	earth_africa	fa-geo-earth-africa	EE45	M	fa
+EarthAmericas	Geo	Earth	earth_americas	fa-geo-earth-americas	EE46	M	fa
+EarthAsia	Geo	Earth	earth_asia	fa-geo-earth-asia	EE47	M	fa
+EarthEurope	Geo	Earth	earth_europe	fa-geo-earth-europe	EF4B	M	fa
+Map	Geo	Map	map	fa-geo-map	F279	M	fa
+MapLocation	Geo	Map	map_location	fa-geo-map-location	EE68	M	fa
+MapLocationDot	Geo	Map	map_location_dot	fa-geo-map-location-dot	EE69	M	fa
+MapO	Geo	Map	map_o	fa-geo-map-o	F278	M	fa
+MapPin	Geo	Map	map_pin	fa-geo-map-pin	F276	M	fa
+UmbrellaBeach	Geo	Misc	umbrella_beach	fa-geo-umbrella-beach	EE91	M	fa
+Leaf	Geo	Nature	leaf	fa-geo-leaf	F06C	M	fa
+Mountain	Geo	Nature	mountain	fa-geo-mountain	EF08	M	fa
+Seedling	Geo	Nature	seedling	fa-geo-seedling	EDA7	M	fa
+Tree	Geo	Nature	tree	fa-geo-tree	F1BB	M	fa
+Water	Geo	Water	water	fa-geo-water	EF30	M	fa

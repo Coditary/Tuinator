@@ -1,0 +1,15 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Baseball	Sport	Ball	baseball	fa-sport-baseball	ED5C	S	fa
+BaseballBatBall	Sport	Ball	baseball_bat_ball	fa-sport-baseball-bat-ball	ED5B	S	fa
+Basketball	Sport	Ball	basketball	fa-sport-basketball	ED5D	S	fa
+BowlingBall	Sport	Ball	bowling_ball	fa-sport-bowling-ball	ED5E	S	fa
+Football	Sport	Ball	football	fa-sport-football	ED69	S	fa
+Futbol	Sport	Ball	futbol	fa-sport-futbol	F1E3	S	fa
+GolfBallTee	Sport	Ball	golf_ball_tee	fa-sport-golf-ball-tee	ED6A	S	fa
+HockeyPuck	Sport	Ball	hockey_puck	fa-sport-hockey-puck	ED6C	S	fa
+TableTennisPaddleBall	Sport	Ball	table_tennis_paddle_ball	fa-sport-table-tennis-paddle-ball	ED71	S	fa
+Volleyball	Sport	Ball	volleyball	fa-sport-volleyball	ED72	S	fa
+BroomBall	Sport	Equipment	broom_ball	fa-sport-broom-ball	ED6E	S	fa
+Dumbbell	Sport	Equipment	dumbbell	fa-sport-dumbbell	ED67	S	fa
+LifeRing	Sport	Water	life_ring	fa-sport-life-ring	F1CD	S	fa
+WaterLadder	Sport	Water	water_ladder	fa-sport-water-ladder	EE8C	S	fa

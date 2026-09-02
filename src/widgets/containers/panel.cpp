@@ -21,13 +21,20 @@ void Panel::set_title(std::string title) {
 
 void Panel::set_content(std::unique_ptr<Widget> content) {
     content_ = std::move(content);
-    if (content_ && on_dirty_) {
+    if (content_) {
         content_->set_on_dirty(on_dirty_);
     }
     if (content_ && on_layout_) {
         content_->set_on_layout(on_layout_);
     }
     mark_dirty();
+}
+
+void Panel::set_on_dirty(std::function<void(Rect)> callback) {
+    Widget::set_on_dirty(std::move(callback));
+    if (content_) {
+        content_->set_on_dirty(on_dirty_);
+    }
 }
 
 Size Panel::preferred_size() const {

@@ -16,6 +16,7 @@ struct HeatmapOptions {
     bool show_col_labels = true;
     bool show_legend = true;
     ChartGlyphStyle style = ChartGlyphStyle::Blocks;
+    int cell_gap = 1;
     int min_width = 20;
     int min_height = 8;
     Style title_style{};

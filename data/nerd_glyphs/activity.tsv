@@ -1,0 +1,14 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+ChessBishop	Activity	Activity	chess_bishop	activity-chess-bishop	E29C	A	fae
+ChessHorse	Activity	Activity	chess_horse	activity-chess-horse	E25F	A	fae
+ChessKing	Activity	Activity	chess_king	activity-chess-king	E260	A	fae
+ChessPawn	Activity	Activity	chess_pawn	activity-chess-pawn	E261	A	fae
+ChessQueen	Activity	Activity	chess_queen	activity-chess-queen	E262	A	fae
+ChessTower	Activity	Activity	chess_tower	activity-chess-tower	E263	A	fae
+Cicling	Activity	Activity	cicling	activity-cicling	E267	A	fae
+Guitar	Activity	Activity	guitar	activity-guitar	E24A	A	fae
+Nintendo	Activity	Activity	nintendo	activity-nintendo	E22A	A	fae
+Playstation	Activity	Activity	playstation	activity-playstation	E230	A	fae
+SpinDouble	Activity	Activity	spin_double	activity-spin-double	E206	A	fae
+Walking	Activity	Activity	walking	activity-walking	E213	A	fae
+Xbox	Activity	Activity	xbox	activity-xbox	E29D	A	fae

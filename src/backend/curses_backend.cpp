@@ -721,12 +721,28 @@ void CursesBackend::begin_frame(BeginFrameOptions options) {
     pending_ansi_draws_.clear();
     pending_image_draws_.clear();
 
+    const Rect terminal{{0, 0}, terminal_size()};
     if (options.full_redraw) {
-        clear();
+        frame_clip_ = terminal;
+        if (options.clear_buffer) {
+            clear();
+        }
         return;
     }
 
+    frame_clip_ = intersect(options.dirty_region, terminal);
     clear_region(options.dirty_region);
+}
+
+bool CursesBackend::ansi_draw_visible(const AnsiDraw& draw) const {
+    if (draw.text.empty()) {
+        return false;
+    }
+
+    const int width = text_display_width(draw.text);
+    const Rect draw_rect{draw.x, draw.y, width, 1};
+    const Rect visible = intersect(draw_rect, frame_clip_);
+    return visible.width > 0 && visible.height > 0;
 }
 
 void CursesBackend::clear_region(Rect region) {
@@ -939,6 +955,9 @@ void CursesBackend::flush_ansi_draws(FILE* output) {
     }
 
     for (const AnsiDraw& draw : pending_ansi_draws_) {
+        if (!ansi_draw_visible(draw)) {
+            continue;
+        }
         draw_text_ansi(output, draw.x, draw.y, draw.text, draw.style);
     }
 

@@ -1,0 +1,12 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Away	Pomodoro	Focus	away	pomodoro-away	E007	o	pom
+CleanCode	Pomodoro	Focus	clean_code	pomodoro-clean-code	E000	o	pom
+PairProgramming	Pomodoro	Focus	pair_programming	pomodoro-pair-programming	E008	o	pom
+PomodoroDone	Pomodoro	Focus	pomodoro_done	pomodoro-pomodoro-done	E001	o	pom
+PomodoroEstimated	Pomodoro	Focus	pomodoro_estimated	pomodoro-pomodoro-estimated	E002	o	pom
+PomodoroSquashed	Pomodoro	Focus	pomodoro_squashed	pomodoro-pomodoro-squashed	E004	o	pom
+PomodoroTicking	Pomodoro	Focus	pomodoro_ticking	pomodoro-pomodoro-ticking	E003	o	pom
+ExternalInterruption	Pomodoro	Interruption	external_interruption	pomodoro-external-interruption	E00A	o	pom
+InternalInterruption	Pomodoro	Interruption	internal_interruption	pomodoro-internal-interruption	E009	o	pom
+LongPause	Pomodoro	Pause	long_pause	pomodoro-long-pause	E006	o	pom
+ShortPause	Pomodoro	Pause	short_pause	pomodoro-short-pause	E005	o	pom

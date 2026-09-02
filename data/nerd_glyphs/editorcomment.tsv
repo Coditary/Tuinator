@@ -1,0 +1,8 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Comment	EditorComment	Comment	comment	editor-comment-comment	EA6B	c	cod
+Comment	EditorComment	Comment	comment	editor-comment-comment	F41F	.	oct
+CommentDiscussion	EditorComment	Comment	comment_discussion	editor-comment-comment-discussion	EAC7	c	cod
+CommentDraft	EditorComment	Comment	comment_draft	editor-comment-comment-draft	EC0E	c	cod
+CommentUnresolved	EditorComment	Comment	comment_unresolved	editor-comment-comment-unresolved	EC0A	c	cod
+Reply	EditorComment	Reply	reply	editor-comment-reply	EA7D	.	cod
+Reply	EditorComment	Reply	reply	editor-comment-reply	F4A8	.	oct

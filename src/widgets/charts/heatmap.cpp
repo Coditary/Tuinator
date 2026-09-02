@@ -64,14 +64,22 @@ double Heatmap::value_max() const {
 Size Heatmap::preferred_size() const {
     const int rows = static_cast<int>(values_.size());
     const int cols = rows > 0 ? static_cast<int>(values_.front().size()) : 0;
+    const int gap = std::max(0, options_.cell_gap);
+    const int stride = 1 + gap;
+    const int grid_width = cols > 0 ? (cols - 1) * stride + 1 : 0;
+
     int label_width = 0;
     for (const std::string& label : row_labels_) {
         label_width = std::max(label_width, text_display_width(label));
     }
 
+    const int title_rows = options_.title.empty() ? 0 : 1;
+    const int col_label_row = options_.show_col_labels ? 1 : 0;
+    const int legend_row = options_.show_legend ? 1 : 0;
+
     return {
-        std::max(options_.min_width, cols + label_width + 2),
-        std::max(options_.min_height, rows + 2 + (options_.title.empty() ? 0 : 1)),
+        std::max(options_.min_width, grid_width + label_width + 2),
+        std::max(options_.min_height, rows + title_rows + col_label_row + legend_row),
     };
 }
 
@@ -106,11 +114,10 @@ void Heatmap::paint(PaintContext& ctx) const {
     top += col_label_row;
 
     const int grid_top = top;
-    const int grid_height = std::max(1, bounds_.height - top - legend_row);
-    const int cell_h = std::max(1, grid_height / std::max(1, rows));
+    const int gap = std::max(0, options_.cell_gap);
+    const int stride = 1 + gap;
     const int grid_left = label_width;
     const int grid_right = bounds_.width;
-    const int cell_w = std::max(1, (grid_right - grid_left) / std::max(1, cols));
 
     const double min_v = value_min();
     const double max_v = value_max();
@@ -127,7 +134,7 @@ void Heatmap::paint(PaintContext& ctx) const {
 
     if (options_.show_col_labels) {
         for (int col = 0; col < cols; ++col) {
-            const int col_x = grid_left + col * cell_w;
+            const int col_x = grid_left + col * stride;
             if (col_x >= grid_right) {
                 break;
             }
@@ -136,13 +143,13 @@ void Heatmap::paint(PaintContext& ctx) const {
                 : std::to_string(col);
             canvas.draw_text(
                 {col_x, grid_top - col_label_row},
-                label.substr(0, static_cast<std::size_t>(std::min(cell_w, grid_right - col_x))),
+                label.substr(0, static_cast<std::size_t>(std::min(1, grid_right - col_x))),
                 options_.label_style);
         }
     }
 
     for (int row = 0; row < rows; ++row) {
-        const int y = grid_top + row * cell_h;
+        const int y = grid_top + row;
         if (y >= bounds_.height - legend_row) {
             break;
         }
@@ -151,7 +158,7 @@ void Heatmap::paint(PaintContext& ctx) const {
         }
 
         for (int col = 0; col < cols && col < static_cast<int>(values_[static_cast<std::size_t>(row)].size()); ++col) {
-            const int cell_x = grid_left + col * cell_w;
+            const int cell_x = grid_left + col * stride;
             if (cell_x >= grid_right) {
                 break;
             }
@@ -159,19 +166,7 @@ void Heatmap::paint(PaintContext& ctx) const {
             const double t = (value - min_v) / span;
             const Style cell_style = chart_blend_styles(low, high, t);
 
-            const int max_dx = std::min(cell_w, grid_right - cell_x);
-            const int max_dy = std::min(cell_h, bounds_.height - legend_row - y);
-            for (int dy = 0; dy < max_dy; ++dy) {
-                for (int dx = 0; dx < max_dx; ++dx) {
-                    chart_paint_glyph_cell(
-                        canvas,
-                        cell_x + dx,
-                        y + dy,
-                        options_.style,
-                        {},
-                        cell_style);
-                }
-            }
+            chart_paint_glyph_cell(canvas, cell_x, y, options_.style, {}, cell_style);
         }
     }
 

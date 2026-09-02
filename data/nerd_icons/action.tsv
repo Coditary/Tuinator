@@ -1,0 +1,3 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Refresh	Action	Action	refresh	action-refresh	E348	*	weather
+RefreshAlt	Action	Action	refresh_alt	action-refresh-alt	E347	*	weather

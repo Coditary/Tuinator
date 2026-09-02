@@ -235,7 +235,7 @@ void Application::process_timers() {
                        [](const TimerEntry& timer) { return !timer.active; }),
         timers_.end());
 
-    if (fired) {
+    if (fired && !dirty_region_.needs_render()) {
         request_redraw();
     }
 }
@@ -426,6 +426,7 @@ void Application::handle_event(const Event& event) {
         (void)resize;
         backend_->invalidate_graphics();
         layout_root();
+        clear_framebuffer_ = true;
         request_redraw();
         return;
     }
@@ -567,12 +568,12 @@ void Application::render() {
 
     BeginFrameOptions frame;
     frame.full_redraw = true;
+    frame.clear_buffer = clear_framebuffer_;
+    clear_framebuffer_ = false;
     frame.dirty_region = terminal_bounds;
     Rect paint_clip = terminal_bounds;
 
-    const bool use_partial =
-        !dirty_region_.is_full()
-        && active_graphics_protocol() == GraphicsProtocol::None;
+    const bool use_partial = !dirty_region_.is_full();
 
     if (use_partial) {
         paint_clip = intersect(dirty_region_.bounds(), terminal_bounds);

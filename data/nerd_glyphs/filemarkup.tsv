@@ -1,0 +1,16 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Ejs	FileMarkup	Markup	ejs	file-markup-ejs	E618	<	seti
+Haml	FileMarkup	Markup	haml	file-markup-haml	E664	<	seti
+Html	FileMarkup	Markup	html	file-markup-html	E60E	<	seti
+Jade	FileMarkup	Markup	jade	file-markup-jade	E66C	<	seti
+Jinja	FileMarkup	Markup	jinja	file-markup-jinja	E66F	<	seti
+Liquid	FileMarkup	Markup	liquid	file-markup-liquid	E670	<	seti
+Markdown	FileMarkup	Markup	markdown	file-markup-markdown	E609	<	seti
+Mustache	FileMarkup	Markup	mustache	file-markup-mustache	E60F	<	seti
+Nunjucks	FileMarkup	Markup	nunjucks	file-markup-nunjucks	E679	<	seti
+Pug	FileMarkup	Markup	pug	file-markup-pug	E686	<	seti
+Slim	FileMarkup	Markup	slim	file-markup-slim	E692	<	seti
+Smarty	FileMarkup	Markup	smarty	file-markup-smarty	E693	<	seti
+Svg	FileMarkup	Markup	svg	file-markup-svg	E698	<	seti
+Twig	FileMarkup	Markup	twig	file-markup-twig	E61C	<	seti
+Xml	FileMarkup	Markup	xml	file-markup-xml	E619	<	seti

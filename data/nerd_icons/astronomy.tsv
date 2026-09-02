@@ -1,0 +1,12 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Moonrise	Astronomy	Celestial	moonrise	astronomy-moonrise	E3C1	n	weather
+Moonset	Astronomy	Celestial	moonset	astronomy-moonset	E3C2	n	weather
+Sunrise	Astronomy	Celestial	sunrise	astronomy-sunrise	E34C	o	weather
+Sunset	Astronomy	Celestial	sunset	astronomy-sunset	E34D	o	weather
+LunarEclipse	Astronomy	Eclipse	lunar_eclipse	astronomy-lunar-eclipse	E369	*	weather
+SolarEclipse	Astronomy	Eclipse	solar_eclipse	astronomy-solar-eclipse	E368	*	weather
+Alien	Astronomy	Misc	alien	astronomy-alien	E36E	*	weather
+Aliens	Astronomy	Misc	aliens	astronomy-aliens	E345	*	weather
+Horizon	Astronomy	Sky	horizon	astronomy-horizon	E343	*	weather
+HorizonAlt	Astronomy	Sky	horizon_alt	astronomy-horizon-alt	E342	*	weather
+Stars	Astronomy	Sky	stars	astronomy-stars	E370	*	weather

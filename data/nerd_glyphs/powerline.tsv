@@ -1,0 +1,5 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Branch	Powerline	Segment	branch	powerline-branch	E0A0	Y	ple
+ColumnNumber	Powerline	Segment	column_number	powerline-column-number	E0A3	#	ple
+Hostname	Powerline	Segment	hostname	powerline-hostname	E0A2	H	ple
+LineNumber	Powerline	Segment	line_number	powerline-line-number	E0A1	#	ple

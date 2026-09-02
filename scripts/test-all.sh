@@ -23,7 +23,9 @@ DEMOS=(
     theme
     dashboard
     controls
-    data
+    piechart
+    charts
+    diffview
 )
 
 passed=0

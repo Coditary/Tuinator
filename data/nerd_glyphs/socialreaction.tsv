@@ -1,0 +1,10 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Smiley	SocialReaction	Face	smiley	social-reaction-smiley	F4A2	.	oct
+FeedHeart	SocialReaction	Heart	feed_heart	social-reaction-feed-heart	F4C8	f	oct
+Heart	SocialReaction	Heart	heart	social-reaction-heart	2665	<3	oct
+HeartFill	SocialReaction	Heart	heart_fill	social-reaction-heart-fill	F4E1	<3	oct
+Mention	SocialReaction	Mention	mention	social-reaction-mention	F486	.	oct
+Star	SocialReaction	Star	star	social-reaction-star	F41E	*	oct
+StarFill	SocialReaction	Star	star_fill	social-reaction-star-fill	F51F	*	oct
+Thumbsdown	SocialReaction	Thumb	thumbsdown	social-reaction-thumbsdown	F497	T	oct
+Thumbsup	SocialReaction	Thumb	thumbsup	social-reaction-thumbsup	F496	T	oct

@@ -1,5 +1,7 @@
 #include <tuinator/render/glyphs.hpp>
 
+#include <tuinator/render/line_icon.hpp>
+
 #include <clocale>
 #include <cstdlib>
 #include <cstring>
@@ -89,6 +91,28 @@ GlyphSet detect_glyph_set() {
     return cached;
 }
 
+bool supports_unicode_text() {
+    return locale_supports_utf8() && terminal_looks_utf8_capable();
+}
+
+GlyphSet detect_file_icon_glyph_set() {
+    const char* setting = std::getenv("TUINATOR_FILE_ICONS");
+    if (setting != nullptr && setting[0] != '\0') {
+        if (std::strcmp(setting, "ascii") == 0) {
+            return GlyphSet::Ascii;
+        }
+        if (std::strcmp(setting, "unicode") == 0 || std::strcmp(setting, "nerd") == 0) {
+            return GlyphSet::Unicode;
+        }
+    }
+
+    if (!supports_unicode_text()) {
+        return GlyphSet::Ascii;
+    }
+
+    return GlyphSet::Unicode;
+}
+
 BorderGlyphs ascii_border_glyphs() {
     return make_glyphs("+", "+", "+", "+", "-", "|", "#");
 }
@@ -105,6 +129,30 @@ BorderGlyphs unicode_border_glyphs() {
     );
 }
 
+BorderGlyphs unicode_heavy_border_glyphs() {
+    return make_glyphs(
+        "\xe2\x94\x8f", // ┏
+        "\xe2\x94\x93", // ┓
+        "\xe2\x94\x97", // ┗
+        "\xe2\x94\x9b", // ┛
+        "\xe2\x94\x81", // ━
+        "\xe2\x94\x83", // ┃
+        "\xe2\x97\xa2"  // ◢
+    );
+}
+
+BorderGlyphs unicode_double_border_glyphs() {
+    return make_glyphs(
+        "\xe2\x95\x94", // ╔
+        "\xe2\x95\x97", // ╗
+        "\xe2\x95\x9a", // ╚
+        "\xe2\x95\x9d", // ╝
+        "\xe2\x95\x90", // ═
+        "\xe2\x95\x91", // ║
+        "\xe2\x97\xa2"  // ◢
+    );
+}
+
 BorderGlyphs unicode_rounded_border_glyphs() {
     return make_glyphs(
         "\xe2\x95\xad", // ╭
@@ -117,22 +165,51 @@ BorderGlyphs unicode_rounded_border_glyphs() {
     );
 }
 
+BorderStyle border_style_from_glyph_set(GlyphSet set) {
+    switch (set) {
+    case GlyphSet::Ascii:
+        return BorderStyle::Ascii;
+    case GlyphSet::UnicodeRounded:
+        return BorderStyle::Rounded;
+    case GlyphSet::Unicode:
+    case GlyphSet::Auto:
+        return BorderStyle::Light;
+    }
+
+    return BorderStyle::Ascii;
+}
+
+BorderGlyphs border_glyphs_for(BorderStyle style) {
+    switch (style) {
+    case BorderStyle::Ascii:
+        return ascii_border_glyphs();
+    case BorderStyle::Light:
+        return unicode_border_glyphs();
+    case BorderStyle::Heavy:
+        return unicode_heavy_border_glyphs();
+    case BorderStyle::Double:
+        return unicode_double_border_glyphs();
+    case BorderStyle::Rounded:
+        return unicode_rounded_border_glyphs();
+    }
+
+    return ascii_border_glyphs();
+}
+
 BorderGlyphs border_glyphs_for(GlyphSet set) {
     if (set == GlyphSet::Auto) {
         set = detect_glyph_set();
     }
 
-    switch (set) {
-    case GlyphSet::Ascii:
-        return ascii_border_glyphs();
-    case GlyphSet::UnicodeRounded:
-        return unicode_rounded_border_glyphs();
-    case GlyphSet::Unicode:
-    case GlyphSet::Auto:
-        return unicode_border_glyphs();
-    }
+    return border_glyphs_for(border_style_from_glyph_set(set));
+}
 
-    return ascii_border_glyphs();
+std::string diff_fill_glyph(GlyphSet glyphs) {
+    return line_icon_glyph(LineIcon::DiffFill, glyphs);
+}
+
+std::string diff_sign_glyph(GlyphSet glyphs) {
+    return line_icon_glyph(LineIcon::DiffSign, glyphs);
 }
 
 } // namespace tuinator

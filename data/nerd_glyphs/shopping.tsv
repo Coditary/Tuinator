@@ -1,0 +1,12 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+BagShopping	Shopping	Bag	bag_shopping	fa-shopping-bag-shopping	F290	C	fa
+BasketShopping	Shopping	Bag	basket_shopping	fa-shopping-basket-shopping	F291	C	fa
+CartArrowDown	Shopping	Cart	cart_arrow_down	fa-shopping-cart-arrow-down	F218	C	fa
+CartFlatbed	Shopping	Cart	cart_flatbed	fa-shopping-cart-flatbed	ED7F	C	fa
+CartFlatbedSuitcase	Shopping	Cart	cart_flatbed_suitcase	fa-shopping-cart-flatbed-suitcase	EE66	C	fa
+CartPlus	Shopping	Cart	cart_plus	fa-shopping-cart-plus	F217	C	fa
+CartShopping	Shopping	Cart	cart_shopping	fa-shopping-cart-shopping	F07A	C	fa
+Gem	Shopping	Product	gem	fa-shopping-gem	F219	C	fa
+Shop	Shopping	Store	shop	fa-shopping-shop	EE18	C	fa
+Store	Shopping	Store	store	fa-shopping-store	EE17	C	fa
+Warehouse	Shopping	Store	warehouse	fa-shopping-warehouse	ED92	C	fa

@@ -1,0 +1,6 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Power	PowerSymbol	Power	power	power-power	23FB	O	iec
+PowerOff	PowerSymbol	Power	power_off	power-power-off	2B58	O	iec
+PowerOn	PowerSymbol	Power	power_on	power-power-on	23FD	O	iec
+SleepMode	PowerSymbol	Power	sleep_mode	power-sleep-mode	23FE	O	iec
+TogglePower	PowerSymbol	Power	toggle_power	power-toggle-power	23FC	O	iec

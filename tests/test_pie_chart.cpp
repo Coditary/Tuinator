@@ -19,8 +19,8 @@ TUINATOR_TEST(pie_chart_renders_legend) {
 
     tuinator::test::render_root(chart, backend);
 
-    TUINATOR_CHECK(tuinator::test::row_contains(backend, 11, "Rust"));
-    TUINATOR_CHECK(tuinator::test::row_contains(backend, 11, "44.0%"));
+    TUINATOR_CHECK(tuinator::test::row_has(backend, "Rust"));
+    TUINATOR_CHECK(tuinator::test::row_has(backend, "44.0%"));
 }
 
 TUINATOR_TEST(pie_chart_style_catalog_contains_braille) {

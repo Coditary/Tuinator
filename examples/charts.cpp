@@ -488,8 +488,10 @@ int main() {
                 std::vector<std::string>{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"},
                 std::vector<std::string>{"W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8", "W9", "W10", "W11", "W12"},
                 tuinator::HeatmapOptions{
-                    .min_width = 48,
-                    .min_height = 12,
+                    .style = tuinator::ChartGlyphStyle::FineDots,
+                    .cell_gap = 1,
+                    .min_width = 36,
+                    .min_height = 10,
                     .title_style = theme.heading,
                     .label_style = theme.muted,
                     .low_style = style_fg(tuinator::Rgb::hex(0x1D4ED8)),

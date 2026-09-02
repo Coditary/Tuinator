@@ -1,0 +1,7 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Earthquake	Hazard	Hazard	earthquake	hazard-earthquake	E3BE	*	weather
+Fire	Hazard	Hazard	fire	hazard-fire	E3BF	*	weather
+Flood	Hazard	Hazard	flood	hazard-flood	E375	*	weather
+Meteor	Hazard	Hazard	meteor	hazard-meteor	E36A	*	weather
+Tsunami	Hazard	Hazard	tsunami	hazard-tsunami	E3BD	o	weather
+Volcano	Hazard	Hazard	volcano	hazard-volcano	E3C0	*	weather

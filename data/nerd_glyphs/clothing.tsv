@@ -1,0 +1,11 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Glasses	Clothing	Accessory	glasses	fa-clothing-glasses	EDFA	W	fa
+Socks	Clothing	Accessory	socks	fa-clothing-socks	EEDF	W	fa
+Swatchbook	Clothing	Accessory	swatchbook	fa-clothing-swatchbook	EE8A	W	fa
+BlackTie	Clothing	Body	black_tie	fa-clothing-black-tie	F27E	W	fa
+Shirt	Clothing	Body	shirt	fa-clothing-shirt	EE1C	W	fa
+ShoePrints	Clothing	Foot	shoe_prints	fa-clothing-shoe-prints	EE14	W	fa
+HatCowboy	Clothing	Head	hat_cowboy	fa-clothing-hat-cowboy	EFB7	W	fa
+HatCowboySide	Clothing	Head	hat_cowboy_side	fa-clothing-hat-cowboy-side	EFB8	W	fa
+HatWizard	Clothing	Head	hat_wizard	fa-clothing-hat-wizard	EF01	W	fa
+HelmetSafety	Clothing	Head	helmet_safety	fa-clothing-helmet-safety	EF84	W	fa

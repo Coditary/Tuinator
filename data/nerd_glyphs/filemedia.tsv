@@ -1,0 +1,10 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Audio	FileMedia	Media	audio	file-media-audio	E638	M	seti
+Favicon	FileMedia	Media	favicon	file-media-favicon	E623	M	seti
+Firefox	FileMedia	Media	firefox	file-media-firefox	E658	M	seti
+Font	FileMedia	Media	font	file-media-font	E659	M	seti
+Illustrator	FileMedia	Media	illustrator	file-media-illustrator	E669	M	seti
+Image	FileMedia	Media	image	file-media-image	E60D	M	seti
+Photoshop	FileMedia	Media	photoshop	file-media-photoshop	E67F	M	seti
+PlayArrow	FileMedia	Media	play_arrow	file-media-play-arrow	E602	M	seti
+Video	FileMedia	Media	video	file-media-video	E69F	M	seti

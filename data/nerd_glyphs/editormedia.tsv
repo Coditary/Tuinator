@@ -1,0 +1,12 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Mic	EditorMedia	Audio	mic	editor-media-mic	EC12	.	cod
+MicFilled	EditorMedia	Audio	mic_filled	editor-media-mic-filled	EC1C	.	cod
+DeviceCamera	EditorMedia	Camera	device_camera	editor-media-device-camera	EADA	.	cod
+DeviceCameraVideo	EditorMedia	Camera	device_camera_video	editor-media-device-camera-video	EAD9	.	cod
+DeviceCamera	EditorMedia	Device	device_camera	editor-media-device-camera	F446	.	oct
+DeviceCameraVideo	EditorMedia	Device	device_camera_video	editor-media-device-camera-video	F447	.	oct
+DeviceMobile	EditorMedia	Device	device_mobile	editor-media-device-mobile	EADB	.	cod
+DeviceMobile	EditorMedia	Device	device_mobile	editor-media-device-mobile	F42C	.	oct
+RadioTower	EditorMedia	Device	radio_tower	editor-media-radio-tower	EB34	.	cod
+Record	EditorMedia	Device	record	editor-media-record	EBA7	.	cod
+RecordSmall	EditorMedia	Device	record_small	editor-media-record-small	EBFA	.	cod

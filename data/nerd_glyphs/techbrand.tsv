@@ -1,0 +1,11 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Devicon	TechBrand	Brand	devicon	tech-brand-devicon	E7C1	B	dev
+Aarch64	TechBrand	Organization	aarch64	tech-brand-aarch64	E700	B	dev
+Apache	TechBrand	Organization	apache	tech-brand-apache	E72B	B	dev
+Gnu	TechBrand	Organization	gnu	tech-brand-gnu	E779	B	dev
+Google	TechBrand	Organization	google	tech-brand-google	E7F0	B	dev
+Behance	TechBrand	Social	behance	tech-brand-behance	E762	B	dev
+Facebook	TechBrand	Social	facebook	tech-brand-facebook	E7D4	B	dev
+Linkedin	TechBrand	Social	linkedin	tech-brand-linkedin	E820	B	dev
+Stackoverflow	TechBrand	Social	stackoverflow	tech-brand-stackoverflow	E710	B	dev
+Twitter	TechBrand	Social	twitter	tech-brand-twitter	E8C9	B	dev

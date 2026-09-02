@@ -5,6 +5,16 @@
 #include <tuinator/render/theme.hpp>
 #include <tuinator/widgets/containers/panel.hpp>
 
+TUINATOR_TEST(diff_fill_glyph_matches_neovim_fillchar) {
+    TUINATOR_CHECK_EQ(tuinator::diff_fill_glyph(tuinator::GlyphSet::Ascii), "/");
+    TUINATOR_CHECK_EQ(tuinator::diff_fill_glyph(tuinator::GlyphSet::Unicode), "\xe2\x95\xb1");
+}
+
+TUINATOR_TEST(diff_sign_glyph_matches_gitsigns_bar) {
+    TUINATOR_CHECK_EQ(tuinator::diff_sign_glyph(tuinator::GlyphSet::Ascii), "|");
+    TUINATOR_CHECK_EQ(tuinator::diff_sign_glyph(tuinator::GlyphSet::Unicode), "\xe2\x96\x8e");
+}
+
 TUINATOR_TEST(border_glyphs_for_each_set) {
     TUINATOR_CHECK_EQ(tuinator::border_glyphs_for(tuinator::GlyphSet::Ascii).horizontal, "-");
     TUINATOR_CHECK_EQ(tuinator::border_glyphs_for(tuinator::GlyphSet::Ascii).vertical, "|");

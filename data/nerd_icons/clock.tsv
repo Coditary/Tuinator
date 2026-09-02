@@ -1,0 +1,13 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Time1	Clock	Clock	time_1	clock-time-1	E382	t	weather
+Time10	Clock	Clock	time_10	clock-time-10	E38B	t	weather
+Time11	Clock	Clock	time_11	clock-time-11	E38C	t	weather
+Time12	Clock	Clock	time_12	clock-time-12	E381	t	weather
+Time2	Clock	Clock	time_2	clock-time-2	E383	t	weather
+Time3	Clock	Clock	time_3	clock-time-3	E384	t	weather
+Time4	Clock	Clock	time_4	clock-time-4	E385	t	weather
+Time5	Clock	Clock	time_5	clock-time-5	E386	t	weather
+Time6	Clock	Clock	time_6	clock-time-6	E387	t	weather
+Time7	Clock	Clock	time_7	clock-time-7	E388	t	weather
+Time8	Clock	Clock	time_8	clock-time-8	E389	t	weather
+Time9	Clock	Clock	time_9	clock-time-9	E38A	t	weather

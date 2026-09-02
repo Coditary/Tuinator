@@ -92,6 +92,50 @@ void ScrollView::scroll_by(int delta_x, int delta_y) {
     scroll_to(scroll_x_ + delta_x, scroll_y_ + delta_y);
 }
 
+void ScrollView::set_on_dirty(std::function<void(Rect)> callback) {
+    Widget::set_on_dirty(std::move(callback));
+    bind_content_dirty_callback();
+}
+
+void ScrollView::bind_content_dirty_callback() {
+    if (!content_ || !on_dirty_) {
+        return;
+    }
+
+    content_->set_on_dirty([this](Rect region) {
+        if (!on_dirty_) {
+            return;
+        }
+
+        if (region.width <= 0 || region.height <= 0) {
+            on_dirty_(bounds_);
+            return;
+        }
+
+        const ScrollbarLayout layout = scrollbar_layout();
+        const Rect viewport{
+            bounds_.x,
+            bounds_.y,
+            layout.metrics.viewport_width,
+            layout.metrics.viewport_height,
+        };
+
+        const Rect translated{
+            bounds_.x + region.x - scroll_x_,
+            bounds_.y + region.y - scroll_y_,
+            region.width,
+            region.height,
+        };
+
+        const Rect visible = intersect(translated, viewport);
+        if (visible.width <= 0 || visible.height <= 0) {
+            return;
+        }
+
+        on_dirty_(visible);
+    });
+}
+
 void ScrollView::refresh_content() {
     layout_content();
     mark_dirty();
@@ -136,9 +180,7 @@ Size ScrollView::preferred_size() const {
 
 void ScrollView::layout(Rect bounds) {
     bounds_ = bounds;
-    if (content_ && on_dirty_) {
-        content_->set_on_dirty(on_dirty_);
-    }
+    bind_content_dirty_callback();
     layout_content();
 }
 

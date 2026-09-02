@@ -54,4 +54,13 @@ inline bool row_contains(const MemoryTerminalBackend& backend, int y, std::strin
     return row.find(text) != std::string::npos;
 }
 
+inline bool row_has(const MemoryTerminalBackend& backend, std::string_view text) {
+    for (int y = 0; y < backend.terminal_size().height; ++y) {
+        if (row_contains(backend, y, text)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 } // namespace tuinator::test

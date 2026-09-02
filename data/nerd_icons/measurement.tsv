@@ -1,0 +1,10 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Barometer	Measurement	Measurement	barometer	measurement-barometer	E372	*	weather
+Celsius	Measurement	Measurement	celsius	measurement-celsius	E339	T	weather
+Degrees	Measurement	Measurement	degrees	measurement-degrees	E33E	*	weather
+Fahrenheit	Measurement	Measurement	fahrenheit	measurement-fahrenheit	E341	T	weather
+Hot	Measurement	Measurement	hot	measurement-hot	E36B	*	weather
+Humidity	Measurement	Measurement	humidity	measurement-humidity	E373	*	weather
+Thermometer	Measurement	Measurement	thermometer	measurement-thermometer	E350	T	weather
+ThermometerExterior	Measurement	Measurement	thermometer_exterior	measurement-thermometer-exterior	E34E	T	weather
+ThermometerInternal	Measurement	Measurement	thermometer_internal	measurement-thermometer-internal	E34F	T	weather

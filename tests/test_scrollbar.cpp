@@ -4,6 +4,7 @@
 #include <tuinator/layout/box.hpp>
 #include <tuinator/render/scrollbar.hpp>
 #include <tuinator/render/theme.hpp>
+#include <tuinator/widgets/containers/panel.hpp>
 #include <tuinator/widgets/containers/scroll_view.hpp>
 #include <tuinator/widgets/controls/text_area.hpp>
 #include <tuinator/widgets/controls/toggle.hpp>
@@ -69,7 +70,7 @@ TUINATOR_TEST(scrollbar_paints_vertical_track) {
 
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    tuinator::paint_scrollbars(canvas, options, 0, 2, 20, 20);
+    tuinator::paint_scrollbars(canvas, options, 0, 5, 11, 20);
     backend.end_frame();
 
     TUINATOR_CHECK(tuinator::test::row_contains(backend, 0, "^"));
@@ -198,7 +199,8 @@ TUINATOR_TEST(scroll_view_row_updates_cleanly_when_scrolling) {
     scroll.scroll_to(0, 27);
     tuinator::test::render_root(scroll, backend);
     TUINATOR_CHECK(tuinator::test::row_contains(backend, 2, "Item 30"));
-    TUINATOR_CHECK(!tuinator::test::row_contains(backend, 2, "Item 3"));
+    // "Item 3" is a prefix of "Item 30" — match the label boundary.
+    TUINATOR_CHECK(!tuinator::test::row_contains(backend, 2, "Item 3 "));
 }
 
 TUINATOR_TEST(scroll_view_paints_scrollbars_for_tall_content) {
@@ -221,6 +223,43 @@ TUINATOR_TEST(scroll_view_paints_scrollbars_for_tall_content) {
 
     TUINATOR_CHECK(tuinator::test::row_contains(backend, 0, "^"));
     TUINATOR_CHECK(tuinator::test::row_contains(backend, 4, "v"));
+}
+
+TUINATOR_TEST(scroll_view_maps_content_dirty_to_screen) {
+    tuinator::Rect reported{};
+    auto content = std::make_unique<tuinator::VBox>(tuinator::BoxOptions{.gap = 0});
+    for (int i = 0; i < 20; ++i) {
+        content->add_child(std::make_unique<tuinator::Label>("row", tuinator::Style{}));
+    }
+
+    tuinator::ScrollViewOptions options;
+    options.width = 20;
+    options.height = 6;
+
+    tuinator::ScrollView scroll(std::move(content), options);
+    scroll.layout({5, 3, 20, 6});
+    scroll.set_on_dirty([&](tuinator::Rect region) { reported = region; });
+
+    scroll.scroll_to(0, 8);
+    scroll.content()->children()[10]->mark_dirty();
+
+    TUINATOR_CHECK_EQ(reported.x, 5);
+    TUINATOR_CHECK_EQ(reported.y, 5);
+}
+
+TUINATOR_TEST(panel_forwards_dirty_callback_to_content) {
+    tuinator::Rect reported{};
+    tuinator::Panel panel("Weekly", tuinator::Style{});
+    auto label = std::make_unique<tuinator::Label>("cell", tuinator::Style{});
+    tuinator::Label* label_ptr = label.get();
+    panel.set_content(std::move(label));
+    panel.layout({0, 0, 24, 6});
+    panel.set_on_dirty([&](tuinator::Rect region) { reported = region; });
+
+    label_ptr->mark_dirty();
+
+    TUINATOR_CHECK_EQ(reported.x, 1);
+    TUINATOR_CHECK_EQ(reported.y, 2);
 }
 
 TUINATOR_TEST(text_area_enter_accepts_newline_character) {

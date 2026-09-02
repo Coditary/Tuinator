@@ -12,7 +12,26 @@
 #include <tuinator/render/paint_context.hpp>
 #include <tuinator/render/color.hpp>
 #include <tuinator/render/style.hpp>
+#include <tuinator/render/file_icon.hpp>
+#include <tuinator/render/git_change_status.hpp>
+#include <tuinator/render/ui_icon.hpp>
+#include <tuinator/render/line_icon.hpp>
+#include <tuinator/render/nerd_icon_set.hpp>
+#include <tuinator/render/weather_icon.hpp>
+#include <tuinator/render/moon_icon.hpp>
+#include <tuinator/render/clock_icon.hpp>
+#include <tuinator/render/compass_icon.hpp>
+#include <tuinator/render/measurement_icon.hpp>
+#include <tuinator/render/astronomy_icon.hpp>
+#include <tuinator/render/air_quality_icon.hpp>
+#include <tuinator/render/hazard_icon.hpp>
+#include <tuinator/render/marine_alert_icon.hpp>
+#include <tuinator/render/action_icon.hpp>
+#include <tuinator/render/block_element.hpp>
+#include <tuinator/render/box_drawing.hpp>
+#include <tuinator/render/border_style.hpp>
 #include <tuinator/render/glyphs.hpp>
+#include <tuinator/render/text.hpp>
 #include <tuinator/render/scrollbar.hpp>
 #include <tuinator/render/graphics_protocol.hpp>
 #include <tuinator/render/terminal_image.hpp>
@@ -31,6 +50,9 @@
 #include <tuinator/widgets/display/big_text.hpp>
 #include <tuinator/widgets/display/image_view.hpp>
 #include <tuinator/widgets/display/label.hpp>
+#include <tuinator/widgets/display/nerd_icon_catalog_gallery.hpp>
+#include <tuinator/widgets/display/nerd_glyph_matrix_gallery.hpp>
+#include <tuinator/render/nerd_glyph_catalog.hpp>
 #include <tuinator/widgets/display/progress_bar.hpp>
 #include <tuinator/widgets/display/separator.hpp>
 #include <tuinator/widgets/display/spinner.hpp>
@@ -67,7 +89,9 @@
 
 // Chrome
 #include <tuinator/widgets/chrome/dialog.hpp>
+#include <tuinator/widgets/chrome/source_control_panel.hpp>
 #include <tuinator/widgets/chrome/status_bar.hpp>
+#include <tuinator/widgets/chrome/status_line.hpp>
 
 #include <tuinator/widgets/widget.hpp>
 #include <tuinator/widgets/capabilities.hpp>

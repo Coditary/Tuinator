@@ -21,6 +21,8 @@ public:
     void set_content(std::unique_ptr<Widget> content);
     Widget* content() const { return content_.get(); }
 
+    void set_on_dirty(std::function<void(Rect)> callback) override;
+
     Size preferred_size() const override;
     void layout(Rect bounds) override;
     void paint(PaintContext& ctx) const override;

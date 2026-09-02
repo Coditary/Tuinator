@@ -1,0 +1,10 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+CustomFolder	FileFolder	Folder	custom_folder	file-folder-custom-folder	E5FF	/	seti
+Folder	FileFolder	Folder	folder	file-folder	E613	/	seti
+FolderConfig	FileFolder	Folder	folder_config	file-folder-config	E5FC	/	seti
+FolderGit	FileFolder	Folder	folder_git	file-folder-git	E5FB	/	seti
+FolderGithub	FileFolder	Folder	folder_github	file-folder-github	E5FD	/	seti
+FolderNpm	FileFolder	Folder	folder_npm	file-folder-npm	E5FA	/	seti
+FolderOct	FileFolder	Folder	folder_oct	file-folder-oct	E6AD	/	seti
+FolderOpen	FileFolder	Folder	folder_open	file-folder-open	E5FE	/	seti
+Home	FileFolder	Folder	home	file-folder-home	E617	/	seti

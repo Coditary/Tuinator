@@ -1,0 +1,15 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+HollyBerry	Religion	Holiday	holly_berry	fa-religion-holly-berry	EF50	&	fa
+SpaghettiMonsterFlying	Religion	Holiday	spaghetti_monster_flying	fa-religion-spaghetti-monster-flying	EED5	&	fa
+PlaceOfWorship	Religion	Place	place_of_worship	fa-religion-place-of-worship	EED7	&	fa
+Bahai	Religion	Symbol	bahai	fa-religion-bahai	EECB	&	fa
+Khanda	Religion	Symbol	khanda	fa-religion-khanda	EECF	&	fa
+Menorah	Religion	Symbol	menorah	fa-religion-menorah	EED2	&	fa
+Om	Religion	Symbol	om	fa-religion-om	EED4	&	fa
+Peace	Religion	Symbol	peace	fa-religion-peace	EED6	&	fa
+YinYang	Religion	Symbol	yin_yang	fa-religion-yin-yang	EEE9	&	fa
+BookBible	Religion	Text	book_bible	fa-religion-book-bible	EEBE	&	fa
+BookJournalWhills	Religion	Text	book_journal_whills	fa-religion-book-journal-whills	EECD	&	fa
+BookQuran	Religion	Text	book_quran	fa-religion-book-quran	EEDC	&	fa
+BookTanakh	Religion	Text	book_tanakh	fa-religion-book-tanakh	EF8E	&	fa
+ScrollTorah	Religion	Text	scroll_torah	fa-religion-scroll-torah	EEE5	&	fa

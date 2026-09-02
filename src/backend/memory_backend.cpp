@@ -57,9 +57,11 @@ void MemoryTerminalBackend::begin_frame(BeginFrameOptions options) {
     image_draws_.clear();
 
     if (options.full_redraw) {
-        for (auto& row : cells_) {
-            for (Cell& cell : row) {
-                cell = Cell{};
+        if (options.clear_buffer) {
+            for (auto& row : cells_) {
+                for (Cell& cell : row) {
+                    cell = Cell{};
+                }
             }
         }
         return;

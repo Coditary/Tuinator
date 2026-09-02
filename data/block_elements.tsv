@@ -1,0 +1,17 @@
+name	codepoint	ascii
+Full	2588	#
+UpperHalf	2580	#
+LowerHalf	2584	#
+LeftHalf	258C	#
+RightHalf	2590	#
+LightShade	2591	.
+MediumShade	2592	:
+DarkShade	2593	#
+LeftOneEighth	258E	|
+RightOneEighth	2595	|
+LowerOneEighth	2581	_
+UpperOneEighth	258F	^
+LeftThreeEighths	258D	|
+RightThreeEighths	2596	|
+UpperOneQuarter	2586	#
+LowerOneQuarter	2582	_

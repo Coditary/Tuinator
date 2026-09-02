@@ -26,6 +26,8 @@ public:
     void activate_tab(int index) override { set_selected_index(index); }
     Widget* active_content() const;
 
+    void set_on_dirty(std::function<void(Rect)> callback) override;
+
     Size preferred_size() const override;
     void layout(Rect bounds) override;
     void paint(PaintContext& ctx) const override;

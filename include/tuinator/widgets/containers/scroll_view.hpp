@@ -35,6 +35,8 @@ public:
     bool try_scroll(const Event& event) override;
     Widget* scroll_content() const override { return content(); }
 
+    void set_on_dirty(std::function<void(Rect)> callback) override;
+
     Size preferred_size() const override;
     void layout(Rect bounds) override;
     void paint(PaintContext& ctx) const override;
@@ -50,6 +52,7 @@ public:
 private:
     void clamp_scroll();
     void layout_content();
+    void bind_content_dirty_callback();
     ScrollbarMetrics scrollbar_metrics() const;
     ScrollbarLayout scrollbar_layout() const;
     Point to_local(Point terminal) const;

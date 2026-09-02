@@ -15,6 +15,8 @@ class TerminalImage;
 
 struct BeginFrameOptions {
     bool full_redraw = true;
+    /// When false on a full redraw, the previous frame stays visible until paint overwrites it.
+    bool clear_buffer = true;
     Rect dirty_region{};
 };
 

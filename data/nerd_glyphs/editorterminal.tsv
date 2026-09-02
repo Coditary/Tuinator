@@ -1,0 +1,10 @@
+name	domain	category	nerd_suffix	path	codepoint	ascii	source_set
+Terminal	EditorTerminal	Shell	terminal	editor-terminal-terminal	EA85	$	cod
+Terminal	EditorTerminal	Shell	terminal	editor-terminal-terminal	F489	$	oct
+TerminalBash	EditorTerminal	Shell	terminal_bash	editor-terminal-terminal-bash	EBCA	$	cod
+TerminalCmd	EditorTerminal	Shell	terminal_cmd	editor-terminal-terminal-cmd	EBC4	$	cod
+TerminalDebian	EditorTerminal	Shell	terminal_debian	editor-terminal-terminal-debian	EBC5	$	cod
+TerminalLinux	EditorTerminal	Shell	terminal_linux	editor-terminal-terminal-linux	EBC6	$	cod
+TerminalPowershell	EditorTerminal	Shell	terminal_powershell	editor-terminal-terminal-powershell	EBC7	$	cod
+TerminalTmux	EditorTerminal	Shell	terminal_tmux	editor-terminal-terminal-tmux	EBC8	$	cod
+TerminalUbuntu	EditorTerminal	Shell	terminal_ubuntu	editor-terminal-terminal-ubuntu	EBC9	$	cod

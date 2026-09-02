@@ -42,6 +42,14 @@ Theme make_theme(
     return theme;
 }
 
+BorderGlyphs resolve_theme_border_glyphs(const ThemeOptions& options) {
+    if (options.border_style.has_value()) {
+        return border_glyphs_for(*options.border_style);
+    }
+
+    return border_glyphs_for(options.glyphs);
+}
+
 } // namespace
 
 Theme dark_theme(ThemeOptions options) {
@@ -57,7 +65,7 @@ Theme dark_theme(ThemeOptions options) {
         make_style(Color::Magenta, Color::Default, true),
         make_style(Color::Green),
         make_style(Color::Red),
-        border_glyphs_for(options.glyphs));
+        resolve_theme_border_glyphs(options));
 }
 
 Theme light_theme(ThemeOptions options) {
@@ -73,7 +81,7 @@ Theme light_theme(ThemeOptions options) {
         make_style(Color::Magenta, Color::Default, true),
         make_style(Color::Green),
         make_style(Color::Red),
-        border_glyphs_for(options.glyphs));
+        resolve_theme_border_glyphs(options));
 }
 
 } // namespace tuinator
