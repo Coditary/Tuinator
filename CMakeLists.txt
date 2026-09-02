@@ -70,6 +70,8 @@ find_package(ZLIB REQUIRED)
 
 # --- Library ------------------------------------------------------------
 
+add_subdirectory(third_party/libvterm EXCLUDE_FROM_ALL)
+
 add_library(tuinator
     ${TUINATOR_BACKEND_SOURCES}
     src/core/action_registry.cpp
@@ -150,6 +152,10 @@ add_library(tuinator
     src/widgets/chrome/source_control_panel.cpp
     src/widgets/chrome/status_bar.cpp
     src/widgets/chrome/status_line.cpp
+    src/widgets/chrome/terminal_frame.cpp
+    src/widgets/chrome/shell_terminal.cpp
+    src/terminal/ansi_terminal_buffer.cpp
+    src/terminal/pty_session.cpp
     src/window/desktop.cpp
     src/window/window.cpp
     src/window/window_manager.cpp
@@ -170,7 +176,14 @@ if(TUINATOR_CURSES_TARGET)
 else()
     target_link_libraries(tuinator PUBLIC ${TUINATOR_CURSES_LIBS})
 endif()
-target_link_libraries(tuinator PRIVATE ZLIB::ZLIB)
+target_link_libraries(tuinator PRIVATE ZLIB::ZLIB tuinator_libvterm)
+
+if(NOT WIN32)
+    find_library(TUINATOR_UTIL_LIBRARY util)
+    if(TUINATOR_UTIL_LIBRARY)
+        target_link_libraries(tuinator PRIVATE ${TUINATOR_UTIL_LIBRARY})
+    endif()
+endif()
 
 target_compile_definitions(tuinator
     PUBLIC  $<$<BOOL:${WIN32}>:TUINATOR_PLATFORM_WINDOWS=1>
@@ -204,6 +217,7 @@ if(TUINATOR_BUILD_TESTS)
         tests/render/test_weather_icon.cpp
         tests/render/test_nerd_icon_catalog.cpp
         tests/render/test_nerd_glyph_matrix.cpp
+        tests/terminal/test_ansi_terminal.cpp
         # Widgets
         tests/widgets/test_label.cpp
         tests/widgets/test_list_view.cpp
@@ -221,6 +235,7 @@ if(TUINATOR_BUILD_TESTS)
         tests/widgets/charts/test_advanced_charts.cpp
         tests/widgets/chrome/test_source_control_panel.cpp
         tests/widgets/chrome/test_status_line.cpp
+        tests/widgets/chrome/test_terminal_frame.cpp
     )
 
     add_executable(tuinator-tests ${TUINATOR_TEST_SOURCES})
@@ -238,7 +253,7 @@ endif()
 option(TUINATOR_BUILD_EXAMPLES "Build example programs" ON)
 
 if(TUINATOR_BUILD_EXAMPLES)
-    set(TUINATOR_DEMOS hello form colors layout counter buttons windows mouse-test scroll theme startup-profile dashboard data controls menu image textarea throbber bigtext checkbox piechart charts diffview weather glyphs)
+    set(TUINATOR_DEMOS hello form colors layout counter buttons windows mouse-test scroll theme startup-profile dashboard data controls menu image textarea throbber bigtext checkbox piechart charts diffview weather glyphs terminal-frame)
     foreach(demo IN LISTS TUINATOR_DEMOS)
         add_executable(tuinator-${demo} examples/${demo}.cpp)
         target_link_libraries(tuinator-${demo} PRIVATE tuinator::tuinator)

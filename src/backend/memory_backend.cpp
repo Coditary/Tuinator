@@ -81,6 +81,10 @@ void MemoryTerminalBackend::begin_frame(BeginFrameOptions options) {
 
 void MemoryTerminalBackend::end_frame() {}
 
+void MemoryTerminalBackend::set_text_cursor(std::optional<Point> position) {
+    text_cursor_ = position;
+}
+
 void MemoryTerminalBackend::ensure_cell(int x, int y) {
     if (y < 0 || y >= size_.height || x < 0 || x >= size_.width) {
         return;

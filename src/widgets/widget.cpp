@@ -178,4 +178,11 @@ void Widget::for_each_child(const std::function<void(Widget*)>& visitor) {
     }
 }
 
+void Widget::for_each_descendant(const std::function<void(Widget*)>& visitor) {
+    visitor(this);
+    for (auto& child : children_) {
+        child->for_each_descendant(visitor);
+    }
+}
+
 } // namespace tuinator

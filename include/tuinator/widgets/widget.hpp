@@ -24,6 +24,11 @@ public:
     virtual bool captures_pointer() const { return false; }
     virtual bool pointer_active() const { return false; }
     virtual bool wants_hover_redraw() const { return false; }
+    virtual void on_idle() {}
+    /// When true, the application polls input periodically so on_idle() can react.
+    virtual bool needs_periodic_idle() const { return false; }
+    virtual bool wants_initial_focus() const { return false; }
+    virtual bool is_shell_terminal() const { return false; }
 
     void add_child(std::unique_ptr<Widget> child);
     const std::vector<std::unique_ptr<Widget>>& children() const { return children_; }
@@ -50,6 +55,7 @@ public:
     virtual void collect_focusable(std::vector<Widget*>& out);
 
     virtual void for_each_child(const std::function<void(Widget*)>& visitor);
+    virtual void for_each_descendant(const std::function<void(Widget*)>& visitor);
 
 protected:
     Rect bounds_{};

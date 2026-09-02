@@ -71,7 +71,11 @@ private:
     void handle_event(const Event& event);
     void render();
     void process_timers();
+    void poll_idle();
     int compute_poll_timeout_ms() const;
+    bool any_widget_needs_periodic_idle() const;
+    bool shell_terminal_active() const;
+    void sync_mouse_cursor_policy();
 
     std::unique_ptr<TerminalBackend> backend_;
     std::unique_ptr<Widget> root_;

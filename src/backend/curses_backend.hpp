@@ -27,6 +27,8 @@ public:
     void begin_frame(BeginFrameOptions options = {}) override;
     void end_frame() override;
     void refresh_mouse_cursor() override;
+    void set_mouse_cursor_suppressed(bool suppressed) override;
+    void set_text_cursor(std::optional<Point> position) override;
 
     void invalidate_graphics() override;
 
@@ -82,6 +84,7 @@ private:
     bool detect_true_color() const;
     std::optional<Event> read_event(bool block);
     void position_hardware_mouse_cursor(FILE* output);
+    void present_text_cursor(FILE* output);
     int mouse_tracking_mode() const;
     void cleanup_kitty_graphics();
     void clear_region(Rect region);
@@ -96,8 +99,13 @@ private:
     bool mouse_enabled_ = false;
     bool xterm_mouse_enabled_ = false;
     bool left_button_down_ = false;
-    bool mouse_cursor_visible_ = true;
+    bool mouse_cursor_user_enabled_ = false;
+    bool mouse_cursor_suppressed_ = false;
+    bool mouse_cursor_visible_ = false;
     std::optional<Point> last_mouse_position_;
+    std::optional<Point> text_cursor_position_;
+    std::optional<Point> placed_text_cursor_;
+    bool hardware_text_cursor_visible_ = false;
     int poll_timeout_ms_ = -1;
     int next_pair_id_ = 2;
     int next_extended_color_ = kExtendedColorBase;

@@ -170,6 +170,20 @@ void VBox::paint(PaintContext& ctx) const {
 }
 
 bool VBox::handle_event(const Event& event) {
+    if (std::holds_alternative<KeyPress>(event)) {
+        for (auto& child : children_) {
+            if (child->has_focused_descendant() && child->handle_event(event)) {
+                return true;
+            }
+        }
+        for (auto& child : children_) {
+            if (child->is_focused() && child->handle_event(event)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     if (std::holds_alternative<MouseEvent>(event)) {
         return Widget::handle_event(event);
     }

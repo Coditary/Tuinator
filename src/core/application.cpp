@@ -76,6 +76,10 @@ bool widget_wants_hover_redraw(Widget* root, Point position) {
     return target != nullptr && target->wants_hover_redraw();
 }
 
+bool widget_is_shell_terminal(const Widget* widget) {
+    return widget != nullptr && widget->is_shell_terminal();
+}
+
 } // namespace
 
 Application::Application()
@@ -99,6 +103,7 @@ void Application::ensure_terminal() {
     startup_profile_mark("application.before_backend_init");
     backend_->init();
     terminal_ready_ = true;
+    sync_mouse_cursor_policy();
     startup_profile_mark("application.after_backend_init");
 }
 
@@ -122,7 +127,11 @@ void Application::set_root(std::unique_ptr<Widget> root) {
             layout_root();
             rebuild_focus_list();
             update_focus();
+        } else {
+            sync_mouse_cursor_policy();
         }
+    } else {
+        sync_mouse_cursor_policy();
     }
 
     request_redraw();
@@ -179,7 +188,12 @@ void Application::cancel_timer(TimerId id) {
 }
 
 int Application::compute_poll_timeout_ms() const {
-    int timeout = backend_->pointer_active() ? 16 : -1;
+    constexpr int kPeriodicIdlePollMs = 16;
+    int timeout = backend_->pointer_active() ? kPeriodicIdlePollMs : -1;
+
+    if (timeout < 0 && any_widget_needs_periodic_idle()) {
+        timeout = kPeriodicIdlePollMs;
+    }
 
     const auto now = std::chrono::steady_clock::now();
     int min_timer_ms = -1;
@@ -206,6 +220,20 @@ int Application::compute_poll_timeout_ms() const {
     }
 
     return std::min(timeout, min_timer_ms);
+}
+
+bool Application::any_widget_needs_periodic_idle() const {
+    if (!root_) {
+        return false;
+    }
+
+    bool needed = false;
+    root_->for_each_descendant([&needed](Widget* widget) {
+        if (widget->needs_periodic_idle()) {
+            needed = true;
+        }
+    });
+    return needed;
 }
 
 void Application::process_timers() {
@@ -258,6 +286,14 @@ void Application::request_redraw(Rect region) {
     dirty_region_.mark_rect(region);
 }
 
+void Application::poll_idle() {
+    if (!root_) {
+        return;
+    }
+
+    root_->for_each_descendant([](Widget* widget) { widget->on_idle(); });
+}
+
 void Application::layout_root() {
     if (!root_) {
         return;
@@ -289,6 +325,29 @@ void Application::rebuild_focus_list() {
     if (focus_index_ >= focusable_.size()) {
         focus_index_ = 0;
     }
+
+    for (std::size_t i = 0; i < focusable_.size(); ++i) {
+        if (focusable_[i]->wants_initial_focus()) {
+            focus_index_ = i;
+            break;
+        }
+    }
+}
+
+void Application::sync_mouse_cursor_policy() {
+    backend_->set_mouse_cursor_suppressed(shell_terminal_active());
+}
+
+bool Application::shell_terminal_active() const {
+    if (widget_is_shell_terminal(root_.get())) {
+        return true;
+    }
+
+    if (focusable_.empty() || focus_index_ >= focusable_.size()) {
+        return false;
+    }
+
+    return widget_is_shell_terminal(focusable_[focus_index_]);
 }
 
 void Application::update_focus() {
@@ -301,6 +360,7 @@ void Application::update_focus() {
         ensure_focus_visible(root_.get(), focusable_[focus_index_]);
     }
 
+    sync_mouse_cursor_policy();
     request_redraw();
 }
 
@@ -382,9 +442,12 @@ int Application::run() {
             while (const auto pending = backend_->poll_event_nonblocking()) {
                 handle_event(*pending);
             }
+            poll_idle();
         } else {
             process_timers();
         }
+
+        poll_idle();
 
         render();
     }
@@ -470,7 +533,12 @@ void Application::handle_event(const Event& event) {
     }
 
     if (const auto* key = std::get_if<KeyPress>(&event)) {
-        if (key->character == 17) {
+        const bool shell_focused = !focusable_.empty()
+            && focus_index_ < focusable_.size()
+            && focusable_[focus_index_] != nullptr
+            && focusable_[focus_index_]->is_shell_terminal();
+
+        if (key->character == 17 && !shell_focused) {
             quit();
             return;
         }
@@ -490,7 +558,13 @@ void Application::handle_event(const Event& event) {
         }
 
         if (root_ && root_->handle_event(event)) {
-            request_redraw();
+            if (!shell_terminal_active()) {
+                request_redraw();
+            }
+            return;
+        }
+
+        if (shell_focused) {
             return;
         }
 
@@ -566,6 +640,8 @@ void Application::render() {
     const Size term = terminal_size();
     const Rect terminal_bounds{{0, 0}, term};
 
+    const bool shell_active = shell_terminal_active();
+
     BeginFrameOptions frame;
     frame.full_redraw = true;
     frame.clear_buffer = clear_framebuffer_;
@@ -573,7 +649,7 @@ void Application::render() {
     frame.dirty_region = terminal_bounds;
     Rect paint_clip = terminal_bounds;
 
-    const bool use_partial = !dirty_region_.is_full();
+    const bool use_partial = !dirty_region_.is_full() && !shell_active;
 
     if (use_partial) {
         paint_clip = intersect(dirty_region_.bounds(), terminal_bounds);

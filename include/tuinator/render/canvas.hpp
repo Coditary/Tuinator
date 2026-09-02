@@ -7,6 +7,7 @@
 #include <tuinator/render/terminal_image.hpp>
 
 #include <functional>
+#include <optional>
 #include <string_view>
 
 namespace tuinator {
@@ -30,6 +31,8 @@ public:
     void draw_vline(int x, int y, int length, Style style = {});
     void fill_rect(Rect rect, char ch, Style style = {});
     void draw_image(Point position, Size cell_size, const TerminalImage& image);
+
+    void set_text_cursor(std::optional<Point> local_position);
 
     void with_clip(Rect rect, const std::function<void(Canvas&)>& draw) const;
 

@@ -92,6 +92,8 @@
 #include <tuinator/widgets/chrome/source_control_panel.hpp>
 #include <tuinator/widgets/chrome/status_bar.hpp>
 #include <tuinator/widgets/chrome/status_line.hpp>
+#include <tuinator/widgets/chrome/terminal_frame.hpp>
+#include <tuinator/widgets/chrome/shell_terminal.hpp>
 
 #include <tuinator/widgets/widget.hpp>
 #include <tuinator/widgets/capabilities.hpp>

@@ -41,12 +41,14 @@ public:
     void draw_image(int x, int y, Size cell_size, const TerminalImage& image) override;
 
     void set_poll_timeout_ms(int timeout_ms) override;
+    void set_text_cursor(std::optional<Point> position) override;
 
     void push_event(Event event);
     void resize(Size size);
 
     const std::vector<std::vector<Cell>>& cells() const { return cells_; }
     const std::vector<ImageDraw>& image_draws() const { return image_draws_; }
+    const std::optional<Point>& text_cursor() const { return text_cursor_; }
     std::string snapshot() const;
 
     static std::unique_ptr<MemoryTerminalBackend> create(Size size = {80, 24});
@@ -60,6 +62,7 @@ private:
     std::deque<Event> events_;
     int poll_timeout_ms_ = -1;
     bool initialized_ = false;
+    std::optional<Point> text_cursor_;
 };
 
 } // namespace tuinator

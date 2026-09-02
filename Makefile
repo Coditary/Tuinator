@@ -3,7 +3,7 @@ CMAKE := cmake
 CMAKE_FLAGS := -DCMAKE_BUILD_TYPE=Release
 CMAKE_CACHE := $(BUILD_DIR)/CMakeCache.txt
 
-DEMOS := hello form colors layout counter buttons windows mouse-test scroll theme dashboard data controls menu image textarea throbber bigtext checkbox piechart charts diffview weather glyphs
+DEMOS := hello form colors layout counter buttons windows mouse-test scroll theme dashboard data controls menu image textarea throbber bigtext checkbox piechart charts diffview weather glyphs terminal-frame
 RUNNABLE := $(DEMOS) profile
 
 .PHONY: all build configure clean rebuild help demos test test-all unit-test profile profile-quick $(RUNNABLE)

@@ -153,6 +153,15 @@ void Canvas::fill_rect(Rect rect, char ch, Style style) {
     }
 }
 
+void Canvas::set_text_cursor(std::optional<Point> local_position) {
+    if (!local_position.has_value()) {
+        backend_.set_text_cursor(std::nullopt);
+        return;
+    }
+
+    backend_.set_text_cursor(to_terminal(*local_position));
+}
+
 void Canvas::draw_image(Point position, Size cell_size, const TerminalImage& image) {
     if (image.empty() || cell_size.width <= 0 || cell_size.height <= 0) {
         return;

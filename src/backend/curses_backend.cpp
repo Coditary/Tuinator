@@ -466,10 +466,11 @@ void CursesBackend::enable_mouse() {
         debug_mouse("has_mouse() returned false");
     }
 
-    mouse_cursor_visible_ = [] {
+    mouse_cursor_user_enabled_ = [] {
         const char* setting = std::getenv("TUINATOR_MOUSE_CURSOR");
-        return setting == nullptr || setting[0] == '\0' || std::strcmp(setting, "0") != 0;
+        return setting != nullptr && setting[0] != '\0' && std::strcmp(setting, "0") != 0;
     }();
+    mouse_cursor_visible_ = mouse_cursor_user_enabled_ && !mouse_cursor_suppressed_;
 
     constexpr mmask_t kWanted = ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION;
 
@@ -569,6 +570,15 @@ void CursesBackend::position_hardware_mouse_cursor(FILE* output) {
 
 void CursesBackend::refresh_mouse_cursor() {
     position_hardware_mouse_cursor(output_stream());
+}
+
+void CursesBackend::set_mouse_cursor_suppressed(bool suppressed) {
+    mouse_cursor_suppressed_ = suppressed;
+    mouse_cursor_visible_ = mouse_cursor_user_enabled_ && !mouse_cursor_suppressed_;
+}
+
+void CursesBackend::set_text_cursor(std::optional<Point> position) {
+    text_cursor_position_ = position;
 }
 
 void CursesBackend::cleanup_kitty_graphics() {
@@ -725,6 +735,9 @@ void CursesBackend::begin_frame(BeginFrameOptions options) {
     if (options.full_redraw) {
         frame_clip_ = terminal;
         if (options.clear_buffer) {
+            if (FILE* output = output_stream()) {
+                send_tty_sequence_to(output, "\033[2J");
+            }
             clear();
         }
         return;
@@ -765,21 +778,78 @@ void CursesBackend::invalidate_graphics() {
 }
 
 void CursesBackend::prepare_refresh(FILE* output) {
-    if (output != nullptr) {
-        send_tty_sequence_to(output, "\033[?25l\033[H");
+    (void)output;
+    move(0, 0);
+}
+
+void CursesBackend::present_text_cursor(FILE* output) {
+    if (text_cursor_position_.has_value()) {
+        const Point position = *text_cursor_position_;
+        text_cursor_position_.reset();
+
+        if (output == nullptr) {
+            return;
+        }
+
+        if (!hardware_text_cursor_visible_) {
+            char sequence[32];
+            std::snprintf(sequence,
+                          sizeof(sequence),
+                          "\033[%d;%dH\033[?25h",
+                          position.y + 1,
+                          position.x + 1);
+            send_tty_sequence_to(output, sequence);
+            hardware_text_cursor_visible_ = true;
+            placed_text_cursor_ = position;
+            return;
+        }
+
+        if (!placed_text_cursor_.has_value()
+            || placed_text_cursor_->x != position.x
+            || placed_text_cursor_->y != position.y) {
+            char sequence[32];
+            std::snprintf(sequence,
+                          sizeof(sequence),
+                          "\033[%d;%dH",
+                          position.y + 1,
+                          position.x + 1);
+            send_tty_sequence_to(output, sequence);
+            placed_text_cursor_ = position;
+        }
+        return;
     }
 
-    // Keep ncurses' logical cursor aligned with the physical home position.
-    move(0, 0);
+    placed_text_cursor_.reset();
+    if (hardware_text_cursor_visible_) {
+        if (output != nullptr) {
+            send_tty_sequence_to(output, "\033[?25l");
+        }
+        hardware_text_cursor_visible_ = false;
+    }
+
+    if (mouse_cursor_visible_) {
+        position_hardware_mouse_cursor(output);
+    } else if (output != nullptr) {
+        send_tty_sequence_to(output, "\033[?25l");
+    }
 }
 
 void CursesBackend::present_frame() {
     FILE* output = output_stream();
+    const bool sync_updates = text_cursor_position_.has_value();
+    if (sync_updates && output != nullptr) {
+        send_tty_sequence_to(output, "\033[?2026h");
+    }
+
     prepare_refresh(output);
     refresh();
     flush_ansi_draws(output);
     flush_image_draws(output);
-    position_hardware_mouse_cursor(output);
+    present_text_cursor(output);
+
+    if (sync_updates && output != nullptr) {
+        send_tty_sequence_to(output, "\033[?2026l");
+    }
 }
 
 void CursesBackend::end_frame() {
@@ -1119,14 +1189,14 @@ void CursesBackend::draw_text(int x, int y, std::string_view text, Style style) 
     const int pair = color_pair_for(style);
     const bool has_rgb =
         style.foreground_rgb.has_value() || style.background_rgb.has_value();
-    const bool extended_pair = extended_colors_available_ && has_rgb;
-    const bool ansi_only = true_color_enabled_ && has_rgb && !extended_pair;
+    const bool use_ansi_draw = true_color_enabled_ && has_rgb;
 
-    if (ansi_only) {
+    if (use_ansi_draw) {
         queue_ansi_draw(x, y, text, style);
         return;
     }
 
+    const bool extended_pair = extended_colors_available_ && has_rgb;
     const bool extended_draw = extended_pair;
     draw_text_cells(y, x, text, attributes, pair, extended_draw);
 }

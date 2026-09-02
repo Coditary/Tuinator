@@ -40,6 +40,12 @@ public:
     /// Move the hardware mouse cursor without a full frame erase/repaint.
     virtual void refresh_mouse_cursor() {}
 
+    /// Hide the hardware mouse cursor while a shell terminal owns the view.
+    virtual void set_mouse_cursor_suppressed(bool suppressed) { (void)suppressed; }
+
+    /// Show the hardware text cursor at a terminal cell (shell terminals).
+    virtual void set_text_cursor(std::optional<Point> position) { (void)position; }
+
     virtual void draw_text(int x, int y, std::string_view text, Style style) = 0;
     virtual void draw_image(int x, int y, Size cell_size, const TerminalImage& image);
 

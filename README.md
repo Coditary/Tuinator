@@ -126,7 +126,7 @@ In the windows demo: drag title bars, resize with `#` corner, `Esc` closes top w
 3. Debug log (does not corrupt the screen): `TUINATOR_MOUSE_DEBUG=1 make mouse-test` → `/tmp/tuinator-mouse.log` (Linux/macOS) or `%TEMP%\tuinator-mouse.log` (Windows)
 4. **tmux:** run `tmux set -g mouse off` — tmux captures clicks by default
 
-Smooth tracking uses xterm **mode 1003** (all motion events) via `/dev/tty`, like the classic ncurses gist. Override with `TUINATOR_MOUSE_TRACK=1002` for drag-only. Optional yellow `+` cursor: `TUINATOR_MOUSE_CURSOR=0` to disable.
+Smooth tracking uses xterm **mode 1003** (all motion events) via `/dev/tty`, like the classic ncurses gist. Override with `TUINATOR_MOUSE_TRACK=1002` for drag-only. Optional hardware `+` cursor: `TUINATOR_MOUSE_CURSOR=1` to enable (off by default; always hidden in shell terminals).
 
 ## Phase 0 status
 
