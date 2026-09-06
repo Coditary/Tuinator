@@ -1,6 +1,5 @@
-#include <tuinator/widgets/charts/stacked_area_chart.hpp>
-
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/charts/stacked_area_chart.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -8,8 +7,7 @@
 namespace tuinator {
 
 StackedAreaChart::StackedAreaChart(std::vector<StackedAreaSeries> series, StackedAreaChartOptions options)
-    : series_(std::move(series)),
-      options_(std::move(options)) {}
+    : series_(std::move(series)), options_(std::move(options)) {}
 
 void StackedAreaChart::set_series(std::vector<StackedAreaSeries> series) {
     series_ = std::move(series);
@@ -76,21 +74,10 @@ void StackedAreaChart::paint(PaintContext& ctx) const {
     const double span = std::max(1e-6, max_v - min_v);
 
     ChartPlotArea common{
-        plot.left,
-        plot.top,
-        plot.width,
-        plot.height,
-        plot.title_rows,
-        plot.legend_rows,
+        plot.left, plot.top, plot.width, plot.height, plot.title_rows, plot.legend_rows,
     };
-    chart_paint_horizontal_grid(
-        canvas,
-        common,
-        min_v,
-        max_v,
-        options_.axis_style,
-        options_.grid_style,
-        options_.show_axes);
+    chart_paint_horizontal_grid(canvas, common, min_v, max_v, options_.axis_style, options_.grid_style,
+                                options_.show_axes);
 
     std::size_t points = 0;
     for (const StackedAreaSeries& item : series_) {
@@ -101,28 +88,22 @@ void StackedAreaChart::paint(PaintContext& ctx) const {
     }
 
     for (int x = 0; x < plot.width; ++x) {
-        const std::size_t index = points == 1
-            ? 0
-            : static_cast<std::size_t>(x) * (points - 1) / static_cast<std::size_t>(std::max(1, plot.width - 1));
+        const std::size_t index = points == 1 ? 0
+                                              : static_cast<std::size_t>(x) * (points - 1) /
+                                                    static_cast<std::size_t>(std::max(1, plot.width - 1));
 
         double cumulative = min_v;
         for (const StackedAreaSeries& item : series_) {
             const double part = index < item.values.size() ? std::max(0.0, item.values[index]) : 0.0;
             const double next = cumulative + part;
 
-            const int y0 = plot.top + plot.height - 1
-                - static_cast<int>((cumulative - min_v) / span * (plot.height - 1) + 0.5);
-            const int y1 = plot.top + plot.height - 1
-                - static_cast<int>((next - min_v) / span * (plot.height - 1) + 0.5);
+            const int y0 =
+                plot.top + plot.height - 1 - static_cast<int>((cumulative - min_v) / span * (plot.height - 1) + 0.5);
+            const int y1 =
+                plot.top + plot.height - 1 - static_cast<int>((next - min_v) / span * (plot.height - 1) + 0.5);
 
             for (int y = std::min(y0, y1); y <= std::max(y0, y1); ++y) {
-                chart_paint_glyph_cell(
-                    canvas,
-                    plot.left + x,
-                    y,
-                    options_.style,
-                    {},
-                    item.style);
+                chart_paint_glyph_cell(canvas, plot.left + x, y, options_.style, {}, item.style);
             }
 
             cumulative = next;

@@ -1,9 +1,9 @@
-#include "test_harness.hpp"
+#include <tuinator/render/file_icon.hpp>
+#include <tuinator/render/glyphs.hpp>
 
 #include <cstring>
 
-#include <tuinator/render/file_icon.hpp>
-#include <tuinator/render/glyphs.hpp>
+#include "test_harness.hpp"
 
 TUINATOR_TEST(file_icon_descriptor_matches_enum_order) {
     TUINATOR_CHECK(std::strcmp(tuinator::file_icon_descriptor(tuinator::FileIcon::Lua).name, "lua") == 0);
@@ -27,9 +27,7 @@ TUINATOR_TEST(file_icon_for_filename_special_cases) {
 
 TUINATOR_TEST(file_icon_for_path_directories) {
     TUINATOR_CHECK_EQ(tuinator::file_icon_for_path("src", true), tuinator::FileIcon::Folder);
-    TUINATOR_CHECK_EQ(
-        tuinator::file_icon_for_path("src", true, true),
-        tuinator::FileIcon::FolderOpen);
+    TUINATOR_CHECK_EQ(tuinator::file_icon_for_path("src", true, true), tuinator::FileIcon::FolderOpen);
 }
 
 TUINATOR_TEST(file_icon_glyph_ascii_fallback) {
@@ -44,9 +42,7 @@ TUINATOR_TEST(file_icon_glyph_unicode_differs_from_ascii) {
 }
 
 TUINATOR_TEST(file_icon_glyph_for_path_uses_basename) {
-    TUINATOR_CHECK_EQ(
-        tuinator::file_icon_for_path("diffview/file_history_panel.lua"),
-        tuinator::FileIcon::Lua);
+    TUINATOR_CHECK_EQ(tuinator::file_icon_for_path("diffview/file_history_panel.lua"), tuinator::FileIcon::Lua);
 }
 
 TUINATOR_TEST(file_icon_color_lua) {

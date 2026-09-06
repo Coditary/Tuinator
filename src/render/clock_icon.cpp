@@ -1,5 +1,4 @@
 #include <tuinator/render/clock_icon.hpp>
-
 #include <tuinator/render/glyphs.hpp>
 
 #include <array>
@@ -29,13 +28,8 @@ std::string utf8_from(char32_t cp) {
     return out;
 }
 
-constexpr ClockIconDescriptor make(
-    ClockIcon kind,
-    ClockIconCategory category,
-    const char* path,
-    const char* nerd_suffix,
-    char32_t codepoint,
-    char ascii) {
+constexpr ClockIconDescriptor make(ClockIcon kind, ClockIconCategory category, const char* path,
+                                   const char* nerd_suffix, char32_t codepoint, char ascii) {
     return ClockIconDescriptor{kind, category, path, nerd_suffix, codepoint, ascii};
 }
 
@@ -66,34 +60,24 @@ const ClockIconDescriptor& descriptor_or_default(ClockIcon icon) {
 
 } // namespace
 
-const ClockIconDescriptor& clock_icon_descriptor(ClockIcon icon) {
-    return descriptor_or_default(icon);
-}
+const ClockIconDescriptor& clock_icon_descriptor(ClockIcon icon) { return descriptor_or_default(icon); }
 
-ClockIconCategory clock_icon_category(ClockIcon icon) {
-    return clock_icon_descriptor(icon).category;
-}
+ClockIconCategory clock_icon_category(ClockIcon icon) { return clock_icon_descriptor(icon).category; }
 
-const char* clock_icon_path(ClockIcon icon) {
-    return clock_icon_descriptor(icon).path;
-}
+const char* clock_icon_path(ClockIcon icon) { return clock_icon_descriptor(icon).path; }
 
-const char* clock_icon_nerd_suffix(ClockIcon icon) {
-    return clock_icon_descriptor(icon).nerd_suffix;
-}
+const char* clock_icon_nerd_suffix(ClockIcon icon) { return clock_icon_descriptor(icon).nerd_suffix; }
 
 const char* clock_icon_category_path(ClockIconCategory category) {
     switch (category) {
-    case ClockIconCategory::Clock:
-        return "clock";
+    case ClockIconCategory::Clock: return "clock";
     }
     return "clock";
 }
 
 const char* clock_icon_category_label(ClockIconCategory category) {
     switch (category) {
-    case ClockIconCategory::Clock:
-        return "Clock";
+    case ClockIconCategory::Clock: return "Clock";
     }
     return "Other";
 }

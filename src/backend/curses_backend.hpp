@@ -1,7 +1,5 @@
 #pragma once
 
-#include "backend/curses_config.hpp"
-
 #include <tuinator/backend/terminal_backend.hpp>
 
 #include <array>
@@ -10,10 +8,12 @@
 #include <unordered_map>
 #include <vector>
 
+#include "backend/curses_config.hpp"
+
 namespace tuinator::detail {
 
 class CursesBackend final : public TerminalBackend {
-public:
+  public:
     CursesBackend();
     ~CursesBackend() override;
 
@@ -39,7 +39,7 @@ public:
     void set_poll_timeout_ms(int timeout_ms) override;
     bool true_color() const override { return true_color_enabled_; }
 
-private:
+  private:
     struct AnsiDraw {
         int x = 0;
         int y = 0;

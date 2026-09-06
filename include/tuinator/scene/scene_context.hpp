@@ -29,7 +29,7 @@ struct WidgetEntry {
 };
 
 class SceneContext {
-public:
+  public:
     SceneContext(Application& app, Theme theme, scene::HandlerRegistry* handlers);
 
     Application& app;
@@ -49,7 +49,7 @@ public:
 
     const std::unordered_map<std::string, WidgetEntry>& widgets() const { return widgets_; }
 
-private:
+  private:
     std::unordered_map<std::string, WidgetEntry> widgets_;
     std::vector<std::function<void()>> post_init_;
 };

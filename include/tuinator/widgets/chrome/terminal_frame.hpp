@@ -37,11 +37,8 @@ struct TerminalFrameOptions {
 /// result into the frame. This is a display surface for Tuinator widgets — not a
 /// PTY host and does not spawn your system shell (zsh/bash).
 class TerminalFrame : public Widget {
-public:
-    TerminalFrame(
-        std::string title,
-        std::unique_ptr<Widget> content,
-        TerminalFrameOptions options = {});
+  public:
+    TerminalFrame(std::string title, std::unique_ptr<Widget> content, TerminalFrameOptions options = {});
 
     const std::string& title() const { return title_; }
     void set_title(std::string title);
@@ -71,7 +68,7 @@ public:
     void collect_focusable(std::vector<Widget*>& out) override;
     void for_each_child(const std::function<void(Widget*)>& visitor) override;
 
-private:
+  private:
     Rect content_bounds() const;
     Rect content_area_local() const;
     Rect status_bounds() const;

@@ -1,6 +1,5 @@
-#include <tuinator/widgets/display/spinner.hpp>
-
 #include <tuinator/core/event.hpp>
+#include <tuinator/widgets/display/spinner.hpp>
 
 #include <algorithm>
 #include <string>
@@ -8,18 +7,9 @@
 
 namespace tuinator {
 
-Spinner::Spinner(int min_value,
-                 int max_value,
-                 int value,
-                 int step,
-                 std::function<void(int)> on_change,
-                 Style style)
-    : min_value_(min_value),
-      max_value_(max_value),
-      value_(std::clamp(value, min_value, max_value)),
-      step_(std::max(1, step)),
-      on_change_(std::move(on_change)),
-      style_(style) {
+Spinner::Spinner(int min_value, int max_value, int value, int step, std::function<void(int)> on_change, Style style)
+    : min_value_(min_value), max_value_(max_value), value_(std::clamp(value, min_value, max_value)),
+      step_(std::max(1, step)), on_change_(std::move(on_change)), style_(style) {
     focused_style_ = style_;
     focused_style_.reverse = true;
 }
@@ -38,13 +28,9 @@ void Spinner::set_value(int value) {
     }
 }
 
-void Spinner::adjust(int delta) {
-    set_value(value_ + delta * step_);
-}
+void Spinner::adjust(int delta) { set_value(value_ + delta * step_); }
 
-Size Spinner::preferred_size() const {
-    return {12, 1};
-}
+Size Spinner::preferred_size() const { return {12, 1}; }
 
 void Spinner::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;
@@ -79,21 +65,12 @@ bool Spinner::handle_event(const Event& event) {
 
     switch (key->key) {
     case Key::Up:
-    case Key::Right:
-        adjust(1);
-        return true;
+    case Key::Right: adjust(1); return true;
     case Key::Down:
-    case Key::Left:
-        adjust(-1);
-        return true;
-    case Key::PageUp:
-        adjust(5);
-        return true;
-    case Key::PageDown:
-        adjust(-5);
-        return true;
-    default:
-        break;
+    case Key::Left: adjust(-1); return true;
+    case Key::PageUp: adjust(5); return true;
+    case Key::PageDown: adjust(-5); return true;
+    default: break;
     }
 
     return false;

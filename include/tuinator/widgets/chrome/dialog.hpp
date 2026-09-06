@@ -9,14 +9,9 @@
 
 namespace tuinator::dialog {
 
-std::unique_ptr<Widget> make_message(
-    const Theme& theme,
-    std::string message,
-    std::function<void()> on_ok = {});
+std::unique_ptr<Widget> make_message(const Theme& theme, std::string message, std::function<void()> on_ok = {});
 
-std::unique_ptr<Widget> make_confirm(
-    const Theme& theme,
-    std::string message,
-    std::function<void(bool confirmed)> on_result);
+std::unique_ptr<Widget> make_confirm(const Theme& theme, std::string message,
+                                     std::function<void(bool confirmed)> on_result);
 
 } // namespace tuinator::dialog

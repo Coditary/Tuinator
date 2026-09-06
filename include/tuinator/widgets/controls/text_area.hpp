@@ -1,7 +1,7 @@
 #pragma once
 
-#include <tuinator/render/style.hpp>
 #include <tuinator/render/scrollbar.hpp>
+#include <tuinator/render/style.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <functional>
@@ -44,7 +44,7 @@ struct TextAreaOptions {
 };
 
 class TextArea : public Widget {
-public:
+  public:
     TextArea(TextAreaOptions options = {}, Style style = {}, Style focused_style = {});
 
     std::string value() const;
@@ -70,7 +70,7 @@ public:
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
 
-private:
+  private:
     int gutter_width() const;
     int content_width() const;
     int content_height() const;

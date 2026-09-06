@@ -104,9 +104,7 @@ std::vector<NerdGlyphDomainSection> load_nerd_glyph_catalog(const std::string& d
     return sections;
 }
 
-std::string nerd_glyph_utf8(char32_t codepoint) {
-    return utf8_from(codepoint);
-}
+std::string nerd_glyph_utf8(char32_t codepoint) { return utf8_from(codepoint); }
 
 std::size_t nerd_glyph_catalog_total(const std::vector<NerdGlyphDomainSection>& sections) {
     std::size_t total = 0;

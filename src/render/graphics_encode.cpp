@@ -1,30 +1,27 @@
 #include <tuinator/render/graphics_encode.hpp>
 
-#include <zlib.h>
-
 #include <algorithm>
 #include <cstdint>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <vector>
+#include <zlib.h>
 
 namespace tuinator {
 
 namespace {
 
 std::string base64_encode(const std::uint8_t* data, std::size_t size) {
-    static constexpr char kAlphabet[] =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    static constexpr char kAlphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     std::string out;
     out.reserve(((size + 2) / 3) * 4);
 
     for (std::size_t index = 0; index < size; index += 3) {
-        const std::uint32_t chunk =
-            (static_cast<std::uint32_t>(data[index]) << 16U)
-            | ((index + 1 < size ? static_cast<std::uint32_t>(data[index + 1]) : 0U) << 8U)
-            | (index + 2 < size ? static_cast<std::uint32_t>(data[index + 2]) : 0U);
+        const std::uint32_t chunk = (static_cast<std::uint32_t>(data[index]) << 16U) |
+                                    ((index + 1 < size ? static_cast<std::uint32_t>(data[index + 1]) : 0U) << 8U) |
+                                    (index + 2 < size ? static_cast<std::uint32_t>(data[index + 2]) : 0U);
 
         out.push_back(kAlphabet[(chunk >> 18U) & 0x3FU]);
         out.push_back(kAlphabet[(chunk >> 12U) & 0x3FU]);
@@ -53,10 +50,8 @@ void append_chunk(std::vector<std::uint8_t>& out, const char* type, const std::v
     out.push_back(static_cast<std::uint8_t>(type[2]));
     out.push_back(static_cast<std::uint8_t>(type[3]));
     out.insert(out.end(), data.begin(), data.end());
-    const std::uint32_t crc = crc32_update(
-        crc32_update(0, reinterpret_cast<const std::uint8_t*>(type), 4),
-        data.data(),
-        data.size());
+    const std::uint32_t crc =
+        crc32_update(crc32_update(0, reinterpret_cast<const std::uint8_t*>(type), 4), data.data(), data.size());
     append_u32_be(out, crc);
 }
 
@@ -70,20 +65,14 @@ std::vector<std::uint8_t> build_png(const TerminalImage& image) {
     for (int y = 0; y < image.height(); ++y) {
         raw.push_back(0);
         const std::size_t row_start = static_cast<std::size_t>(y * image.width() * 4);
-        raw.insert(
-            raw.end(),
-            image.rgba().begin() + static_cast<std::ptrdiff_t>(row_start),
-            image.rgba().begin() + static_cast<std::ptrdiff_t>(row_start + image.width() * 4));
+        raw.insert(raw.end(), image.rgba().begin() + static_cast<std::ptrdiff_t>(row_start),
+                   image.rgba().begin() + static_cast<std::ptrdiff_t>(row_start + image.width() * 4));
     }
 
     uLongf compressed_size = compressBound(static_cast<uLong>(raw.size()));
     std::vector<std::uint8_t> compressed(compressed_size);
-    if (compress2(
-            compressed.data(),
-            &compressed_size,
-            raw.data(),
-            static_cast<uLong>(raw.size()),
-            Z_BEST_SPEED) != Z_OK) {
+    if (compress2(compressed.data(), &compressed_size, raw.data(), static_cast<uLong>(raw.size()), Z_BEST_SPEED) !=
+        Z_OK) {
         return {};
     }
     compressed.resize(compressed_size);
@@ -145,18 +134,11 @@ std::string kitty_transmit(const TerminalImage& image) {
 std::string kitty_place(int cell_cols, int cell_rows) {
     std::ostringstream out;
     out << "\033_Ga=p,i=1"
-        << ",c=" << cell_cols
-        << ",r=" << cell_rows
-        << ",C=1,q=2;\033\\";
+        << ",c=" << cell_cols << ",r=" << cell_rows << ",C=1,q=2;\033\\";
     return out.str();
 }
 
-std::string encode_iterm2(
-    const TerminalImage& image,
-    int cell_x,
-    int cell_y,
-    int cell_width,
-    int cell_height) {
+std::string encode_iterm2(const TerminalImage& image, int cell_x, int cell_y, int cell_width, int cell_height) {
     const std::vector<std::uint8_t> png = build_png(image);
     if (png.empty()) {
         return {};
@@ -164,8 +146,7 @@ std::string encode_iterm2(
 
     const std::string payload = base64_encode(png.data(), png.size());
     std::ostringstream out;
-    out << "\033]1337;File=inline=1;size=" << std::max(1, cell_width)
-        << "x" << std::max(1, cell_height)
+    out << "\033]1337;File=inline=1;size=" << std::max(1, cell_width) << "x" << std::max(1, cell_height)
         << ";preserveAspectRatio=1";
     if (cell_x > 0) {
         out << ";x=" << cell_x;
@@ -204,45 +185,30 @@ std::string encode_sixel(const TerminalImage& image, int cell_x, int cell_y) {
 
 } // namespace
 
-std::string encode_kitty_transmit(const TerminalImage& image) {
-    return kitty_transmit(image);
-}
+std::string encode_kitty_transmit(const TerminalImage& image) { return kitty_transmit(image); }
 
-std::string encode_kitty_place(int cell_cols, int cell_rows) {
-    return kitty_place(cell_cols, cell_rows);
-}
+std::string encode_kitty_place(int cell_cols, int cell_rows) { return kitty_place(cell_cols, cell_rows); }
 
 std::uint32_t terminal_image_content_hash(const TerminalImage& image) {
     if (image.empty()) {
         return 0;
     }
 
-    return static_cast<std::uint32_t>(
-        ::crc32(0, image.rgba().data(), static_cast<uInt>(image.rgba().size())));
+    return static_cast<std::uint32_t>(::crc32(0, image.rgba().data(), static_cast<uInt>(image.rgba().size())));
 }
 
-std::vector<std::uint8_t> rgba_to_png(const TerminalImage& image) {
-    return build_png(image);
-}
+std::vector<std::uint8_t> rgba_to_png(const TerminalImage& image) { return build_png(image); }
 
-std::string encode_terminal_image(
-    GraphicsProtocol protocol,
-    const TerminalImage& image,
-    int cell_x,
-    int cell_y,
-    int cell_width,
-    int cell_height) {
+std::string encode_terminal_image(GraphicsProtocol protocol, const TerminalImage& image, int cell_x, int cell_y,
+                                  int cell_width, int cell_height) {
     switch (protocol) {
     case GraphicsProtocol::Kitty:
         (void)cell_x;
         (void)cell_y;
         return kitty_transmit(image);
-    case GraphicsProtocol::Iterm2:
-        return encode_iterm2(image, cell_x, cell_y, cell_width, cell_height);
-    case GraphicsProtocol::Sixel:
-        return encode_sixel(image, cell_x, cell_y);
-    case GraphicsProtocol::None:
-        return {};
+    case GraphicsProtocol::Iterm2: return encode_iterm2(image, cell_x, cell_y, cell_width, cell_height);
+    case GraphicsProtocol::Sixel: return encode_sixel(image, cell_x, cell_y);
+    case GraphicsProtocol::None: return {};
     }
 
     return {};

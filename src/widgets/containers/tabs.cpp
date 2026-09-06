@@ -1,7 +1,6 @@
-#include <tuinator/widgets/containers/tabs.hpp>
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/containers/tabs.hpp>
 
 #include <algorithm>
 #include <string>

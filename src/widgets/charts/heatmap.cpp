@@ -1,20 +1,14 @@
-#include <tuinator/widgets/charts/heatmap.hpp>
-
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/charts/heatmap.hpp>
 
 #include <algorithm>
 #include <cmath>
 
 namespace tuinator {
 
-Heatmap::Heatmap(
-    std::vector<std::vector<double>> values,
-    std::vector<std::string> row_labels,
-    std::vector<std::string> col_labels,
-    HeatmapOptions options)
-    : values_(std::move(values)),
-      row_labels_(std::move(row_labels)),
-      col_labels_(std::move(col_labels)),
+Heatmap::Heatmap(std::vector<std::vector<double>> values, std::vector<std::string> row_labels,
+                 std::vector<std::string> col_labels, HeatmapOptions options)
+    : values_(std::move(values)), row_labels_(std::move(row_labels)), col_labels_(std::move(col_labels)),
       options_(std::move(options)) {}
 
 void Heatmap::set_values(std::vector<std::vector<double>> values) {
@@ -139,12 +133,11 @@ void Heatmap::paint(PaintContext& ctx) const {
                 break;
             }
             const std::string label = col < static_cast<int>(col_labels_.size())
-                ? col_labels_[static_cast<std::size_t>(col)]
-                : std::to_string(col);
-            canvas.draw_text(
-                {col_x, grid_top - col_label_row},
-                label.substr(0, static_cast<std::size_t>(std::min(1, grid_right - col_x))),
-                options_.label_style);
+                                          ? col_labels_[static_cast<std::size_t>(col)]
+                                          : std::to_string(col);
+            canvas.draw_text({col_x, grid_top - col_label_row},
+                             label.substr(0, static_cast<std::size_t>(std::min(1, grid_right - col_x))),
+                             options_.label_style);
         }
     }
 

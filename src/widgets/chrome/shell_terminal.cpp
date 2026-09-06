@@ -27,9 +27,7 @@ bool ShellTerminal::start(const std::string& shell_command) {
     return true;
 }
 
-Size ShellTerminal::preferred_size() const {
-    return {80, 24};
-}
+Size ShellTerminal::preferred_size() const { return {80, 24}; }
 
 void ShellTerminal::layout(Rect bounds) {
     bounds_ = bounds;

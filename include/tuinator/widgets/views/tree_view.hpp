@@ -16,7 +16,7 @@ struct TreeNode {
 };
 
 class TreeView : public Widget {
-public:
+  public:
     TreeView(Style item_style = {}, Style selected_style = {});
 
     void set_root(TreeNode root);
@@ -31,7 +31,7 @@ public:
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
 
-private:
+  private:
     struct VisibleNode {
         TreeNode* node = nullptr;
         std::string path;

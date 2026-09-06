@@ -1,6 +1,5 @@
-#include <tuinator/widgets/charts/gauge_chart.hpp>
-
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/charts/gauge_chart.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -16,9 +15,7 @@ constexpr double kTerminalAspect = 2.0;
 
 } // namespace
 
-GaugeChart::GaugeChart(double value, GaugeChartOptions options)
-    : value_(value),
-      options_(std::move(options)) {}
+GaugeChart::GaugeChart(double value, GaugeChartOptions options) : value_(value), options_(std::move(options)) {}
 
 void GaugeChart::set_value(double value) {
     value_ = std::clamp(value, options_.min_value, options_.max_value);
@@ -61,13 +58,8 @@ void GaugeChart::paint_arc(Canvas& canvas, int cx, int cy, int radius) const {
             }
 
             const bool filled = angle >= value_angle;
-            chart_paint_glyph_cell(
-                canvas,
-                x,
-                y,
-                options_.glyph,
-                {},
-                filled ? options_.fill_style : options_.track_style);
+            chart_paint_glyph_cell(canvas, x, y, options_.glyph, {},
+                                   filled ? options_.fill_style : options_.track_style);
         }
     }
 
@@ -84,19 +76,11 @@ void GaugeChart::paint_arc(Canvas& canvas, int cx, int cy, int radius) const {
 
 void GaugeChart::paint_horizontal(Canvas& canvas, int x, int y, int width) const {
     const double span = std::max(1e-6, options_.max_value - options_.min_value);
-    const int filled = std::clamp(
-        static_cast<int>((value_ - options_.min_value) / span * width),
-        0,
-        width);
+    const int filled = std::clamp(static_cast<int>((value_ - options_.min_value) / span * width), 0, width);
 
     for (int col = 0; col < width; ++col) {
-        chart_paint_glyph_cell(
-            canvas,
-            x + col,
-            y,
-            options_.glyph,
-            {},
-            col < filled ? options_.fill_style : options_.track_style);
+        chart_paint_glyph_cell(canvas, x + col, y, options_.glyph, {},
+                               col < filled ? options_.fill_style : options_.track_style);
     }
 }
 

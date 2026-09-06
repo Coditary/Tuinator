@@ -1,9 +1,8 @@
-#include <tuinator/widgets/chrome/status_line.hpp>
-
 #include <tuinator/render/file_icon.hpp>
 #include <tuinator/render/line_icon.hpp>
-#include <tuinator/render/ui_icon.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/render/ui_icon.hpp>
+#include <tuinator/widgets/chrome/status_line.hpp>
 
 #include <algorithm>
 #include <string>
@@ -85,8 +84,8 @@ int StatusLine::segment_width(const StatusSegment& segment) const {
 
 Style StatusLine::segment_style(const StatusSegment& segment) const {
     Style style = apply_segment_colors(style_.background, segment);
-    if ((segment.kind == StatusSegmentKind::Pill || segment.kind == StatusSegmentKind::Box)
-        && segment.background_rgb.has_value()) {
+    if ((segment.kind == StatusSegmentKind::Pill || segment.kind == StatusSegmentKind::Box) &&
+        segment.background_rgb.has_value()) {
         style.background_rgb = segment.background_rgb;
     }
     return style;
@@ -107,8 +106,8 @@ void StatusLine::paint_segment(Canvas& canvas, int x, int y, const StatusSegment
     Style style = segment_style(segment);
     int cursor = x;
 
-    if ((segment.kind == StatusSegmentKind::Pill || segment.kind == StatusSegmentKind::Box)
-        && segment.background_rgb.has_value()) {
+    if ((segment.kind == StatusSegmentKind::Pill || segment.kind == StatusSegmentKind::Box) &&
+        segment.background_rgb.has_value()) {
         const int width = segment_width(segment);
         canvas.fill_rect({{cursor, y}, {width, 1}}, ' ', style);
     }

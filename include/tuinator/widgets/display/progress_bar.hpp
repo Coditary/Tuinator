@@ -3,8 +3,8 @@
 #include <tuinator/render/style.hpp>
 #include <tuinator/widgets/widget.hpp>
 
-#include <string>
 #include <initializer_list>
+#include <string>
 #include <vector>
 
 namespace tuinator {
@@ -88,17 +88,14 @@ struct ProgressBarOptions {
 };
 
 ProgressBarOptions progress_bar_preset(ProgressBarLayout layout, const Style& fill, const Style& track);
-ProgressBarOptions progress_bar_filled_label(
-    const Style& fill,
-    const Style& track,
-    std::string inside_label,
-    ProgressBarMode mode = ProgressBarMode::Determinate);
-std::vector<ProgressBarGradientStop> progress_bar_gradient(
-    std::initializer_list<std::pair<float, std::uint32_t>> hex_stops);
+ProgressBarOptions progress_bar_filled_label(const Style& fill, const Style& track, std::string inside_label,
+                                             ProgressBarMode mode = ProgressBarMode::Determinate);
+std::vector<ProgressBarGradientStop>
+progress_bar_gradient(std::initializer_list<std::pair<float, std::uint32_t>> hex_stops);
 ProgressBarGlyphs progress_bar_glyphs_for(ProgressBarLayout layout);
 
 class ProgressBar : public Widget {
-public:
+  public:
     ProgressBar(double value = 0.0, ProgressBarOptions options = {});
 
     ProgressBar(double value, Style fill_style, Style track_style, int min_width = 20);
@@ -121,7 +118,7 @@ public:
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
-private:
+  private:
     int bar_column_count() const;
     int rendered_bar_width(int bar_width) const;
     void paint_glyph_bar(Canvas& canvas) const;
@@ -137,7 +134,8 @@ private:
     void paint_task_row(Canvas& canvas) const;
     void paint_shimmer_bar(Canvas& canvas, int x, int y, int bar_width, const Style* fill_override = nullptr) const;
     void paint_bar_at(Canvas& canvas, int x, int y, int bar_width, const Style* fill_override = nullptr) const;
-    void fill_rect_gradient(Canvas& canvas, int x, int y, int width, int height, char ch, const Style& base, int bar_width) const;
+    void fill_rect_gradient(Canvas& canvas, int x, int y, int width, int height, char ch, const Style& base,
+                            int bar_width) const;
     Style fill_style_at(const Style& base, int column, int bar_width) const;
 
     double value_;

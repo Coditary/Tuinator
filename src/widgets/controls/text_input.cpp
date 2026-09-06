@@ -1,7 +1,6 @@
-#include <tuinator/widgets/controls/text_input.hpp>
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/controls/text_input.hpp>
 
 #include <algorithm>
 #include <variant>
@@ -9,9 +8,7 @@
 namespace tuinator {
 
 TextInput::TextInput(TextInputOptions options, Style style, Style focused_style)
-    : placeholder_(std::move(options.placeholder)),
-      min_width_(std::max(1, options.min_width)),
-      style_(style),
+    : placeholder_(std::move(options.placeholder)), min_width_(std::max(1, options.min_width)), style_(style),
       focused_style_(focused_style) {}
 
 void TextInput::set_value(std::string value) {
@@ -26,17 +23,11 @@ void TextInput::set_placeholder(std::string placeholder) {
     mark_dirty();
 }
 
-void TextInput::set_on_change(std::function<void(const std::string&)> callback) {
-    on_change_ = std::move(callback);
-}
+void TextInput::set_on_change(std::function<void(const std::string&)> callback) { on_change_ = std::move(callback); }
 
-void TextInput::set_on_submit(std::function<void(const std::string&)> callback) {
-    on_submit_ = std::move(callback);
-}
+void TextInput::set_on_submit(std::function<void(const std::string&)> callback) { on_submit_ = std::move(callback); }
 
-Size TextInput::preferred_size() const {
-    return {min_width_ + 2, 1};
-}
+Size TextInput::preferred_size() const { return {min_width_ + 2, 1}; }
 
 void TextInput::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;
@@ -115,25 +106,16 @@ bool TextInput::handle_event(const Event& event) {
             delete_at_cursor();
         }
         return true;
-    case Key::Left:
-        move_cursor(-1, false);
-        return true;
-    case Key::Right:
-        move_cursor(1, false);
-        return true;
-    case Key::Home:
-        set_cursor(0, false);
-        return true;
-    case Key::End:
-        set_cursor(value_.size(), false);
-        return true;
+    case Key::Left: move_cursor(-1, false); return true;
+    case Key::Right: move_cursor(1, false); return true;
+    case Key::Home: set_cursor(0, false); return true;
+    case Key::End: set_cursor(value_.size(), false); return true;
     case Key::Enter:
         if (on_submit_) {
             on_submit_(value_);
         }
         return true;
-    default:
-        break;
+    default: break;
     }
 
     if (key->character == 1) {
@@ -202,9 +184,7 @@ void TextInput::delete_selection() {
 
 void TextInput::move_cursor(int delta, bool extend_selection) {
     if (delta < 0) {
-        set_cursor(cursor_ > static_cast<std::size_t>(-delta)
-                       ? cursor_ - static_cast<std::size_t>(-delta)
-                       : 0,
+        set_cursor(cursor_ > static_cast<std::size_t>(-delta) ? cursor_ - static_cast<std::size_t>(-delta) : 0,
                    extend_selection);
     } else {
         set_cursor(cursor_ + static_cast<std::size_t>(delta), extend_selection);
@@ -231,13 +211,9 @@ void TextInput::select_all() {
     mark_dirty();
 }
 
-void TextInput::clear_selection() {
-    selection_anchor_ = cursor_;
-}
+void TextInput::clear_selection() { selection_anchor_ = cursor_; }
 
-bool TextInput::has_selection() const {
-    return selection_anchor_ != cursor_;
-}
+bool TextInput::has_selection() const { return selection_anchor_ != cursor_; }
 
 std::pair<std::size_t, std::size_t> TextInput::selection_range() const {
     const std::size_t start = std::min(selection_anchor_, cursor_);

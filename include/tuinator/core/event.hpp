@@ -1,9 +1,9 @@
 #pragma once
 
+#include <tuinator/core/geometry.hpp>
+
 #include <cstdint>
 #include <variant>
-
-#include <tuinator/core/geometry.hpp>
 
 namespace tuinator {
 

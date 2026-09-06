@@ -1,6 +1,5 @@
-#include <tuinator/widgets/menu/menu_common.hpp>
-
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/menu/menu_common.hpp>
 
 #include <algorithm>
 #include <cctype>
@@ -9,9 +8,7 @@ namespace tuinator {
 
 namespace {
 
-char normalize_key(char ch) {
-    return static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
-}
+char normalize_key(char ch) { return static_cast<char>(std::tolower(static_cast<unsigned char>(ch))); }
 
 } // namespace
 
@@ -85,9 +82,7 @@ const MenuBarLook* menu_bar_look_named(std::string_view name) {
     return nullptr;
 }
 
-bool menu_item_selectable(const MenuItem& item) {
-    return item.kind != MenuItemKind::Separator;
-}
+bool menu_item_selectable(const MenuItem& item) { return item.kind != MenuItemKind::Separator; }
 
 bool menu_item_has_submenu(const MenuItem& item) {
     return item.kind == MenuItemKind::Submenu || !item.children.empty();
@@ -150,9 +145,7 @@ void menu_move_selection(const std::vector<MenuItem>& items, int& active_item, i
     }
 }
 
-const std::vector<MenuItem>* menu_follow_path(
-    const std::vector<MenuItem>& root,
-    const std::vector<int>& path) {
+const std::vector<MenuItem>* menu_follow_path(const std::vector<MenuItem>& root, const std::vector<int>& path) {
     const std::vector<MenuItem>* items = &root;
     for (int index : path) {
         if (index < 0 || index >= static_cast<int>(items->size())) {
@@ -186,12 +179,8 @@ void paint_menu_label(Canvas& canvas, int x, int y, std::string_view label, cons
     }
 }
 
-void paint_menu_panel(
-    Canvas& canvas,
-    const MenuPanelLayout& layout,
-    const std::vector<MenuItem>& items,
-    int active_item,
-    const MenuBarLook& look) {
+void paint_menu_panel(Canvas& canvas, const MenuPanelLayout& layout, const std::vector<MenuItem>& items,
+                      int active_item, const MenuBarLook& look) {
     if (layout.width <= 0 || layout.height <= 0) {
         return;
     }
@@ -209,10 +198,8 @@ void paint_menu_panel(
             if (item.kind == MenuItemKind::Separator) {
                 Style line_style = look.border_style;
                 line_style.dim = true;
-                clipped.draw_text(
-                    {1, y},
-                    std::string(static_cast<std::size_t>(inner_width), look.glyphs.horizontal[0]),
-                    line_style);
+                clipped.draw_text({1, y}, std::string(static_cast<std::size_t>(inner_width), look.glyphs.horizontal[0]),
+                                  line_style);
                 continue;
             }
 

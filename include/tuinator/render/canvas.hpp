@@ -13,7 +13,7 @@
 namespace tuinator {
 
 class Canvas {
-public:
+  public:
     explicit Canvas(TerminalBackend& backend);
 
     Size size() const;
@@ -39,7 +39,7 @@ public:
     Point origin() const { return origin_; }
     Canvas scrolled(int dx, int dy) const;
 
-private:
+  private:
     Canvas(TerminalBackend& backend, Point origin, Size size, Rect clip, BorderGlyphs glyphs);
 
     Point to_terminal(Point local) const;

@@ -17,7 +17,7 @@ struct ScrollViewOptions {
 };
 
 class ScrollView : public Widget, public Scrollable {
-public:
+  public:
     explicit ScrollView(std::unique_ptr<Widget> content, ScrollViewOptions options = {});
 
     Widget* content() const { return content_.get(); }
@@ -49,7 +49,7 @@ public:
     Widget* hit_test_focusable(Point point) override;
     void for_each_child(const std::function<void(Widget*)>& visitor) override;
 
-private:
+  private:
     void clamp_scroll();
     void layout_content();
     void bind_content_dirty_callback();

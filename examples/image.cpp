@@ -71,15 +71,14 @@ int main(int argc, char** argv) {
 
     auto root = std::make_unique<tuinator::VBox>(tuinator::BoxOptions{.gap = 1, .padding = 1});
     root->add_child(std::make_unique<tuinator::Label>("Tuinator image test", theme.heading));
-    root->add_child(std::make_unique<tuinator::Label>(
-        "Protocol: " + tuinator::graphics_protocol_name(protocol)
-            + "  |  TUINATOR_GRAPHICS=kitty|iterm2|sixel|auto",
-        theme.muted));
+    root->add_child(std::make_unique<tuinator::Label>("Protocol: " + tuinator::graphics_protocol_name(protocol) +
+                                                          "  |  TUINATOR_GRAPHICS=kitty|iterm2|sixel|auto",
+                                                      theme.muted));
     root->add_child(std::make_unique<tuinator::ImageView>(image, display_cells));
-    root->add_child(std::make_unique<tuinator::Label>(
-        "Lenna test image (" + std::to_string(image.width()) + "x"
-            + std::to_string(image.height()) + " px). Override: argv[1] path.",
-        theme.muted));
+    root->add_child(std::make_unique<tuinator::Label>("Lenna test image (" + std::to_string(image.width()) + "x" +
+                                                          std::to_string(image.height()) +
+                                                          " px). Override: argv[1] path.",
+                                                      theme.muted));
     root->add_child(std::make_unique<tuinator::Label>("Press q to quit", theme.muted));
 
     app.set_root(std::move(root));

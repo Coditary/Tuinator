@@ -11,7 +11,7 @@ class Widget;
 
 /// Scrollable viewport contract used by Application for focus, keys, and pointer capture.
 class Scrollable {
-public:
+  public:
     virtual ~Scrollable() = default;
 
     virtual int scroll_x() const = 0;
@@ -25,7 +25,7 @@ public:
 
 /// Tab container contract used by Application for numeric tab shortcuts.
 class TabHost {
-public:
+  public:
     virtual ~TabHost() = default;
 
     virtual int tab_count() const = 0;
@@ -43,10 +43,7 @@ void ensure_focus_visible(Widget* root, Widget* target);
 
 Scrollable* find_scrollable_for_widget(Widget* root, const Widget* target);
 Scrollable* find_first_scrollable(Widget* root);
-bool collect_scrollables_for_widget(
-    Widget* root,
-    const Widget* target,
-    std::vector<Scrollable*>& out);
+bool collect_scrollables_for_widget(Widget* root, const Widget* target, std::vector<Scrollable*>& out);
 
 Widget* find_pointer_active_widget(Widget* root);
 MouseEvent adjust_mouse_for_widget(Widget* root, Widget* target, const MouseEvent& mouse);

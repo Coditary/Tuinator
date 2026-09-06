@@ -1,7 +1,6 @@
-#include <tuinator/widgets/controls/text_area.hpp>
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/controls/text_area.hpp>
 
 #include <algorithm>
 #include <cstdio>
@@ -40,18 +39,12 @@ int digit_count(int value) {
     return digits;
 }
 
-bool is_printable(char ch) {
-    return ch >= 32 && ch <= 126;
-}
+bool is_printable(char ch) { return ch >= 32 && ch <= 126; }
 
 bool style_customized(const Style& style) {
-    return style.foreground != Color::Default
-        || style.background != Color::Default
-        || style.foreground_rgb.has_value()
-        || style.background_rgb.has_value()
-        || style.bold
-        || style.dim
-        || style.reverse;
+    return style.foreground != Color::Default || style.background != Color::Default ||
+           style.foreground_rgb.has_value() || style.background_rgb.has_value() || style.bold || style.dim ||
+           style.reverse;
 }
 
 std::string fit_gutter_text(std::string_view text, int columns) {
@@ -71,9 +64,7 @@ std::string fit_gutter_text(std::string_view text, int columns) {
 
 } // namespace
 
-GutterCell absolute_gutter(const GutterLine& line) {
-    return {std::to_string(line.number), {}};
-}
+GutterCell absolute_gutter(const GutterLine& line) { return {std::to_string(line.number), {}}; }
 
 GutterCell relative_gutter(const GutterLine& line) {
     if (line.current) {
@@ -95,17 +86,11 @@ GutterCell hybrid_gutter(const GutterLine& line) {
 }
 
 TextArea::TextArea(TextAreaOptions options, Style style, Style focused_style)
-    : title_(std::move(options.title)),
-      placeholder_(std::move(options.placeholder)),
-      min_width_(std::max(8, options.min_width)),
-      min_height_(std::max(3, options.min_height)),
-      line_numbers_(options.line_numbers),
-      status_bar_(options.status_bar),
-      gutter_width_(std::max(0, options.gutter_width)),
-      scrollbars_(std::move(options.scrollbars)),
-      style_(style),
-      focused_style_(focused_style),
-      gutter_renderer_(std::move(options.gutter)) {}
+    : title_(std::move(options.title)), placeholder_(std::move(options.placeholder)),
+      min_width_(std::max(8, options.min_width)), min_height_(std::max(3, options.min_height)),
+      line_numbers_(options.line_numbers), status_bar_(options.status_bar),
+      gutter_width_(std::max(0, options.gutter_width)), scrollbars_(std::move(options.scrollbars)), style_(style),
+      focused_style_(focused_style), gutter_renderer_(std::move(options.gutter)) {}
 
 std::string TextArea::value() const {
     std::string out;
@@ -162,13 +147,9 @@ void TextArea::set_gutter_width(int width) {
     mark_dirty();
 }
 
-void TextArea::set_on_change(std::function<void(const std::string&)> callback) {
-    on_change_ = std::move(callback);
-}
+void TextArea::set_on_change(std::function<void(const std::string&)> callback) { on_change_ = std::move(callback); }
 
-Size TextArea::preferred_size() const {
-    return {min_width_, min_height_};
-}
+Size TextArea::preferred_size() const { return {min_width_, min_height_}; }
 
 void TextArea::layout(Rect bounds) {
     bounds_ = bounds;
@@ -237,21 +218,12 @@ ScrollbarMetrics TextArea::scrollbar_metrics() const {
         --area_height;
     }
 
-    return compute_scrollbar_metrics(
-        area_width,
-        area_height,
-        max_line_width(),
-        line_count(),
-        scrollbars_.config);
+    return compute_scrollbar_metrics(area_width, area_height, max_line_width(), line_count(), scrollbars_.config);
 }
 
-int TextArea::content_width() const {
-    return std::max(0, scrollbar_metrics().viewport_width - gutter_width());
-}
+int TextArea::content_width() const { return std::max(0, scrollbar_metrics().viewport_width - gutter_width()); }
 
-int TextArea::content_height() const {
-    return scrollbar_metrics().viewport_height;
-}
+int TextArea::content_height() const { return scrollbar_metrics().viewport_height; }
 
 void TextArea::clamp_cursor() {
     if (lines_.empty()) {
@@ -375,9 +347,7 @@ void TextArea::set_cursor(int row, int col) {
     mark_dirty();
 }
 
-Point TextArea::to_local(Point terminal) const {
-    return {terminal.x - bounds_.x, terminal.y - bounds_.y};
-}
+Point TextArea::to_local(Point terminal) const { return {terminal.x - bounds_.x, terminal.y - bounds_.y}; }
 
 bool TextArea::handle_mouse(const MouseEvent& mouse) {
     if (!contains_point(mouse.position)) {
@@ -461,12 +431,10 @@ void TextArea::paint(PaintContext& ctx) const {
             const std::string& line = lines_[static_cast<std::size_t>(index)];
             for (int col = 0; col < width; ++col) {
                 const int char_index = scroll_x_ + col;
-                const char ch =
-                    char_index >= 0 && char_index < static_cast<int>(line.size())
-                        ? line[static_cast<std::size_t>(char_index)]
-                        : ' ';
-                const bool at_cursor =
-                    focused && index == cursor_row_ && char_index == cursor_col_;
+                const char ch = char_index >= 0 && char_index < static_cast<int>(line.size())
+                                    ? line[static_cast<std::size_t>(char_index)]
+                                    : ' ';
+                const bool at_cursor = focused && index == cursor_row_ && char_index == cursor_col_;
 
                 Style glyph_style = text_style;
                 if (at_cursor) {
@@ -478,16 +446,9 @@ void TextArea::paint(PaintContext& ctx) const {
     }
 
     const auto metrics = scrollbar_metrics();
-    const int editor_height = metrics.viewport_height
-        + (metrics.show_horizontal ? 1 : 0);
+    const int editor_height = metrics.viewport_height + (metrics.show_horizontal ? 1 : 0);
     canvas.with_clip({{0, 0}, {bounds_.width, editor_height}}, [&](Canvas& editor) {
-        paint_scrollbars(
-            editor,
-            scrollbars_,
-            scroll_x_,
-            scroll_y_,
-            max_line_width(),
-            line_count());
+        paint_scrollbars(editor, scrollbars_, scroll_x_, scroll_y_, max_line_width(), line_count());
     });
 
     if (!status_bar_ || bounds_.height <= 0) {
@@ -532,24 +493,18 @@ bool TextArea::handle_event(const Event& event) {
     }
 
     switch (key->key) {
-    case Key::Backspace:
-        delete_before_cursor();
-        return true;
-    case Key::Delete:
-        delete_at_cursor();
-        return true;
+    case Key::Backspace: delete_before_cursor(); return true;
+    case Key::Delete: delete_at_cursor(); return true;
     case Key::Left:
         if (cursor_col_ > 0) {
             set_cursor(cursor_row_, cursor_col_ - 1);
         } else if (cursor_row_ > 0) {
-            const int prev_len =
-                static_cast<int>(lines_[static_cast<std::size_t>(cursor_row_ - 1)].size());
+            const int prev_len = static_cast<int>(lines_[static_cast<std::size_t>(cursor_row_ - 1)].size());
             set_cursor(cursor_row_ - 1, prev_len);
         }
         return true;
     case Key::Right: {
-        const int line_len =
-            static_cast<int>(lines_[static_cast<std::size_t>(cursor_row_)].size());
+        const int line_len = static_cast<int>(lines_[static_cast<std::size_t>(cursor_row_)].size());
         if (cursor_col_ < line_len) {
             set_cursor(cursor_row_, cursor_col_ + 1);
         } else if (cursor_row_ + 1 < line_count()) {
@@ -567,28 +522,15 @@ bool TextArea::handle_event(const Event& event) {
             set_cursor(cursor_row_ + 1, cursor_col_);
         }
         return true;
-    case Key::Home:
-        set_cursor(cursor_row_, 0);
-        return true;
+    case Key::Home: set_cursor(cursor_row_, 0); return true;
     case Key::End:
-        set_cursor(
-            cursor_row_,
-            static_cast<int>(lines_[static_cast<std::size_t>(cursor_row_)].size()));
+        set_cursor(cursor_row_, static_cast<int>(lines_[static_cast<std::size_t>(cursor_row_)].size()));
         return true;
-    case Key::PageUp:
-        set_cursor(cursor_row_ - std::max(1, content_height()), cursor_col_);
-        return true;
-    case Key::PageDown:
-        set_cursor(cursor_row_ + std::max(1, content_height()), cursor_col_);
-        return true;
-    case Key::Enter:
-        insert_newline();
-        return true;
-    case Key::Tab:
-        insert_char('\t');
-        return true;
-    default:
-        break;
+    case Key::PageUp: set_cursor(cursor_row_ - std::max(1, content_height()), cursor_col_); return true;
+    case Key::PageDown: set_cursor(cursor_row_ + std::max(1, content_height()), cursor_col_); return true;
+    case Key::Enter: insert_newline(); return true;
+    case Key::Tab: insert_char('\t'); return true;
+    default: break;
     }
 
     if (key->character == '\n' || key->character == '\r') {

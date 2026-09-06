@@ -154,29 +154,78 @@ std::vector<tuinator::SourceControlSection> make_source_sections() {
         {
             "Changes (12)",
             {
-                {.path = "file_history_panel.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "55", .deletions = "29", .selected = true},
-                {.path = "diffview.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "21", .deletions = "9"},
-                {.path = "file_history_view.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "17", .deletions = "6"},
-                {.path = "listeners.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "9", .deletions = "3"},
-                {.path = "buffer.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "12", .deletions = "4"},
-                {.path = "command.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "8", .deletions = "2"},
-                {.path = "config.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "3", .deletions = "1"},
-                {.path = "history.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "6", .deletions = "2"},
+                {.path = "file_history_panel.lua",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "55",
+                 .deletions = "29",
+                 .selected = true},
+                {.path = "diffview.lua",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "21",
+                 .deletions = "9"},
+                {.path = "file_history_view.lua",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "17",
+                 .deletions = "6"},
+                {.path = "listeners.lua",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "9",
+                 .deletions = "3"},
+                {.path = "buffer.lua",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "12",
+                 .deletions = "4"},
+                {.path = "command.lua",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "8",
+                 .deletions = "2"},
+                {.path = "config.lua",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "3",
+                 .deletions = "1"},
+                {.path = "history.lua",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "6",
+                 .deletions = "2"},
                 {.path = "init.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "4", .deletions = "1"},
-                {.path = "state.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "5", .deletions = "2"},
+                {.path = "state.lua",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "5",
+                 .deletions = "2"},
                 {.path = "ui.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "7", .deletions = "1"},
-                {.path = "diffview.vim", .status = tuinator::GitChangeStatus::Modified, .additions = "4", .deletions = "4"},
+                {.path = "diffview.vim",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "4",
+                 .deletions = "4"},
             },
         },
         {
             "Staged changes (6)",
             {
-                {.path = "diffview/main.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "10", .deletions = "2"},
-                {.path = "diffview/help.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "4", .deletions = "0"},
-                {.path = "diffview/hunk.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "6", .deletions = "1"},
-                {.path = "diffview/list.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "3", .deletions = "0"},
-                {.path = "diffview/render.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "8", .deletions = "3"},
-                {.path = "diffview/state.lua", .status = tuinator::GitChangeStatus::Modified, .additions = "2", .deletions = "1"},
+                {.path = "diffview/main.lua",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "10",
+                 .deletions = "2"},
+                {.path = "diffview/help.lua",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "4",
+                 .deletions = "0"},
+                {.path = "diffview/hunk.lua",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "6",
+                 .deletions = "1"},
+                {.path = "diffview/list.lua",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "3",
+                 .deletions = "0"},
+                {.path = "diffview/render.lua",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "8",
+                 .deletions = "3"},
+                {.path = "diffview/state.lua",
+                 .status = tuinator::GitChangeStatus::Modified,
+                 .additions = "2",
+                 .deletions = "1"},
             },
         },
     };
@@ -209,14 +258,12 @@ struct SplitDiffRow {
     std::optional<DiffRow> right;
 };
 
-tuinator::Style with_bg(const NvPalette& palette, tuinator::Rgb bg) {
-    return tuinator::style_fg_bg(palette.text, bg);
-}
+tuinator::Style with_bg(const NvPalette& palette, tuinator::Rgb bg) { return tuinator::style_fg_bg(palette.text, bg); }
 
 bool is_lua_keyword(std::string_view word) {
     static constexpr const char* kKeywords[] = {
-        "function", "local", "return", "if", "then", "else", "end", "for", "in", "do",
-        "nil",  "true", "false", "self", "require",
+        "function", "local", "return", "if",   "then",  "else", "end",     "for",
+        "in",       "do",    "nil",    "true", "false", "self", "require",
     };
     for (const char* keyword : kKeywords) {
         if (word == keyword) {
@@ -226,13 +273,8 @@ bool is_lua_keyword(std::string_view word) {
     return false;
 }
 
-void paint_lua_line(
-    tuinator::Canvas& canvas,
-    int x,
-    int y,
-    std::string_view line,
-    const NvPalette& palette,
-    tuinator::Style row_style) {
+void paint_lua_line(tuinator::Canvas& canvas, int x, int y, std::string_view line, const NvPalette& palette,
+                    tuinator::Style row_style) {
     if (line.size() >= 2 && line[0] == '-' && line[1] == '-') {
         auto style = row_style;
         style.foreground_rgb = palette.muted;
@@ -290,8 +332,8 @@ void paint_lua_line(
         }
 
         const std::size_t start = pos;
-        while (pos < line.size()
-               && (std::isalnum(static_cast<unsigned char>(line[pos])) || line[pos] == '_' || line[pos] == '.')) {
+        while (pos < line.size() &&
+               (std::isalnum(static_cast<unsigned char>(line[pos])) || line[pos] == '_' || line[pos] == '.')) {
             ++pos;
         }
 
@@ -328,16 +370,8 @@ void paint_hatch_row(tuinator::Canvas& canvas, int x, int y, int width, const Nv
     }
 }
 
-void paint_diff_cell(
-    tuinator::Canvas& canvas,
-    int x,
-    int y,
-    int width,
-    const std::optional<DiffRow>& cell,
-    bool is_right,
-    int cursor_row,
-    int row_index,
-    const NvPalette& palette) {
+void paint_diff_cell(tuinator::Canvas& canvas, int x, int y, int width, const std::optional<DiffRow>& cell,
+                     bool is_right, int cursor_row, int row_index, const NvPalette& palette) {
     const int gutter_width = 6;
     const int text_x = x + gutter_width + 1;
 
@@ -377,9 +411,8 @@ void paint_diff_cell(
 }
 
 class NvTabBar : public tuinator::Widget {
-public:
-    explicit NvTabBar(std::vector<std::string> tabs, int active = 0)
-        : tabs_(std::move(tabs)), active_(active) {}
+  public:
+    explicit NvTabBar(std::vector<std::string> tabs, int active = 0) : tabs_(std::move(tabs)), active_(active) {}
 
     tuinator::Size preferred_size() const override { return {0, 1}; }
 
@@ -396,9 +429,8 @@ public:
             const int icon_width = std::max(1, tuinator::text_display_width(icon_glyph));
 
             const tuinator::Rgb tab_bg = active ? palette_.tab_active : palette_.bg;
-            auto style = active
-                ? tuinator::style_fg_bg(palette_.text, tab_bg)
-                : tuinator::style_fg_bg(palette_.muted, tab_bg);
+            auto style =
+                active ? tuinator::style_fg_bg(palette_.text, tab_bg) : tuinator::style_fg_bg(palette_.muted, tab_bg);
             if (active) {
                 style.bold = true;
             }
@@ -419,10 +451,7 @@ public:
             }
 
             int cursor = x + accent_width + 1;
-            canvas.draw_text(
-                {cursor, 0},
-                icon_glyph,
-                file_icon_row_style(palette_, icon, tab_bg));
+            canvas.draw_text({cursor, 0}, icon_glyph, file_icon_row_style(palette_, icon, tab_bg));
             cursor += icon_width;
             canvas.draw_text({cursor, 0}, label, style);
             cursor += static_cast<int>(label.size());
@@ -439,20 +468,18 @@ public:
         canvas.draw_text({std::max(0, bounds_.width - 4), 0}, "1  2", pane_style);
     }
 
-private:
+  private:
     NvPalette palette_;
     std::vector<std::string> tabs_;
     int active_ = 0;
 };
 
 class NvDiffSplit : public tuinator::Widget {
-public:
+  public:
     explicit NvDiffSplit(std::vector<SplitDiffRow> rows, int cursor_row = 1)
         : rows_(std::move(rows)), cursor_row_(cursor_row) {}
 
-    tuinator::Size preferred_size() const override {
-        return {80, std::max(1, static_cast<int>(rows_.size()))};
-    }
+    tuinator::Size preferred_size() const override { return {80, std::max(1, static_cast<int>(rows_.size()))}; }
 
     void paint(tuinator::PaintContext& ctx) const override {
         tuinator::Canvas& canvas = ctx.canvas;
@@ -487,14 +514,14 @@ public:
         }
     }
 
-private:
+  private:
     NvPalette palette_;
     std::vector<SplitDiffRow> rows_;
     int cursor_row_ = 0;
 };
 
 class DiffviewRoot : public tuinator::VBox {
-public:
+  public:
     explicit DiffviewRoot(tuinator::BoxOptions options) : tuinator::VBox(options) {}
     bool wants_full_screen() const override { return true; }
 };
@@ -522,7 +549,8 @@ std::vector<SplitDiffRow> make_aligned_diff_rows() {
         {std::nullopt, code_row(89, "  self.state.entry_buf = nil", true)},
         {std::nullopt, code_row(90, "end", true)},
         {std::nullopt, code_row(91, "")},
-        {code_row(120, "function FileHistoryPanel:invalidate()"), code_row(92, "function FileHistoryPanel:invalidate()")},
+        {code_row(120, "function FileHistoryPanel:invalidate()"),
+         code_row(92, "function FileHistoryPanel:invalidate()")},
         {code_row(121, "  self.state.dirty = true"), code_row(93, "  self.state.dirty = true")},
         {code_row(122, "end"), code_row(94, "end")},
     };

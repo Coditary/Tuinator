@@ -1,6 +1,3 @@
-#include "render_helper.hpp"
-#include "test_harness.hpp"
-
 #include <tuinator/layout/box.hpp>
 #include <tuinator/render/scrollbar.hpp>
 #include <tuinator/render/theme.hpp>
@@ -12,6 +9,9 @@
 
 #include <memory>
 #include <string>
+
+#include "render_helper.hpp"
+#include "test_harness.hpp"
 
 TUINATOR_TEST(scrollbar_style_presets_provide_distinct_glyphs) {
     const auto ascii = tuinator::ScrollbarStyles::ascii().glyphs();
@@ -42,8 +42,7 @@ TUINATOR_TEST(scrollbar_options_compose_config_behavior_and_style) {
     config.horizontal = false;
 
     auto options = tuinator::ScrollbarOptions::from_parts(
-        config,
-        tuinator::ScrollbarBehavior::classic().with_wheel_step(5),
+        config, tuinator::ScrollbarBehavior::classic().with_wheel_step(5),
         tuinator::ScrollbarStyles::themed(theme, tuinator::ScrollbarStyles::classic())
             .with_thumb_style(tuinator::style_fg(tuinator::Rgb::hex(0x00FF00)))
             .patch_glyphs(glyph_patch));
@@ -60,8 +59,7 @@ TUINATOR_TEST(scrollbar_paints_vertical_track) {
     tuinator::MemoryTerminalBackend backend({12, 6});
     backend.init();
 
-    tuinator::ScrollbarOptions options =
-        tuinator::scrollbar_options(tuinator::ScrollbarPreset::Ascii);
+    tuinator::ScrollbarOptions options = tuinator::scrollbar_options(tuinator::ScrollbarPreset::Ascii);
 
     tuinator::ScrollbarMetrics metrics;
     metrics.show_vertical = true;
@@ -127,9 +125,8 @@ TUINATOR_TEST(hbox_forwards_wheel_events_to_child_under_cursor) {
         list->add_child(std::move(row));
     }
 
-    auto scroll = std::make_unique<tuinator::ScrollView>(
-        std::move(list),
-        tuinator::ScrollViewOptions{.width = 20, .height = 5});
+    auto scroll =
+        std::make_unique<tuinator::ScrollView>(std::move(list), tuinator::ScrollViewOptions{.width = 20, .height = 5});
     auto* scroll_ptr = scroll.get();
 
     auto panels = std::make_unique<tuinator::HBox>(tuinator::BoxOptions{.gap = 2});

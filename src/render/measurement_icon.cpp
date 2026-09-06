@@ -1,6 +1,5 @@
-#include <tuinator/render/measurement_icon.hpp>
-
 #include <tuinator/render/glyphs.hpp>
+#include <tuinator/render/measurement_icon.hpp>
 
 #include <array>
 #include <string>
@@ -29,26 +28,27 @@ std::string utf8_from(char32_t cp) {
     return out;
 }
 
-constexpr MeasurementIconDescriptor make(
-    MeasurementIcon kind,
-    MeasurementIconCategory category,
-    const char* path,
-    const char* nerd_suffix,
-    char32_t codepoint,
-    char ascii) {
+constexpr MeasurementIconDescriptor make(MeasurementIcon kind, MeasurementIconCategory category, const char* path,
+                                         const char* nerd_suffix, char32_t codepoint, char ascii) {
     return MeasurementIconDescriptor{kind, category, path, nerd_suffix, codepoint, ascii};
 }
 
 constexpr std::array<MeasurementIconDescriptor, 9> kDescriptors{{
-    make(MeasurementIcon::Barometer, MeasurementIconCategory::Measurement, "measurement-barometer", "barometer", 0xE372, '*'),
+    make(MeasurementIcon::Barometer, MeasurementIconCategory::Measurement, "measurement-barometer", "barometer", 0xE372,
+         '*'),
     make(MeasurementIcon::Celsius, MeasurementIconCategory::Measurement, "measurement-celsius", "celsius", 0xE339, 'T'),
     make(MeasurementIcon::Degrees, MeasurementIconCategory::Measurement, "measurement-degrees", "degrees", 0xE33E, '*'),
-    make(MeasurementIcon::Fahrenheit, MeasurementIconCategory::Measurement, "measurement-fahrenheit", "fahrenheit", 0xE341, 'T'),
+    make(MeasurementIcon::Fahrenheit, MeasurementIconCategory::Measurement, "measurement-fahrenheit", "fahrenheit",
+         0xE341, 'T'),
     make(MeasurementIcon::Hot, MeasurementIconCategory::Measurement, "measurement-hot", "hot", 0xE36B, '*'),
-    make(MeasurementIcon::Humidity, MeasurementIconCategory::Measurement, "measurement-humidity", "humidity", 0xE373, '*'),
-    make(MeasurementIcon::Thermometer, MeasurementIconCategory::Measurement, "measurement-thermometer", "thermometer", 0xE350, 'T'),
-    make(MeasurementIcon::ThermometerExterior, MeasurementIconCategory::Measurement, "measurement-thermometer-exterior", "thermometer_exterior", 0xE34E, 'T'),
-    make(MeasurementIcon::ThermometerInternal, MeasurementIconCategory::Measurement, "measurement-thermometer-internal", "thermometer_internal", 0xE34F, 'T'),
+    make(MeasurementIcon::Humidity, MeasurementIconCategory::Measurement, "measurement-humidity", "humidity", 0xE373,
+         '*'),
+    make(MeasurementIcon::Thermometer, MeasurementIconCategory::Measurement, "measurement-thermometer", "thermometer",
+         0xE350, 'T'),
+    make(MeasurementIcon::ThermometerExterior, MeasurementIconCategory::Measurement, "measurement-thermometer-exterior",
+         "thermometer_exterior", 0xE34E, 'T'),
+    make(MeasurementIcon::ThermometerInternal, MeasurementIconCategory::Measurement, "measurement-thermometer-internal",
+         "thermometer_internal", 0xE34F, 'T'),
 }};
 
 static_assert(kDescriptors.size() == 9, "descriptor table out of sync");
@@ -71,26 +71,20 @@ MeasurementIconCategory measurement_icon_category(MeasurementIcon icon) {
     return measurement_icon_descriptor(icon).category;
 }
 
-const char* measurement_icon_path(MeasurementIcon icon) {
-    return measurement_icon_descriptor(icon).path;
-}
+const char* measurement_icon_path(MeasurementIcon icon) { return measurement_icon_descriptor(icon).path; }
 
-const char* measurement_icon_nerd_suffix(MeasurementIcon icon) {
-    return measurement_icon_descriptor(icon).nerd_suffix;
-}
+const char* measurement_icon_nerd_suffix(MeasurementIcon icon) { return measurement_icon_descriptor(icon).nerd_suffix; }
 
 const char* measurement_icon_category_path(MeasurementIconCategory category) {
     switch (category) {
-    case MeasurementIconCategory::Measurement:
-        return "measurement";
+    case MeasurementIconCategory::Measurement: return "measurement";
     }
     return "measurement";
 }
 
 const char* measurement_icon_category_label(MeasurementIconCategory category) {
     switch (category) {
-    case MeasurementIconCategory::Measurement:
-        return "Measurement";
+    case MeasurementIconCategory::Measurement: return "Measurement";
     }
     return "Other";
 }

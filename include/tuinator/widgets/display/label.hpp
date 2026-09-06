@@ -8,7 +8,7 @@
 namespace tuinator {
 
 class Label : public Widget {
-public:
+  public:
     explicit Label(std::string text, Style style = {});
 
     const std::string& text() const { return text_; }
@@ -21,7 +21,7 @@ public:
     void layout(Rect bounds) override;
     void paint(PaintContext& ctx) const override;
 
-private:
+  private:
     std::string text_;
     Style style_;
 };

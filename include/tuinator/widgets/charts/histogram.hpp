@@ -33,7 +33,7 @@ struct HistogramOptions {
 };
 
 class Histogram : public Widget {
-public:
+  public:
     Histogram(std::vector<HistogramBin> bins = {}, HistogramOptions options = {});
 
     const std::vector<HistogramBin>& bins() const { return bins_; }
@@ -45,7 +45,7 @@ public:
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
-private:
+  private:
     std::vector<HistogramBin> bins_;
     HistogramOptions options_;
 };

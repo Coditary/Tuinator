@@ -14,16 +14,10 @@ struct ChartState {
 };
 
 class PieChartRoot : public tuinator::VBox {
-public:
-    PieChartRoot(
-        tuinator::BoxOptions options,
-        tuinator::Application* app,
-        tuinator::Label* mode_label,
-        tuinator::StatusBar* status)
-        : tuinator::VBox(options),
-          app_(app),
-          mode_label_(mode_label),
-          status_(status) {}
+  public:
+    PieChartRoot(tuinator::BoxOptions options, tuinator::Application* app, tuinator::Label* mode_label,
+                 tuinator::StatusBar* status)
+        : tuinator::VBox(options), app_(app), mode_label_(mode_label), status_(status) {}
 
     bool wants_full_screen() const override { return true; }
 
@@ -37,26 +31,23 @@ public:
     bool handle_event(const tuinator::Event& event) override {
         const auto* key = std::get_if<tuinator::KeyPress>(&event);
         if (key != nullptr) {
-            if (key->key == tuinator::Key::Enter
-                || key->character == ' '
-                || key->character == 'h'
-                || key->character == 'H') {
+            if (key->key == tuinator::Key::Enter || key->character == ' ' || key->character == 'h' ||
+                key->character == 'H') {
                 cycle_style();
                 return true;
             }
 
             if (key->character >= '1' && key->character <= '4') {
                 const int index = key->character - '1';
-                if (index >= 0 && index < static_cast<int>(charts_.size())
-                    && charts_[static_cast<std::size_t>(index)] != nullptr
-                    && charts_[static_cast<std::size_t>(index)]->chart != nullptr) {
+                if (index >= 0 && index < static_cast<int>(charts_.size()) &&
+                    charts_[static_cast<std::size_t>(index)] != nullptr &&
+                    charts_[static_cast<std::size_t>(index)]->chart != nullptr) {
                     charts_[static_cast<std::size_t>(index)]->chart->set_focused(true);
                     if (app_ != nullptr) {
                         app_->refresh_focus();
                     }
                     if (status_ != nullptr) {
-                        status_->set_text("Focused chart " + std::to_string(index + 1)
-                            + " • Left/Right adjust slice");
+                        status_->set_text("Focused chart " + std::to_string(index + 1) + " • Left/Right adjust slice");
                     }
                 }
                 return true;
@@ -66,7 +57,7 @@ public:
         return tuinator::VBox::handle_event(event);
     }
 
-private:
+  private:
     void cycle_style() {
         if (styles_.empty()) {
             return;
@@ -89,8 +80,7 @@ private:
             mode_label_->set_text("Current style: " + std::string(style_title(style)));
         }
         if (status_ != nullptr) {
-            status_->set_text("Style: " + std::string(style_title(style))
-                + " • drag slice edges to resize");
+            status_->set_text("Style: " + std::string(style_title(style)) + " • drag slice edges to resize");
         }
     }
 
@@ -111,9 +101,7 @@ private:
     std::size_t style_index_ = 0;
 };
 
-tuinator::PieChartOptions chart_options(
-    const tuinator::Theme& theme,
-    tuinator::PieChartStyle style) {
+tuinator::PieChartOptions chart_options(const tuinator::Theme& theme, tuinator::PieChartStyle style) {
     tuinator::PieChartOptions options{};
     options.title_style = theme.heading;
     options.legend_style = theme.label;
@@ -125,9 +113,8 @@ tuinator::PieChartOptions chart_options(
     return options;
 }
 
-std::vector<tuinator::PieChartSlice> make_slices(
-    const std::vector<std::pair<std::string, double>>& items,
-    const std::vector<tuinator::Style>& colors) {
+std::vector<tuinator::PieChartSlice> make_slices(const std::vector<std::pair<std::string, double>>& items,
+                                                 const std::vector<tuinator::Style>& colors) {
     std::vector<tuinator::PieChartSlice> slices;
     slices.reserve(items.size());
     for (std::size_t i = 0; i < items.size(); ++i) {
@@ -140,18 +127,13 @@ std::vector<tuinator::PieChartSlice> make_slices(
     return slices;
 }
 
-std::unique_ptr<tuinator::PieChart> make_chart(
-    const tuinator::Theme& theme,
-    const std::string& title,
-    tuinator::PieChartStyle style,
-    const std::vector<std::pair<std::string, double>>& items,
-    const std::vector<tuinator::Style>& colors,
-    ChartState* state) {
+std::unique_ptr<tuinator::PieChart> make_chart(const tuinator::Theme& theme, const std::string& title,
+                                               tuinator::PieChartStyle style,
+                                               const std::vector<std::pair<std::string, double>>& items,
+                                               const std::vector<tuinator::Style>& colors, ChartState* state) {
     auto options = chart_options(theme, style);
     options.title = title;
-    auto chart = std::make_unique<tuinator::PieChart>(
-        make_slices(items, colors),
-        options);
+    auto chart = std::make_unique<tuinator::PieChart>(make_slices(items, colors), options);
 
     state->chart = chart.get();
     state->base_values.clear();
@@ -188,22 +170,16 @@ int main() {
 
     auto desktop = std::make_unique<tuinator::Desktop>();
     auto status = std::make_unique<tuinator::StatusBar>(
-        "Drag slice edges to adjust • Space/H = cycle style • 1-4 = focus chart",
-        theme.muted);
+        "Drag slice edges to adjust • Space/H = cycle style • 1-4 = focus chart", theme.muted);
     auto* status_ptr = status.get();
 
     auto mode_label = std::make_unique<tuinator::Label>("Current style: Thick dots", theme.accent);
     auto* mode_label_ptr = mode_label.get();
 
-    auto root = std::make_unique<PieChartRoot>(
-        tuinator::BoxOptions{.gap = 1, .padding = 1},
-        &app,
-        mode_label_ptr,
-        status_ptr);
+    auto root =
+        std::make_unique<PieChartRoot>(tuinator::BoxOptions{.gap = 1, .padding = 1}, &app, mode_label_ptr, status_ptr);
 
-    root->add_child(std::make_unique<tuinator::Label>(
-        "Pie Chart Demo (Animated + Interactive)",
-        theme.heading));
+    root->add_child(std::make_unique<tuinator::Label>("Pie Chart Demo (Animated + Interactive)", theme.heading));
     root->add_child(std::make_unique<tuinator::Label>(
         "Thick/fine dots, stars, blocks, or braille. Drag a slice edge to resize values. "
         "Space/Enter/H = cycle style • 1-4 = focus chart • q = quit",
@@ -226,34 +202,17 @@ int main() {
     ChartState budget{};
 
     auto grid = std::make_unique<tuinator::Grid>(tuinator::GridOptions{.columns = 2, .gap = 2});
-    grid->add_child(make_chart(
-        theme,
-        "Languages",
-        tuinator::PieChartStyle::Dots,
-        {{"Rust", 44.0}, {"Go", 34.0}, {"Python", 22.0}},
-        palette,
-        &languages));
-    grid->add_child(make_chart(
-        theme,
-        "Market Share",
-        tuinator::PieChartStyle::Dots,
-        {{"Product A", 35.0}, {"Product B", 16.0}, {"Product C", 49.0}},
-        {palette[4], palette[3], palette[5]},
-        &market));
-    grid->add_child(make_chart(
-        theme,
-        "Time Allocation",
-        tuinator::PieChartStyle::Dots,
-        {{"Work", 52.0}, {"Sleep", 20.0}, {"Leisure", 28.0}},
-        {palette[1], palette[4], palette[2]},
-        &time));
-    grid->add_child(make_chart(
-        theme,
-        "Budget",
-        tuinator::PieChartStyle::Dots,
-        {{"Housing", 38.0}, {"Food", 18.0}, {"Transport", 12.0}, {"Other", 32.0}},
-        {palette[0], palette[3], palette[5], palette[6]},
-        &budget));
+    grid->add_child(make_chart(theme, "Languages", tuinator::PieChartStyle::Dots,
+                               {{"Rust", 44.0}, {"Go", 34.0}, {"Python", 22.0}}, palette, &languages));
+    grid->add_child(make_chart(theme, "Market Share", tuinator::PieChartStyle::Dots,
+                               {{"Product A", 35.0}, {"Product B", 16.0}, {"Product C", 49.0}},
+                               {palette[4], palette[3], palette[5]}, &market));
+    grid->add_child(make_chart(theme, "Time Allocation", tuinator::PieChartStyle::Dots,
+                               {{"Work", 52.0}, {"Sleep", 20.0}, {"Leisure", 28.0}},
+                               {palette[1], palette[4], palette[2]}, &time));
+    grid->add_child(make_chart(theme, "Budget", tuinator::PieChartStyle::Dots,
+                               {{"Housing", 38.0}, {"Food", 18.0}, {"Transport", 12.0}, {"Other", 32.0}},
+                               {palette[0], palette[3], palette[5], palette[6]}, &budget));
 
     grid->set_flex(1);
     root->add_child(std::move(grid));

@@ -1,7 +1,6 @@
-#include <tuinator/widgets/menu/menu_bar.hpp>
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/menu/menu_bar.hpp>
 #include <tuinator/widgets/menu/menu_common.hpp>
 
 #include <algorithm>
@@ -12,10 +11,7 @@
 namespace tuinator {
 
 MenuItem::MenuItem(std::string label, std::function<void()> action, std::string shortcut, bool enabled)
-    : label(std::move(label)),
-      action(std::move(action)),
-      shortcut(std::move(shortcut)),
-      enabled(enabled) {}
+    : label(std::move(label)), action(std::move(action)), shortcut(std::move(shortcut)), enabled(enabled) {}
 
 MenuItem MenuItem::separator() {
     MenuItem item;
@@ -32,11 +28,7 @@ MenuItem MenuItem::checkbox(std::string label, bool checked, std::function<void(
     return item;
 }
 
-MenuItem MenuItem::submenu(
-    std::string label,
-    std::vector<MenuItem> items,
-    std::string shortcut,
-    std::string icon) {
+MenuItem MenuItem::submenu(std::string label, std::vector<MenuItem> items, std::string shortcut, std::string icon) {
     MenuItem item;
     item.label = std::move(label);
     item.children = std::move(items);
@@ -62,18 +54,10 @@ ParsedMenuText parse_menu_mnemonic(std::string_view label) {
 
 namespace {
 
-char normalize_key(char ch) {
-    return static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
-}
+char normalize_key(char ch) { return static_cast<char>(std::tolower(static_cast<unsigned char>(ch))); }
 
-MenuBarLook current_look(
-    const Style& bar,
-    const Style& active,
-    const Style& submenu,
-    const Style& disabled,
-    const Style& shortcut,
-    const Style& border,
-    BorderGlyphs glyphs) {
+MenuBarLook current_look(const Style& bar, const Style& active, const Style& submenu, const Style& disabled,
+                         const Style& shortcut, const Style& border, BorderGlyphs glyphs) {
     MenuBarLook look;
     look.bar_style = bar;
     look.active_style = active;
@@ -87,8 +71,7 @@ MenuBarLook current_look(
 
 } // namespace
 
-MenuBar::MenuBar(Style style, Style active_style)
-    : style_(style), active_style_(active_style) {
+MenuBar::MenuBar(Style style, Style active_style) : style_(style), active_style_(active_style) {
     submenu_style_ = style_;
     submenu_style_.dim = true;
     disabled_style_ = style_;
@@ -120,9 +103,7 @@ void MenuBar::set_on_action(std::function<void(const std::string&, const std::st
     on_action_ = std::move(callback);
 }
 
-void MenuBar::set_on_hint(std::function<void(const std::string& hint)> callback) {
-    on_hint_ = std::move(callback);
-}
+void MenuBar::set_on_hint(std::function<void(const std::string& hint)> callback) { on_hint_ = std::move(callback); }
 
 void MenuBar::set_border_glyphs(BorderGlyphs glyphs) {
     glyphs_ = std::move(glyphs);
@@ -281,8 +262,8 @@ void MenuBar::paint(PaintContext& ctx) const {
 }
 
 void MenuBar::paint_dropdown(Canvas& canvas, const DropdownLayout& layout) const {
-    const MenuBarLook look = current_look(
-        style_, active_style_, submenu_style_, disabled_style_, shortcut_style_, border_style_, glyphs_);
+    const MenuBarLook look =
+        current_look(style_, active_style_, submenu_style_, disabled_style_, shortcut_style_, border_style_, glyphs_);
 
     const std::vector<MenuPanelLayout> panels = open_panels();
     const std::vector<MenuItem>* items = &menus_[static_cast<std::size_t>(active_menu_)].items;
@@ -410,8 +391,8 @@ bool MenuBar::handle_event(const Event& event) {
             const std::vector<MenuPanelLayout> panels = open_panels();
             for (std::size_t depth = 0; depth < panels.size(); ++depth) {
                 const MenuPanelLayout& panel = panels[depth];
-                if (local.x >= panel.x && local.x < panel.x + panel.width
-                    && local.y >= panel.y && local.y < panel.y + panel.height) {
+                if (local.x >= panel.x && local.x < panel.x + panel.width && local.y >= panel.y &&
+                    local.y < panel.y + panel.height) {
                     const int row = local.y - panel.y - 1;
                     if (row >= 0) {
                         while (submenu_path_.size() > depth) {
@@ -457,8 +438,7 @@ bool MenuBar::handle_event(const Event& event) {
         }
     }
 
-    if ((key->character >= 'a' && key->character <= 'z')
-        || (key->character >= 'A' && key->character <= 'Z')) {
+    if ((key->character >= 'a' && key->character <= 'z') || (key->character >= 'A' && key->character <= 'Z')) {
         if (!is_focused() && !open_) {
             return false;
         }
@@ -473,16 +453,14 @@ bool MenuBar::handle_event(const Event& event) {
 
     if (!open_) {
         if (key->key == Key::Right) {
-            const int next =
-                active_menu_ < 0 ? 0 : (active_menu_ + 1) % static_cast<int>(menus_.size());
+            const int next = active_menu_ < 0 ? 0 : (active_menu_ + 1) % static_cast<int>(menus_.size());
             open_menu(next);
             return true;
         }
         if (key->key == Key::Left) {
-            const int next = active_menu_ < 0
-                ? static_cast<int>(menus_.size()) - 1
-                : (active_menu_ - 1 + static_cast<int>(menus_.size()))
-                      % static_cast<int>(menus_.size());
+            const int next = active_menu_ < 0 ? static_cast<int>(menus_.size()) - 1
+                                              : (active_menu_ - 1 + static_cast<int>(menus_.size())) %
+                                                    static_cast<int>(menus_.size());
             open_menu(next);
             return true;
         }
@@ -494,15 +472,9 @@ bool MenuBar::handle_event(const Event& event) {
     }
 
     switch (key->key) {
-    case Key::Up:
-        move_selection(-1);
-        return true;
-    case Key::Down:
-        move_selection(1);
-        return true;
-    case Key::Enter:
-        activate_item(active_item_);
-        return true;
+    case Key::Up: move_selection(-1); return true;
+    case Key::Down: move_selection(1); return true;
+    case Key::Enter: activate_item(active_item_); return true;
     case Key::Left:
         if (!submenu_path_.empty()) {
             close_submenu();
@@ -520,8 +492,7 @@ bool MenuBar::handle_event(const Event& event) {
         open_menu(next);
         return true;
     }
-    default:
-        break;
+    default: break;
     }
 
     return false;

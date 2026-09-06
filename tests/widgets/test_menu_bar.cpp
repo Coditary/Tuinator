@@ -1,12 +1,12 @@
-#include "render_helper.hpp"
-#include "test_harness.hpp"
-
 #include <tuinator/core/action_registry.hpp>
 #include <tuinator/render/theme.hpp>
 #include <tuinator/widgets/menu/command_palette.hpp>
 #include <tuinator/widgets/menu/context_menu.hpp>
 #include <tuinator/widgets/menu/menu_bar.hpp>
 #include <tuinator/widgets/menu/menu_common.hpp>
+
+#include "render_helper.hpp"
+#include "test_harness.hpp"
 
 TUINATOR_TEST(menu_mnemonic_parsing) {
     const tuinator::ParsedMenuText parsed = tuinator::parse_menu_mnemonic("&File");
@@ -52,12 +52,10 @@ TUINATOR_TEST(menu_item_separator_factory) {
 }
 
 TUINATOR_TEST(menu_submenu_factory_has_children) {
-    const tuinator::MenuItem item = tuinator::MenuItem::submenu(
-        "&Export",
-        {
-            {"PDF", []() {}},
-            {"PNG", []() {}},
-        });
+    const tuinator::MenuItem item = tuinator::MenuItem::submenu("&Export", {
+                                                                               {"PDF", []() {}},
+                                                                               {"PNG", []() {}},
+                                                                           });
     TUINATOR_CHECK(item.kind == tuinator::MenuItemKind::Submenu);
     TUINATOR_CHECK_EQ(item.children.size(), 2U);
 }

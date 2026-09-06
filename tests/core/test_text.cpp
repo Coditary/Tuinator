@@ -1,9 +1,9 @@
-#include "test_harness.hpp"
-
 #include <tuinator/render/text.hpp>
 
 #include <string>
 #include <string_view>
+
+#include "test_harness.hpp"
 
 TUINATOR_TEST(text_display_width_ascii) {
     TUINATOR_CHECK_EQ(tuinator::text_display_width("hello"), 5);
@@ -12,18 +12,14 @@ TUINATOR_TEST(text_display_width_ascii) {
 
 TUINATOR_TEST(text_byte_length_matches_width) {
     const std::string text = "Tuinator Data Explorer";
-    TUINATOR_CHECK_EQ(
-        tuinator::text_byte_length_for_width(text, 80),
-        static_cast<std::size_t>(text.size()));
+    TUINATOR_CHECK_EQ(tuinator::text_byte_length_for_width(text, 80), static_cast<std::size_t>(text.size()));
 }
 
 TUINATOR_TEST(text_string_view_from_buffer) {
     const std::string text = "Tuinator Data Explorer";
     const std::string_view view(text.data(), text.size());
     TUINATOR_CHECK_EQ(tuinator::text_display_width(view), 22);
-    TUINATOR_CHECK_EQ(
-        tuinator::text_byte_length_for_width(view, 70),
-        static_cast<std::size_t>(text.size()));
+    TUINATOR_CHECK_EQ(tuinator::text_byte_length_for_width(view, 70), static_cast<std::size_t>(text.size()));
 }
 
 TUINATOR_TEST(text_display_width_emoji_and_variation_selector) {

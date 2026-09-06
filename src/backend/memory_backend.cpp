@@ -19,14 +19,11 @@ void MemoryTerminalBackend::shutdown() {
     events_.clear();
 }
 
-Size MemoryTerminalBackend::terminal_size() const {
-    return size_;
-}
+Size MemoryTerminalBackend::terminal_size() const { return size_; }
 
 void MemoryTerminalBackend::resize(Size size) {
     size_ = {std::max(1, size.width), std::max(1, size.height)};
-    cells_.assign(static_cast<std::size_t>(size_.height),
-                  std::vector<Cell>(static_cast<std::size_t>(size_.width)));
+    cells_.assign(static_cast<std::size_t>(size_.height), std::vector<Cell>(static_cast<std::size_t>(size_.width)));
 }
 
 std::optional<Event> MemoryTerminalBackend::poll_event() {
@@ -81,9 +78,7 @@ void MemoryTerminalBackend::begin_frame(BeginFrameOptions options) {
 
 void MemoryTerminalBackend::end_frame() {}
 
-void MemoryTerminalBackend::set_text_cursor(std::optional<Point> position) {
-    text_cursor_ = position;
-}
+void MemoryTerminalBackend::set_text_cursor(std::optional<Point> position) { text_cursor_ = position; }
 
 void MemoryTerminalBackend::ensure_cell(int x, int y) {
     if (y < 0 || y >= size_.height || x < 0 || x >= size_.width) {
@@ -121,13 +116,9 @@ void MemoryTerminalBackend::draw_image(int x, int y, Size cell_size, const Termi
     image_draws_.push_back(ImageDraw{x, y, cell_size, image});
 }
 
-void MemoryTerminalBackend::set_poll_timeout_ms(int timeout_ms) {
-    poll_timeout_ms_ = timeout_ms;
-}
+void MemoryTerminalBackend::set_poll_timeout_ms(int timeout_ms) { poll_timeout_ms_ = timeout_ms; }
 
-void MemoryTerminalBackend::push_event(Event event) {
-    events_.push_back(std::move(event));
-}
+void MemoryTerminalBackend::push_event(Event event) { events_.push_back(std::move(event)); }
 
 std::string MemoryTerminalBackend::snapshot() const {
     std::ostringstream out;

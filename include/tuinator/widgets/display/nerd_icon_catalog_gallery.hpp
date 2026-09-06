@@ -17,13 +17,13 @@ struct NerdIconCatalogGalleryStyle {
 
 /// Catalog of all 228 Nerd Fonts weather-set glyphs split into semantic domains.
 class NerdIconCatalogGallery : public Widget {
-public:
+  public:
     explicit NerdIconCatalogGallery(NerdIconCatalogGalleryStyle style = {});
 
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
-private:
+  private:
     NerdIconCatalogGalleryStyle style_;
 };
 

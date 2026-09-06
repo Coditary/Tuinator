@@ -1,17 +1,15 @@
-#include <tuinator/scene/scene.hpp>
-
+#include <tuinator/core/action_registry.hpp>
+#include <tuinator/core/application.hpp>
+#include <tuinator/render/glyphs.hpp>
+#include <tuinator/render/theme.hpp>
 #include <tuinator/scene/detail/binding_engine.hpp>
 #include <tuinator/scene/detail/json_node.hpp>
 #include <tuinator/scene/detail/widget_builder.generated.hpp>
+#include <tuinator/scene/scene.hpp>
 #include <tuinator/scene/scene_context.hpp>
-#include <tuinator/core/application.hpp>
-#include <tuinator/core/action_registry.hpp>
-#include <tuinator/render/glyphs.hpp>
-#include <tuinator/render/theme.hpp>
-
-#include <nlohmann/json.hpp>
 
 #include <fstream>
+#include <nlohmann/json.hpp>
 #include <sstream>
 #include <stdexcept>
 
@@ -27,18 +25,27 @@ Theme resolve_scene_theme(const nlohmann::json& scene, const Theme& fallback) {
     ThemeOptions options{};
     if (const nlohmann::json* glyphs = json::find(theme_block, "glyphs", "glyphSet", "glyph_set")) {
         const std::string name = json::as_string(*glyphs);
-        if (name == "Ascii") options.glyphs = GlyphSet::Ascii;
-        else if (name == "Unicode") options.glyphs = GlyphSet::Unicode;
-        else if (name == "UnicodeRounded") options.glyphs = GlyphSet::UnicodeRounded;
-        else options.glyphs = GlyphSet::Auto;
+        if (name == "Ascii")
+            options.glyphs = GlyphSet::Ascii;
+        else if (name == "Unicode")
+            options.glyphs = GlyphSet::Unicode;
+        else if (name == "UnicodeRounded")
+            options.glyphs = GlyphSet::UnicodeRounded;
+        else
+            options.glyphs = GlyphSet::Auto;
     }
     if (const nlohmann::json* border = json::find(theme_block, "borderStyle", "border_style")) {
         const std::string name = json::as_string(*border);
-        if (name == "Ascii") options.border_style = BorderStyle::Ascii;
-        else if (name == "Light") options.border_style = BorderStyle::Light;
-        else if (name == "Heavy") options.border_style = BorderStyle::Heavy;
-        else if (name == "Double") options.border_style = BorderStyle::Double;
-        else if (name == "Rounded") options.border_style = BorderStyle::Rounded;
+        if (name == "Ascii")
+            options.border_style = BorderStyle::Ascii;
+        else if (name == "Light")
+            options.border_style = BorderStyle::Light;
+        else if (name == "Heavy")
+            options.border_style = BorderStyle::Heavy;
+        else if (name == "Double")
+            options.border_style = BorderStyle::Double;
+        else if (name == "Rounded")
+            options.border_style = BorderStyle::Rounded;
     }
     const std::string preset = json::node_string_default(theme_block, "dark", "preset");
     if (preset == "light") {
@@ -103,7 +110,8 @@ void register_timers(const nlohmann::json& scene, detail::SceneContext& ctx) {
     }
 }
 
-BuildResult build_scene_document(const nlohmann::json& scene, Application& app, const Theme& theme, const LoadOptions& options) {
+BuildResult build_scene_document(const nlohmann::json& scene, Application& app, const Theme& theme,
+                                 const LoadOptions& options) {
     if (!scene.is_object()) {
         throw std::runtime_error("Scene root must be a JSON object");
     }
@@ -136,11 +144,8 @@ BuildResult build_scene_document(const nlohmann::json& scene, Application& app, 
 
 } // namespace
 
-BuildResult load_and_build(
-    const std::filesystem::path& path,
-    Application& app,
-    const Theme& theme,
-    const LoadOptions& options) {
+BuildResult load_and_build(const std::filesystem::path& path, Application& app, const Theme& theme,
+                           const LoadOptions& options) {
     std::ifstream input(path);
     if (!input) {
         throw std::runtime_error("Failed to open scene file: " + path.string());
@@ -150,11 +155,8 @@ BuildResult load_and_build(
     return load_and_build_from_string(buffer.str(), app, theme, options);
 }
 
-BuildResult load_and_build_from_string(
-    const std::string& json_text,
-    Application& app,
-    const Theme& theme,
-    const LoadOptions& options) {
+BuildResult load_and_build_from_string(const std::string& json_text, Application& app, const Theme& theme,
+                                       const LoadOptions& options) {
     const nlohmann::json scene = nlohmann::json::parse(json_text);
     return build_scene_document(scene, app, theme, options);
 }

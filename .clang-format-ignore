@@ -1,0 +1,7 @@
+build*/
+build-*/
+**/CMakeFiles/**
+**/_deps/**
+**/*.generated.cpp
+**/*.generated.hpp
+third_party/**

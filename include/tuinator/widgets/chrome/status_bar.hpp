@@ -8,7 +8,7 @@
 namespace tuinator {
 
 class StatusBar : public Widget {
-public:
+  public:
     explicit StatusBar(std::string text = {}, Style style = {});
 
     const std::string& text() const { return text_; }
@@ -17,7 +17,7 @@ public:
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
-private:
+  private:
     std::string text_;
     Style style_;
 };

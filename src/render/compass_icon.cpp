@@ -1,5 +1,4 @@
 #include <tuinator/render/compass_icon.hpp>
-
 #include <tuinator/render/glyphs.hpp>
 
 #include <array>
@@ -29,25 +28,27 @@ std::string utf8_from(char32_t cp) {
     return out;
 }
 
-constexpr CompassIconDescriptor make(
-    CompassIcon kind,
-    CompassIconCategory category,
-    const char* path,
-    const char* nerd_suffix,
-    char32_t codepoint,
-    char ascii) {
+constexpr CompassIconDescriptor make(CompassIcon kind, CompassIconCategory category, const char* path,
+                                     const char* nerd_suffix, char32_t codepoint, char ascii) {
     return CompassIconDescriptor{kind, category, path, nerd_suffix, codepoint, ascii};
 }
 
 constexpr std::array<CompassIconDescriptor, 8> kDescriptors{{
-    make(CompassIcon::DirectionDown, CompassIconCategory::Direction, "compass-direction-down", "direction_down", 0xE340, '>'),
-    make(CompassIcon::DirectionDownLeft, CompassIconCategory::Direction, "compass-direction-down-left", "direction_down_left", 0xE33F, '>'),
-    make(CompassIcon::DirectionDownRight, CompassIconCategory::Direction, "compass-direction-down-right", "direction_down_right", 0xE380, '>'),
-    make(CompassIcon::DirectionLeft, CompassIconCategory::Direction, "compass-direction-left", "direction_left", 0xE344, '>'),
-    make(CompassIcon::DirectionRight, CompassIconCategory::Direction, "compass-direction-right", "direction_right", 0xE349, '>'),
+    make(CompassIcon::DirectionDown, CompassIconCategory::Direction, "compass-direction-down", "direction_down", 0xE340,
+         '>'),
+    make(CompassIcon::DirectionDownLeft, CompassIconCategory::Direction, "compass-direction-down-left",
+         "direction_down_left", 0xE33F, '>'),
+    make(CompassIcon::DirectionDownRight, CompassIconCategory::Direction, "compass-direction-down-right",
+         "direction_down_right", 0xE380, '>'),
+    make(CompassIcon::DirectionLeft, CompassIconCategory::Direction, "compass-direction-left", "direction_left", 0xE344,
+         '>'),
+    make(CompassIcon::DirectionRight, CompassIconCategory::Direction, "compass-direction-right", "direction_right",
+         0xE349, '>'),
     make(CompassIcon::DirectionUp, CompassIconCategory::Direction, "compass-direction-up", "direction_up", 0xE353, '>'),
-    make(CompassIcon::DirectionUpLeft, CompassIconCategory::Direction, "compass-direction-up-left", "direction_up_left", 0xE37F, '>'),
-    make(CompassIcon::DirectionUpRight, CompassIconCategory::Direction, "compass-direction-up-right", "direction_up_right", 0xE352, '>'),
+    make(CompassIcon::DirectionUpLeft, CompassIconCategory::Direction, "compass-direction-up-left", "direction_up_left",
+         0xE37F, '>'),
+    make(CompassIcon::DirectionUpRight, CompassIconCategory::Direction, "compass-direction-up-right",
+         "direction_up_right", 0xE352, '>'),
 }};
 
 static_assert(kDescriptors.size() == 8, "descriptor table out of sync");
@@ -62,34 +63,24 @@ const CompassIconDescriptor& descriptor_or_default(CompassIcon icon) {
 
 } // namespace
 
-const CompassIconDescriptor& compass_icon_descriptor(CompassIcon icon) {
-    return descriptor_or_default(icon);
-}
+const CompassIconDescriptor& compass_icon_descriptor(CompassIcon icon) { return descriptor_or_default(icon); }
 
-CompassIconCategory compass_icon_category(CompassIcon icon) {
-    return compass_icon_descriptor(icon).category;
-}
+CompassIconCategory compass_icon_category(CompassIcon icon) { return compass_icon_descriptor(icon).category; }
 
-const char* compass_icon_path(CompassIcon icon) {
-    return compass_icon_descriptor(icon).path;
-}
+const char* compass_icon_path(CompassIcon icon) { return compass_icon_descriptor(icon).path; }
 
-const char* compass_icon_nerd_suffix(CompassIcon icon) {
-    return compass_icon_descriptor(icon).nerd_suffix;
-}
+const char* compass_icon_nerd_suffix(CompassIcon icon) { return compass_icon_descriptor(icon).nerd_suffix; }
 
 const char* compass_icon_category_path(CompassIconCategory category) {
     switch (category) {
-    case CompassIconCategory::Direction:
-        return "compass-direction";
+    case CompassIconCategory::Direction: return "compass-direction";
     }
     return "compass";
 }
 
 const char* compass_icon_category_label(CompassIconCategory category) {
     switch (category) {
-    case CompassIconCategory::Direction:
-        return "Direction";
+    case CompassIconCategory::Direction: return "Direction";
     }
     return "Other";
 }

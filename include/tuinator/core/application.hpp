@@ -18,7 +18,7 @@ namespace tuinator {
 using TimerId = int;
 
 class Application {
-public:
+  public:
     Application();
     explicit Application(std::unique_ptr<TerminalBackend> backend);
     ~Application();
@@ -50,7 +50,7 @@ public:
     /// Release the terminal backend (for inline mode teardown).
     void shutdown_terminal();
 
-private:
+  private:
     struct TimerEntry {
         TimerId id = 0;
         int interval_ms = 0;

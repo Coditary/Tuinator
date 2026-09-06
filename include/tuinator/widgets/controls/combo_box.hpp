@@ -10,7 +10,7 @@
 namespace tuinator {
 
 class ComboBox : public Widget {
-public:
+  public:
     ComboBox(Style item_style = {}, Style selected_style = {});
 
     const std::vector<std::string>& items() const { return items_; }
@@ -27,7 +27,7 @@ public:
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
 
-private:
+  private:
     void close();
     void open();
     void select_index(int index, bool notify);

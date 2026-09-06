@@ -26,11 +26,9 @@ struct HeatmapOptions {
 };
 
 class Heatmap : public Widget {
-public:
-    Heatmap(std::vector<std::vector<double>> values = {},
-            std::vector<std::string> row_labels = {},
-            std::vector<std::string> col_labels = {},
-            HeatmapOptions options = {});
+  public:
+    Heatmap(std::vector<std::vector<double>> values = {}, std::vector<std::string> row_labels = {},
+            std::vector<std::string> col_labels = {}, HeatmapOptions options = {});
 
     const std::vector<std::vector<double>>& values() const { return values_; }
     const HeatmapOptions& options() const { return options_; }
@@ -42,7 +40,7 @@ public:
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
-private:
+  private:
     double value_min() const;
     double value_max() const;
 

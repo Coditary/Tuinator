@@ -34,35 +34,16 @@ struct ScrollbarLayout {
     ScrollbarThumb horizontal_thumb;
 };
 
-ScrollbarMetrics compute_scrollbar_metrics(
-    int width,
-    int height,
-    int content_width,
-    int content_height,
-    const ScrollbarConfig& config);
+ScrollbarMetrics compute_scrollbar_metrics(int width, int height, int content_width, int content_height,
+                                           const ScrollbarConfig& config);
 
-ScrollbarLayout compute_scrollbar_layout(
-    int width,
-    int height,
-    int content_width,
-    int content_height,
-    int scroll_x,
-    int scroll_y,
-    const ScrollbarConfig& config,
-    bool show_arrows);
+ScrollbarLayout compute_scrollbar_layout(int width, int height, int content_width, int content_height, int scroll_x,
+                                         int scroll_y, const ScrollbarConfig& config, bool show_arrows);
 
-int scroll_y_for_vertical_thumb(
-    const ScrollbarLayout& layout,
-    int thumb_start,
-    int content_height,
-    int viewport_height,
-    bool show_arrows);
+int scroll_y_for_vertical_thumb(const ScrollbarLayout& layout, int thumb_start, int content_height, int viewport_height,
+                                bool show_arrows);
 
-int scroll_x_for_horizontal_thumb(
-    const ScrollbarLayout& layout,
-    int thumb_start,
-    int content_width,
-    int viewport_width,
-    bool show_arrows);
+int scroll_x_for_horizontal_thumb(const ScrollbarLayout& layout, int thumb_start, int content_width, int viewport_width,
+                                  bool show_arrows);
 
 } // namespace tuinator

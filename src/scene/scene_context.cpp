@@ -1,6 +1,5 @@
-#include <tuinator/scene/scene_context.hpp>
-
 #include <tuinator/core/application.hpp>
+#include <tuinator/scene/scene_context.hpp>
 #include <tuinator/window/desktop.hpp>
 #include <tuinator/window/window_host.hpp>
 
@@ -40,9 +39,7 @@ void SceneContext::invoke_handler(const std::string& name) {
     handlers->invoke(name, app);
 }
 
-void SceneContext::schedule_post_init(std::function<void()> fn) {
-    post_init_.push_back(std::move(fn));
-}
+void SceneContext::schedule_post_init(std::function<void()> fn) { post_init_.push_back(std::move(fn)); }
 
 void SceneContext::run_post_init() {
     for (auto& fn : post_init_) {

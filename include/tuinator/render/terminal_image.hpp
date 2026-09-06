@@ -9,7 +9,7 @@ namespace tuinator {
 
 /// RGBA8 pixel buffer for terminal graphics protocols.
 class TerminalImage {
-public:
+  public:
     TerminalImage() = default;
     TerminalImage(int width, int height, std::vector<std::uint8_t> rgba);
 
@@ -24,7 +24,7 @@ public:
 
     TerminalImage resized(int width, int height) const;
 
-private:
+  private:
     int width_ = 0;
     int height_ = 0;
     std::vector<std::uint8_t> rgba_;

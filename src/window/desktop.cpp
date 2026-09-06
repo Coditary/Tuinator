@@ -1,14 +1,12 @@
-#include <tuinator/window/desktop.hpp>
-
 #include <tuinator/core/action_registry.hpp>
 #include <tuinator/widgets/menu/command_palette.hpp>
 #include <tuinator/widgets/menu/context_menu.hpp>
 #include <tuinator/widgets/menu/menu_bar.hpp>
+#include <tuinator/window/desktop.hpp>
 
 namespace tuinator {
 
-Desktop::Desktop()
-    : windows_(desktop_window_manager_options()) {
+Desktop::Desktop() : windows_(desktop_window_manager_options()) {
     context_menu_ = std::make_unique<ContextMenu>();
     command_palette_ = std::make_unique<CommandPalette>();
     windows_.set_on_dirty([this](Rect region) {
@@ -19,8 +17,7 @@ Desktop::Desktop()
 
 Desktop::~Desktop() = default;
 
-Window* Desktop::create_window(std::string title, Rect bounds, std::unique_ptr<Widget> content,
-                               WindowOptions options) {
+Window* Desktop::create_window(std::string title, Rect bounds, std::unique_ptr<Widget> content, WindowOptions options) {
     return windows_.create_window(std::move(title), bounds, std::move(content), options);
 }
 
@@ -32,9 +29,7 @@ Window* Desktop::show_modal(std::string title, Rect bounds, std::unique_ptr<Widg
     return create_window(std::move(title), bounds, std::move(content), options);
 }
 
-void Desktop::close_window(Window* window) {
-    windows_.close_window(window);
-}
+void Desktop::close_window(Window* window) { windows_.close_window(window); }
 
 void Desktop::set_background(std::unique_ptr<Widget> background) {
     background_ = std::move(background);
@@ -72,9 +67,7 @@ void Desktop::show_command_palette() {
     mark_dirty();
 }
 
-void Desktop::set_action_registry(std::shared_ptr<ActionRegistry> registry) {
-    action_registry_ = std::move(registry);
-}
+void Desktop::set_action_registry(std::shared_ptr<ActionRegistry> registry) { action_registry_ = std::move(registry); }
 
 Size Desktop::preferred_size() const {
     if (bounds_.width > 0 && bounds_.height > 0) {
@@ -138,8 +131,8 @@ bool Desktop::handle_event(const Event& event) {
     }
 
     if (const auto* mouse = std::get_if<MouseEvent>(&event)) {
-        if (mouse->button == MouseButton::Right
-            && (mouse->action == MouseAction::Click || mouse->action == MouseAction::Release)) {
+        if (mouse->button == MouseButton::Right &&
+            (mouse->action == MouseAction::Click || mouse->action == MouseAction::Release)) {
             if (!windows_.has_modal() && windows_.top_window_at(mouse->position) == nullptr && context_menu_) {
                 show_context_menu(mouse->position);
                 return true;

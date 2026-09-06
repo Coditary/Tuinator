@@ -12,12 +12,8 @@ void TerminalBackend::draw_image(int x, int y, Size cell_size, const TerminalIma
     (void)image;
 }
 
-std::unique_ptr<TerminalBackend> TerminalBackend::create() {
-    return std::make_unique<detail::CursesBackend>();
-}
+std::unique_ptr<TerminalBackend> TerminalBackend::create() { return std::make_unique<detail::CursesBackend>(); }
 
-std::unique_ptr<TerminalBackend> TerminalBackend::create_ncurses() {
-    return create();
-}
+std::unique_ptr<TerminalBackend> TerminalBackend::create_ncurses() { return create(); }
 
 } // namespace tuinator

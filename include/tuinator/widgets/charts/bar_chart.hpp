@@ -43,7 +43,7 @@ struct BarChartOptions {
 };
 
 class BarChart : public Widget {
-public:
+  public:
     BarChart(std::vector<BarChartBar> bars = {}, BarChartOptions options = {});
 
     const std::vector<BarChartBar>& bars() const { return bars_; }
@@ -62,7 +62,7 @@ public:
     bool captures_pointer() const override { return options_.interactive; }
     bool pointer_active() const override { return dragging_; }
 
-private:
+  private:
     struct PlotArea {
         int left = 0;
         int top = 0;

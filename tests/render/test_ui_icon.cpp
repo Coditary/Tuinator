@@ -1,13 +1,15 @@
-#include "test_harness.hpp"
-
-#include <cstring>
-
 #include <tuinator/render/glyphs.hpp>
 #include <tuinator/render/ui_icon.hpp>
 
+#include <cstring>
+
+#include "test_harness.hpp"
+
 TUINATOR_TEST(ui_icon_descriptor_matches_enum_order) {
-    TUINATOR_CHECK(std::strcmp(tuinator::ui_icon_descriptor(tuinator::UiIcon::GitBranch).nerd_name, "dev-git_branch") == 0);
-    TUINATOR_CHECK(std::strcmp(tuinator::ui_icon_descriptor(tuinator::UiIcon::DiffAdded).nerd_name, "cod-diff_added") == 0);
+    TUINATOR_CHECK(std::strcmp(tuinator::ui_icon_descriptor(tuinator::UiIcon::GitBranch).nerd_name, "dev-git_branch") ==
+                   0);
+    TUINATOR_CHECK(std::strcmp(tuinator::ui_icon_descriptor(tuinator::UiIcon::DiffAdded).nerd_name, "cod-diff_added") ==
+                   0);
     TUINATOR_CHECK_EQ(tuinator::ui_icon_set(tuinator::UiIcon::Linux), tuinator::UiIconSet::Devicon);
     TUINATOR_CHECK_EQ(tuinator::ui_icon_set(tuinator::UiIcon::Close), tuinator::UiIconSet::Codicon);
 }

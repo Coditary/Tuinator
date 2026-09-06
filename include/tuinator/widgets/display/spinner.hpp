@@ -8,12 +8,8 @@
 namespace tuinator {
 
 class Spinner : public Widget {
-public:
-    Spinner(int min_value,
-            int max_value,
-            int value,
-            int step = 1,
-            std::function<void(int)> on_change = {},
+  public:
+    Spinner(int min_value, int max_value, int value, int step = 1, std::function<void(int)> on_change = {},
             Style style = {});
 
     int value() const { return value_; }
@@ -24,7 +20,7 @@ public:
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
 
-private:
+  private:
     void adjust(int delta);
 
     int min_value_;

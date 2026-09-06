@@ -35,22 +35,14 @@ WindowManagerOptions nested_window_manager_options() {
     return options;
 }
 
-WindowManager::WindowManager(WindowManagerOptions options)
-    : options_(options) {}
+WindowManager::WindowManager(WindowManagerOptions options) : options_(options) {}
 
-void WindowManager::set_bounds(Rect bounds) {
-    host_bounds_ = bounds;
-}
+void WindowManager::set_bounds(Rect bounds) { host_bounds_ = bounds; }
 
-void WindowManager::set_on_dirty(std::function<void(Rect)> callback) {
-    on_dirty_ = std::move(callback);
-}
+void WindowManager::set_on_dirty(std::function<void(Rect)> callback) { on_dirty_ = std::move(callback); }
 
-Window* WindowManager::create_window(
-    std::string title,
-    Rect bounds,
-    std::unique_ptr<Widget> content,
-    WindowOptions options) {
+Window* WindowManager::create_window(std::string title, Rect bounds, std::unique_ptr<Widget> content,
+                                     WindowOptions options) {
     auto window = std::make_unique<Window>(std::move(title), bounds, std::move(content), options);
     Window* raw = window.get();
     raw->set_z_index(next_z_index_++);
@@ -71,9 +63,7 @@ void WindowManager::close_window(Window* window) {
     }
 
     const auto it = std::find_if(windows_.begin(), windows_.end(),
-                                 [window](const std::unique_ptr<Window>& entry) {
-                                     return entry.get() == window;
-                                 });
+                                 [window](const std::unique_ptr<Window>& entry) { return entry.get() == window; });
     if (it == windows_.end()) {
         return;
     }
@@ -112,9 +102,7 @@ Rect WindowManager::clamp_area() const {
     return host_bounds_;
 }
 
-Point WindowManager::paint_offset() const {
-    return {host_bounds_.x, host_bounds_.y};
-}
+Point WindowManager::paint_offset() const { return {host_bounds_.x, host_bounds_.y}; }
 
 void WindowManager::paint_windows(PaintContext& ctx) const {
     const auto paint_stack = [&](PaintContext& clipped_ctx) {
@@ -179,13 +167,9 @@ void WindowManager::paint_windows(PaintContext& ctx) const {
     }
 }
 
-bool WindowManager::has_modal() const {
-    return top_modal() != nullptr;
-}
+bool WindowManager::has_modal() const { return top_modal() != nullptr; }
 
-bool WindowManager::is_dragging() const {
-    return drag_mode_ != DragMode::None;
-}
+bool WindowManager::is_dragging() const { return drag_mode_ != DragMode::None; }
 
 Window* WindowManager::top_window_at(Point point) const {
     Window* result = nullptr;
@@ -244,10 +228,9 @@ void WindowManager::bring_to_front(Window* window) {
 }
 
 void WindowManager::sort_windows() {
-    std::sort(windows_.begin(), windows_.end(),
-              [](const std::unique_ptr<Window>& a, const std::unique_ptr<Window>& b) {
-                  return a->z_index() < b->z_index();
-              });
+    std::sort(windows_.begin(), windows_.end(), [](const std::unique_ptr<Window>& a, const std::unique_ptr<Window>& b) {
+        return a->z_index() < b->z_index();
+    });
 }
 
 Point WindowManager::to_window_local(Point point, const Window& window) const {
@@ -275,8 +258,8 @@ bool WindowManager::begin_drag_if_needed(const MouseEvent& event, Window* window
         return false;
     }
 
-    const bool can_start = event.action == MouseAction::Press
-        || (event.action == MouseAction::Move && event.left_pressed);
+    const bool can_start =
+        event.action == MouseAction::Press || (event.action == MouseAction::Move && event.left_pressed);
     if (!can_start) {
         return false;
     }
@@ -306,8 +289,7 @@ bool WindowManager::update_drag(const MouseEvent& event) {
         return false;
     }
 
-    const bool motion_while_held =
-        event.action == MouseAction::Move && event.left_pressed;
+    const bool motion_while_held = event.action == MouseAction::Move && event.left_pressed;
     const bool final_position = event.action == MouseAction::Release;
 
     if (!motion_while_held && !final_position) {
@@ -387,8 +369,7 @@ bool WindowManager::handle_mouse(const MouseEvent& event) {
         return dispatch_window_click(event);
     }
 
-    if (event.action == MouseAction::Press
-        || (event.action == MouseAction::Move && event.left_pressed)) {
+    if (event.action == MouseAction::Press || (event.action == MouseAction::Move && event.left_pressed)) {
         return dispatch_window_click(event);
     }
 
@@ -451,8 +432,7 @@ bool WindowManager::dispatch_window_click(const MouseEvent& event) {
         }
     }
 
-    return event.action != MouseAction::Press
-        && !(event.action == MouseAction::Move && event.left_pressed);
+    return event.action != MouseAction::Press && !(event.action == MouseAction::Move && event.left_pressed);
 }
 
 bool WindowManager::route_keyboard(const Event& event) {

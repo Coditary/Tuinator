@@ -1,9 +1,9 @@
-#include "test_harness.hpp"
-
 #include <tuinator/backend/memory_backend.hpp>
 #include <tuinator/backend/terminal_backend.hpp>
 #include <tuinator/render/dirty_region.hpp>
 #include <tuinator/render/style.hpp>
+
+#include "test_harness.hpp"
 
 TUINATOR_TEST(dirty_region_starts_full) {
     tuinator::DirtyRegion region;

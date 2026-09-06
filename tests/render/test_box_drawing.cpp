@@ -1,7 +1,7 @@
-#include "test_harness.hpp"
-
 #include <tuinator/render/box_drawing.hpp>
 #include <tuinator/render/glyphs.hpp>
+
+#include "test_harness.hpp"
 
 TUINATOR_TEST(box_drawing_descriptor_matches_enum_order) {
     TUINATOR_CHECK_EQ(tuinator::box_drawing_descriptor(tuinator::BoxDrawing::Horizontal).codepoint, 0x2500);
@@ -13,12 +13,14 @@ TUINATOR_TEST(box_drawing_descriptor_matches_enum_order) {
 TUINATOR_TEST(box_drawing_glyph_ascii_fallback) {
     TUINATOR_CHECK_EQ(tuinator::box_drawing_glyph(tuinator::BoxDrawing::Horizontal, tuinator::GlyphSet::Ascii), "-");
     TUINATOR_CHECK_EQ(tuinator::box_drawing_glyph(tuinator::BoxDrawing::Vertical, tuinator::GlyphSet::Ascii), "|");
-    TUINATOR_CHECK_EQ(tuinator::box_drawing_glyph(tuinator::BoxDrawing::HorizontalDouble, tuinator::GlyphSet::Ascii), "=");
+    TUINATOR_CHECK_EQ(tuinator::box_drawing_glyph(tuinator::BoxDrawing::HorizontalDouble, tuinator::GlyphSet::Ascii),
+                      "=");
     TUINATOR_CHECK_EQ(tuinator::box_drawing_glyph(tuinator::BoxDrawing::DownRight, tuinator::GlyphSet::Ascii), "+");
 }
 
 TUINATOR_TEST(box_drawing_glyph_unicode_differs_from_ascii) {
-    const std::string horizontal = tuinator::box_drawing_glyph(tuinator::BoxDrawing::Horizontal, tuinator::GlyphSet::Unicode);
+    const std::string horizontal =
+        tuinator::box_drawing_glyph(tuinator::BoxDrawing::Horizontal, tuinator::GlyphSet::Unicode);
     TUINATOR_CHECK(horizontal != "-");
     TUINATOR_CHECK_EQ(horizontal, "\xe2\x94\x80");
 }
@@ -32,12 +34,8 @@ TUINATOR_TEST(all_box_drawings_lists_every_kind) {
 
 TUINATOR_TEST(border_glyphs_from_box_drawing_builds_border) {
     const tuinator::BorderGlyphs border = tuinator::border_glyphs_from_box_drawing(
-        tuinator::BoxDrawing::DownRight,
-        tuinator::BoxDrawing::DownLeft,
-        tuinator::BoxDrawing::UpRight,
-        tuinator::BoxDrawing::UpLeft,
-        tuinator::BoxDrawing::Horizontal,
-        tuinator::BoxDrawing::Vertical);
+        tuinator::BoxDrawing::DownRight, tuinator::BoxDrawing::DownLeft, tuinator::BoxDrawing::UpRight,
+        tuinator::BoxDrawing::UpLeft, tuinator::BoxDrawing::Horizontal, tuinator::BoxDrawing::Vertical);
 
     const tuinator::GlyphSet glyphs = tuinator::GlyphSet::Auto;
     TUINATOR_CHECK_EQ(border.top_left, tuinator::box_drawing_glyph(tuinator::BoxDrawing::DownRight, glyphs));
@@ -51,11 +49,8 @@ TUINATOR_TEST(border_glyphs_from_box_drawing_builds_border) {
 
 TUINATOR_TEST(border_glyphs_from_box_drawing_rounded_style) {
     const tuinator::BorderGlyphs border = tuinator::border_glyphs_from_box_drawing(
-        tuinator::BoxDrawing::RoundedDownRight,
-        tuinator::BoxDrawing::RoundedDownLeft,
-        tuinator::BoxDrawing::RoundedUpRight,
-        tuinator::BoxDrawing::RoundedUpLeft,
-        tuinator::BoxDrawing::Horizontal,
+        tuinator::BoxDrawing::RoundedDownRight, tuinator::BoxDrawing::RoundedDownLeft,
+        tuinator::BoxDrawing::RoundedUpRight, tuinator::BoxDrawing::RoundedUpLeft, tuinator::BoxDrawing::Horizontal,
         tuinator::BoxDrawing::Vertical);
 
     const tuinator::GlyphSet glyphs = tuinator::GlyphSet::Auto;

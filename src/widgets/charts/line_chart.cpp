@@ -1,6 +1,5 @@
-#include <tuinator/widgets/charts/line_chart.hpp>
-
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/charts/line_chart.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -35,8 +34,7 @@ DataExtent compute_data_extent(const std::vector<LineChartSeries>& series, doubl
 } // namespace
 
 LineChart::LineChart(std::vector<LineChartSeries> series, LineChartOptions options)
-    : series_(std::move(series)),
-      options_(std::move(options)) {}
+    : series_(std::move(series)), options_(std::move(options)) {}
 
 void LineChart::set_series(std::vector<LineChartSeries> series) {
     series_ = std::move(series);
@@ -66,9 +64,9 @@ void LineChart::push_value(std::size_t series_index, double value, std::size_t m
     series_[series_index].values.push_back(value);
     if (max_points > 0 && series_[series_index].values.size() > max_points) {
         const std::size_t overflow = series_[series_index].values.size() - max_points;
-        series_[series_index].values.erase(
-            series_[series_index].values.begin(),
-            series_[series_index].values.begin() + static_cast<std::ptrdiff_t>(overflow));
+        series_[series_index].values.erase(series_[series_index].values.begin(),
+                                           series_[series_index].values.begin() +
+                                               static_cast<std::ptrdiff_t>(overflow));
     }
     mark_dirty();
 }
@@ -100,17 +98,13 @@ double LineChart::value_min() const {
     return chart_auto_min(extent.min_v, value_max());
 }
 
-double LineChart::value_span() const {
-    return std::max(1e-6, value_max() - value_min());
-}
+double LineChart::value_span() const { return std::max(1e-6, value_max() - value_min()); }
 
 LineChart::PlotArea LineChart::compute_plot() const {
     PlotArea plot{};
     plot.title_rows = options_.title.empty() ? 0 : 1;
-    plot.legend_rows = (options_.show_legend && options_.mode != LineChartMode::Sparkline
-        && series_.size() > 1)
-        ? 1
-        : 0;
+    plot.legend_rows =
+        (options_.show_legend && options_.mode != LineChartMode::Sparkline && series_.size() > 1) ? 1 : 0;
 
     const bool axes = options_.show_axes && options_.mode != LineChartMode::Sparkline;
     plot.left = axes ? kAxisWidth : 0;
@@ -136,8 +130,7 @@ double LineChart::sample_series(const LineChartSeries& series, double x) const {
     const int i0 = std::clamp(static_cast<int>(std::floor(index)), 0, static_cast<int>(series.values.size()) - 1);
     const int i1 = std::min(i0 + 1, static_cast<int>(series.values.size()) - 1);
     const double t = index - static_cast<double>(i0);
-    return series.values[static_cast<std::size_t>(i0)] * (1.0 - t)
-        + series.values[static_cast<std::size_t>(i1)] * t;
+    return series.values[static_cast<std::size_t>(i0)] * (1.0 - t) + series.values[static_cast<std::size_t>(i1)] * t;
 }
 
 void LineChart::plot_point(Canvas& canvas, int x, int y, const Style& style) const {
@@ -155,13 +148,7 @@ void LineChart::plot_braille_point(Canvas& canvas, int x, int y, const Style& st
     canvas.draw_text({x, y}, chart_braille_from_dots(dots), style);
 }
 
-void LineChart::draw_line_segment(
-    Canvas& canvas,
-    int x0,
-    int y0,
-    int x1,
-    int y1,
-    const Style& style) const {
+void LineChart::draw_line_segment(Canvas& canvas, int x0, int y0, int x1, int y1, const Style& style) const {
     int dx = std::abs(x1 - x0);
     int dy = std::abs(y1 - y0);
     int sx = x0 < x1 ? 1 : -1;
@@ -307,9 +294,8 @@ void LineChart::paint(PaintContext& ctx) const {
             if (item.label.empty()) {
                 continue;
             }
-            canvas.draw_text({x, y}, item.label + " ", item.style.foreground == Color::Default
-                ? options_.legend_style
-                : item.style);
+            canvas.draw_text({x, y}, item.label + " ",
+                             item.style.foreground == Color::Default ? options_.legend_style : item.style);
             x += text_display_width(item.label) + 1;
         }
     }

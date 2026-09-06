@@ -1,5 +1,4 @@
 #include <tuinator/core/action_registry.hpp>
-
 #include <tuinator/widgets/menu/menu_bar.hpp>
 
 #include <algorithm>
@@ -9,19 +8,13 @@ namespace tuinator {
 
 namespace {
 
-char normalize_key(char ch) {
-    return static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
-}
+char normalize_key(char ch) { return static_cast<char>(std::tolower(static_cast<unsigned char>(ch))); }
 
 } // namespace
 
-void ActionRegistry::register_action(RegisteredAction action) {
-    actions_.push_back(std::move(action));
-}
+void ActionRegistry::register_action(RegisteredAction action) { actions_.push_back(std::move(action)); }
 
-void ActionRegistry::clear() {
-    actions_.clear();
-}
+void ActionRegistry::clear() { actions_.clear(); }
 
 const RegisteredAction* ActionRegistry::find(std::string_view id) const {
     for (const RegisteredAction& action : actions_) {

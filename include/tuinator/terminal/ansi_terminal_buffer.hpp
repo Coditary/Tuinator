@@ -1,7 +1,7 @@
 #pragma once
 
-#include <tuinator/core/geometry.hpp>
 #include <tuinator/core/event.hpp>
+#include <tuinator/core/geometry.hpp>
 #include <tuinator/render/paint_context.hpp>
 #include <tuinator/render/style.hpp>
 
@@ -13,7 +13,7 @@ namespace tuinator {
 
 /// Terminal cell grid backed by libvterm (VT100/xterm emulation).
 class AnsiTerminalBuffer {
-public:
+  public:
     AnsiTerminalBuffer();
     ~AnsiTerminalBuffer();
 
@@ -36,7 +36,7 @@ public:
 
     void paint(PaintContext& ctx, Point origin) const;
 
-private:
+  private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
     Size size_{80, 24};

@@ -1,5 +1,5 @@
-#include <tuinator/scene/detail/style_resolve.hpp>
 #include <tuinator/scene/detail/json_node.hpp>
+#include <tuinator/scene/detail/style_resolve.hpp>
 
 #include <stdexcept>
 #include <unordered_map>
@@ -9,15 +9,9 @@ namespace tuinator::scene::style {
 namespace {
 
 const std::unordered_map<std::string, Color> k_colors = {
-    {"Default", Color::Default},
-    {"Black", Color::Black},
-    {"Red", Color::Red},
-    {"Green", Color::Green},
-    {"Yellow", Color::Yellow},
-    {"Blue", Color::Blue},
-    {"Magenta", Color::Magenta},
-    {"Cyan", Color::Cyan},
-    {"White", Color::White},
+    {"Default", Color::Default}, {"Black", Color::Black},   {"Red", Color::Red},
+    {"Green", Color::Green},     {"Yellow", Color::Yellow}, {"Blue", Color::Blue},
+    {"Magenta", Color::Magenta}, {"Cyan", Color::Cyan},     {"White", Color::White},
 };
 
 Style style_from_color_name(const std::string& name) {
@@ -67,17 +61,28 @@ Style style_from_object(const nlohmann::json& object, const Theme& theme) {
 }
 
 const Style& theme_style(const Theme& theme, const std::string& name) {
-    if (name == "heading") return theme.heading;
-    if (name == "label") return theme.label;
-    if (name == "muted") return theme.muted;
-    if (name == "button") return theme.button;
-    if (name == "button_focused") return theme.button_focused;
-    if (name == "text_input") return theme.text_input;
-    if (name == "text_input_focused") return theme.text_input_focused;
-    if (name == "border") return theme.border;
-    if (name == "accent") return theme.accent;
-    if (name == "success") return theme.success;
-    if (name == "danger") return theme.danger;
+    if (name == "heading")
+        return theme.heading;
+    if (name == "label")
+        return theme.label;
+    if (name == "muted")
+        return theme.muted;
+    if (name == "button")
+        return theme.button;
+    if (name == "button_focused")
+        return theme.button_focused;
+    if (name == "text_input")
+        return theme.text_input;
+    if (name == "text_input_focused")
+        return theme.text_input_focused;
+    if (name == "border")
+        return theme.border;
+    if (name == "accent")
+        return theme.accent;
+    if (name == "success")
+        return theme.success;
+    if (name == "danger")
+        return theme.danger;
     throw std::runtime_error("Unknown style preset: " + name);
 }
 

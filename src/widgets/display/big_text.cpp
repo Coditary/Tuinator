@@ -1,13 +1,12 @@
-#include <tuinator/widgets/display/big_text.hpp>
-
 #include <tuinator/render/color.hpp>
-
-#include "widgets/display/big_text_fonts.inc"
+#include <tuinator/widgets/display/big_text.hpp>
 
 #include <algorithm>
 #include <cstdint>
 #include <string>
 #include <utility>
+
+#include "widgets/display/big_text_fonts.inc"
 
 namespace tuinator {
 
@@ -53,29 +52,20 @@ bool is_figlet(BigTextKind kind) {
     case BigTextKind::Small:
     case BigTextKind::Big:
     case BigTextKind::Doom:
-    case BigTextKind::FigletShadow:
-        return true;
-    default:
-        return false;
+    case BigTextKind::FigletShadow: return true;
+    default: return false;
     }
 }
 
 const char* figlet_id(BigTextKind kind) {
     switch (kind) {
-    case BigTextKind::Slant:
-        return "slant";
-    case BigTextKind::Standard:
-        return "standard";
-    case BigTextKind::Small:
-        return "small";
-    case BigTextKind::Big:
-        return "big";
-    case BigTextKind::Doom:
-        return "doom";
-    case BigTextKind::FigletShadow:
-        return "shadow";
-    default:
-        return nullptr;
+    case BigTextKind::Slant: return "slant";
+    case BigTextKind::Standard: return "standard";
+    case BigTextKind::Small: return "small";
+    case BigTextKind::Big: return "big";
+    case BigTextKind::Doom: return "doom";
+    case BigTextKind::FigletShadow: return "shadow";
+    default: return nullptr;
     }
 }
 
@@ -153,11 +143,11 @@ char32_t pack_cell(BigTextKind kind, const std::uint8_t sample[8], int count) {
     case BigTextKind::Sextant:
         return kSextant[on(0) | (on(1) << 1) | (on(2) << 2) | (on(3) << 3) | (on(4) << 4) | (on(5) << 5)];
     case BigTextKind::Quarter:
-        return kOctant[on(0) | (on(0) << 1) | (on(1) << 2) | (on(1) << 3) | (on(2) << 4) | (on(2) << 5)
-                       | (on(3) << 6) | (on(3) << 7)];
+        return kOctant[on(0) | (on(0) << 1) | (on(1) << 2) | (on(1) << 3) | (on(2) << 4) | (on(2) << 5) | (on(3) << 6) |
+                       (on(3) << 7)];
     case BigTextKind::Octant:
-        return kOctant[on(0) | (on(1) << 1) | (on(2) << 2) | (on(3) << 3) | (on(4) << 4) | (on(5) << 5)
-                       | (on(6) << 6) | (on(7) << 7)];
+        return kOctant[on(0) | (on(1) << 1) | (on(2) << 2) | (on(3) << 3) | (on(4) << 4) | (on(5) << 5) | (on(6) << 6) |
+                       (on(7) << 7)];
     case BigTextKind::Braille: {
         static const int bits[8] = {0, 3, 1, 4, 2, 5, 6, 7};
         int mask = 0;
@@ -178,8 +168,7 @@ char32_t pack_cell(BigTextKind kind, const std::uint8_t sample[8], int count) {
         }
         return U'█';
     }
-    default:
-        return on(0) ? U'█' : U' ';
+    default: return on(0) ? U'█' : U' ';
     }
 }
 
@@ -285,8 +274,8 @@ void apply_outline(Bitmap& bmp) {
             if (copy.at(x, y) == 0) {
                 continue;
             }
-            const bool edge = copy.at(x - 1, y) == 0 || copy.at(x + 1, y) == 0
-                || copy.at(x, y - 1) == 0 || copy.at(x, y + 1) == 0;
+            const bool edge =
+                copy.at(x - 1, y) == 0 || copy.at(x + 1, y) == 0 || copy.at(x, y - 1) == 0 || copy.at(x, y + 1) == 0;
             if (edge) {
                 bmp.set(x, y, 2, copy.letter_at(x, y));
             }
@@ -294,9 +283,7 @@ void apply_outline(Bitmap& bmp) {
     }
 }
 
-int clamp_int(int value, int lo, int hi) {
-    return std::max(lo, std::min(hi, value));
-}
+int clamp_int(int value, int lo, int hi) { return std::max(lo, std::min(hi, value)); }
 
 int effective_shadow_layers(BigTextKind kind, const BigTextOptions& options) {
     if (options.shadow_layers > 0) {
@@ -315,10 +302,8 @@ int effective_shadow_layers(BigTextKind kind, const BigTextOptions& options) {
     case BigTextKind::Block:
     case BigTextKind::Outline:
     case BigTextKind::Letter:
-    case BigTextKind::Banner:
-        return 1;
-    default:
-        return 0;
+    case BigTextKind::Banner: return 1;
+    default: return 0;
     }
 }
 
@@ -357,8 +342,8 @@ void apply_drop_shadow(Bitmap& src, int dx, int dy, int layers, bool edges_only)
                     continue;
                 }
                 if (edges_only) {
-                    const bool edge = src.at(x - 1, y) == 0 || src.at(x + 1, y) == 0
-                        || src.at(x, y - 1) == 0 || src.at(x, y + 1) == 0;
+                    const bool edge = src.at(x - 1, y) == 0 || src.at(x + 1, y) == 0 || src.at(x, y - 1) == 0 ||
+                                      src.at(x, y + 1) == 0;
                     if (!edge) {
                         continue;
                     }
@@ -387,12 +372,7 @@ struct RasterCell {
     bool shadow = false;
 };
 
-void pack_bitmap(
-    const Bitmap& bmp,
-    BigTextKind kind,
-    std::vector<RasterCell>& cells,
-    int& width,
-    int& height) {
+void pack_bitmap(const Bitmap& bmp, BigTextKind kind, std::vector<RasterCell>& cells, int& width, int& height) {
     int px = 1;
     int py = 1;
     pixels_per_cell(kind, px, py);
@@ -432,8 +412,8 @@ void pack_bitmap(
             } else if (kind == BigTextKind::Banner) {
                 const bool any = std::any_of(bits, bits + n, [](std::uint8_t v) { return v != 0; });
                 cell.glyph = any ? "#" : " ";
-            } else if (kind == BigTextKind::Block || kind == BigTextKind::Outline
-                       || kind == BigTextKind::Stacked || kind == BigTextKind::Isometric) {
+            } else if (kind == BigTextKind::Block || kind == BigTextKind::Outline || kind == BigTextKind::Stacked ||
+                       kind == BigTextKind::Isometric) {
                 const bool fill = std::any_of(bits, bits + n, [](std::uint8_t v) { return v == 2; });
                 const bool dim = std::any_of(bits, bits + n, [](std::uint8_t v) { return v == 1; });
                 if (fill) {
@@ -467,12 +447,7 @@ std::vector<std::string_view> split_rows(std::string_view glyph) {
     return rows;
 }
 
-void raster_figlet(
-    std::string_view line,
-    BigTextKind kind,
-    std::vector<RasterCell>& cells,
-    int& width,
-    int& height) {
+void raster_figlet(std::string_view line, BigTextKind kind, std::vector<RasterCell>& cells, int& width, int& height) {
     const auto* font = big_text_fonts::figlet_font(figlet_id(kind));
     if (font == nullptr) {
         width = 0;
@@ -498,8 +473,8 @@ void raster_figlet(
             gw = std::max(gw, static_cast<int>(row.size()));
         }
         for (int r = 0; r < height; ++r) {
-            std::string_view row = r < static_cast<int>(glyph_rows.size()) ? glyph_rows[static_cast<std::size_t>(r)]
-                                                                          : std::string_view{};
+            std::string_view row =
+                r < static_cast<int>(glyph_rows.size()) ? glyph_rows[static_cast<std::size_t>(r)] : std::string_view{};
             rows[static_cast<std::size_t>(r)].append(row);
             const int pad = gw - static_cast<int>(row.size());
             if (pad > 0) {
@@ -609,9 +584,7 @@ Rgb sample_big_text_gradient(const std::vector<BigTextGradientStop>& stops, floa
     return stops.back().color;
 }
 
-Style style_from_gradient(const Style& base, Rgb rgb) {
-    return ColorValue::from_rgb(rgb).foreground_style(base);
-}
+Style style_from_gradient(const Style& base, Rgb rgb) { return ColorValue::from_rgb(rgb).foreground_style(base); }
 
 } // namespace
 
@@ -663,8 +636,7 @@ BigTextKind big_text_kind_named(std::string_view name, BigTextKind fallback) {
     return fallback;
 }
 
-std::vector<BigTextGradientStop> big_text_gradient(
-    std::initializer_list<std::pair<float, std::uint32_t>> hex_stops) {
+std::vector<BigTextGradientStop> big_text_gradient(std::initializer_list<std::pair<float, std::uint32_t>> hex_stops) {
     std::vector<BigTextGradientStop> stops;
     stops.reserve(hex_stops.size());
     for (const auto& stop : hex_stops) {
@@ -814,11 +786,9 @@ const BigTextLook* big_text_look_named(std::string_view name) {
     return nullptr;
 }
 
-BigText::BigText(std::string text, Style style)
-    : BigText(std::move(text), BigTextOptions{}, style) {}
+BigText::BigText(std::string text, Style style) : BigText(std::move(text), BigTextOptions{}, style) {}
 
-BigText::BigText(std::string text, BigTextKind kind, Style style)
-    : text_(std::move(text)), style_(style) {
+BigText::BigText(std::string text, BigTextKind kind, Style style) : text_(std::move(text)), style_(style) {
     options_.kind = kind;
 }
 
@@ -855,8 +825,8 @@ void BigText::set_style(Style style) {
 }
 
 void BigText::set_shadow_style(Style style) {
-    const bool needs_rebuild = options_.kind != BigTextKind::Stacked
-        && options_.kind != BigTextKind::Isometric && !options_.shadow_style.has_value();
+    const bool needs_rebuild = options_.kind != BigTextKind::Stacked && options_.kind != BigTextKind::Isometric &&
+                               !options_.shadow_style.has_value();
     options_.shadow_style = style;
     if (needs_rebuild) {
         dirty_cache_ = true;
@@ -888,7 +858,7 @@ void BigText::rebuild() const {
             const int layers = effective_shadow_layers(options_.kind, options_);
             if (layers > 0) {
                 apply_drop_shadow(bmp, options_.shadow_dx, options_.shadow_dy, layers,
-                    options_.kind == BigTextKind::Stacked);
+                                  options_.kind == BigTextKind::Stacked);
             }
             pack_bitmap(bmp, options_.kind, cells, width, height);
         }
@@ -912,6 +882,8 @@ void BigText::rebuild() const {
             for (const RasterCell& cell : cells) {
                 cache_cells_.push_back(to_cache(cell));
             }
+            // y tracks the vertical cursor for stacked lines after the first raster.
+            // NOLINTNEXTLINE(clang-analyzer-deadcode.DeadStores)
             y = height;
             continue;
         }
@@ -971,19 +943,14 @@ void BigText::paint(PaintContext& ctx) const {
             if (!cell.shadow && !options_.gradient_stops.empty()) {
                 float t = 0.0f;
                 if (options_.gradient_axis == BigTextGradientAxis::Horizontal) {
-                    t = cache_width_ > 1
-                        ? static_cast<float>(x) / static_cast<float>(cache_width_ - 1)
-                        : 0.0f;
+                    t = cache_width_ > 1 ? static_cast<float>(x) / static_cast<float>(cache_width_ - 1) : 0.0f;
                 } else {
-                    t = cache_height_ > 1
-                        ? static_cast<float>(y) / static_cast<float>(cache_height_ - 1)
-                        : 0.0f;
+                    t = cache_height_ > 1 ? static_cast<float>(y) / static_cast<float>(cache_height_ - 1) : 0.0f;
                 }
                 style = style_from_gradient(style, sample_big_text_gradient(options_.gradient_stops, t));
             } else if (options_.rainbow) {
                 if (!options_.palette.empty()) {
-                    style = options_.palette[static_cast<std::size_t>(cell.letter)
-                                             % options_.palette.size()];
+                    style = options_.palette[static_cast<std::size_t>(cell.letter) % options_.palette.size()];
                 } else {
                     style.foreground = kRainbow[static_cast<std::size_t>(cell.letter) % 6];
                     style.bold = true;

@@ -1,9 +1,9 @@
-#include "render_helper.hpp"
-#include "test_harness.hpp"
-
 #include <tuinator/render/glyphs.hpp>
 #include <tuinator/render/theme.hpp>
 #include <tuinator/widgets/containers/panel.hpp>
+
+#include "render_helper.hpp"
+#include "test_harness.hpp"
 
 TUINATOR_TEST(diff_fill_glyph_matches_neovim_fillchar) {
     TUINATOR_CHECK_EQ(tuinator::diff_fill_glyph(tuinator::GlyphSet::Ascii), "/");

@@ -31,7 +31,7 @@ struct GaugeChartOptions {
 };
 
 class GaugeChart : public Widget {
-public:
+  public:
     GaugeChart(double value = 0.0, GaugeChartOptions options = {});
 
     double value() const { return value_; }
@@ -43,7 +43,7 @@ public:
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
-private:
+  private:
     void paint_arc(Canvas& canvas, int cx, int cy, int radius) const;
     void paint_horizontal(Canvas& canvas, int x, int y, int width) const;
 

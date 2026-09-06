@@ -21,9 +21,8 @@ tuinator::GutterCell marked_gutter(const tuinator::GutterLine& line) {
 }
 
 class EditorRoot : public tuinator::VBox {
-public:
-    explicit EditorRoot(tuinator::BoxOptions options)
-        : tuinator::VBox(options) {}
+  public:
+    explicit EditorRoot(tuinator::BoxOptions options) : tuinator::VBox(options) {}
 
     bool wants_full_screen() const override { return true; }
 
@@ -41,7 +40,7 @@ public:
         return tuinator::VBox::handle_event(event);
     }
 
-private:
+  private:
     enum class GutterMode {
         Hidden,
         Absolute,
@@ -51,18 +50,10 @@ private:
 
     void cycle_gutter() {
         switch (mode_) {
-        case GutterMode::Hidden:
-            mode_ = GutterMode::Absolute;
-            break;
-        case GutterMode::Absolute:
-            mode_ = GutterMode::Relative;
-            break;
-        case GutterMode::Relative:
-            mode_ = GutterMode::Hybrid;
-            break;
-        case GutterMode::Hybrid:
-            mode_ = GutterMode::Hidden;
-            break;
+        case GutterMode::Hidden: mode_ = GutterMode::Absolute; break;
+        case GutterMode::Absolute: mode_ = GutterMode::Relative; break;
+        case GutterMode::Relative: mode_ = GutterMode::Hybrid; break;
+        case GutterMode::Hybrid: mode_ = GutterMode::Hidden; break;
         }
 
         editor_->set_gutter_width(0);
@@ -94,9 +85,8 @@ private:
         if (hint_ == nullptr) {
             return;
         }
-        hint_->set_text(
-            "Esc/Ctrl+Q quit  |  Tab gutter (" + gutter
-            + ")  |  arrows/wheel scroll  |  click to place cursor");
+        hint_->set_text("Esc/Ctrl+Q quit  |  Tab gutter (" + gutter +
+                        ")  |  arrows/wheel scroll  |  click to place cursor");
     }
 
     tuinator::TextArea* editor_ = nullptr;
@@ -122,21 +112,17 @@ int main() {
     options.placeholder = "Start typing...";
     options.gutter = tuinator::absolute_gutter;
 
-    auto editor = std::make_unique<tuinator::TextArea>(
-        options,
-        theme.text_input,
-        theme.text_input_focused);
+    auto editor = std::make_unique<tuinator::TextArea>(options, theme.text_input, theme.text_input_focused);
     editor->set_flex(1);
-    editor->set_value(
-        "# tuinator-textarea\n"
-        "\n"
-        "A multi-line editor widget with a replaceable gutter.\n"
-        "\n"
-        "> Type to edit. Arrows, Home/End, PgUp/PgDn and mouse wheel scroll.\n"
-        "> Click to move the cursor. Enter inserts a new line.\n"
-        "\n"
-        "Tab cycles the sidebar: absolute, relative, symbols, off.\n"
-        "Esc or Ctrl+Q quits.");
+    editor->set_value("# tuinator-textarea\n"
+                      "\n"
+                      "A multi-line editor widget with a replaceable gutter.\n"
+                      "\n"
+                      "> Type to edit. Arrows, Home/End, PgUp/PgDn and mouse wheel scroll.\n"
+                      "> Click to move the cursor. Enter inserts a new line.\n"
+                      "\n"
+                      "Tab cycles the sidebar: absolute, relative, symbols, off.\n"
+                      "Esc or Ctrl+Q quits.");
 
     auto hint = std::make_unique<tuinator::Label>(
         "Esc/Ctrl+Q quit  |  Tab gutter (absolute line numbers)  |  arrows/wheel scroll  |  click to place cursor",

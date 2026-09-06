@@ -1,5 +1,4 @@
 #include <tuinator/render/file_icon.hpp>
-
 #include <tuinator/render/glyphs.hpp>
 
 #include <algorithm>
@@ -31,20 +30,10 @@ std::string utf8_from(char32_t cp) {
     return out;
 }
 
-constexpr FileIconDescriptor make(
-    FileIcon kind,
-    const char* name,
-    char32_t codepoint,
-    char ascii,
-    std::uint8_t r,
-    std::uint8_t g,
-    std::uint8_t b) {
+constexpr FileIconDescriptor make(FileIcon kind, const char* name, char32_t codepoint, char ascii, std::uint8_t r,
+                                  std::uint8_t g, std::uint8_t b) {
     return FileIconDescriptor{
-        kind,
-        name,
-        codepoint,
-        ascii,
-        Rgb{r, g, b},
+        kind, name, codepoint, ascii, Rgb{r, g, b},
     };
 }
 
@@ -102,9 +91,8 @@ constexpr std::array<FileIconDescriptor, 44> kDescriptors{{
 static_assert(kDescriptors.size() == 44, "descriptor table out of sync with FileIcon enum");
 
 std::string to_lower(std::string value) {
-    std::transform(value.begin(), value.end(), value.begin(), [](unsigned char ch) {
-        return static_cast<char>(std::tolower(ch));
-    });
+    std::transform(value.begin(), value.end(), value.begin(),
+                   [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
     return value;
 }
 
@@ -242,8 +230,7 @@ FileIcon icon_for_extension_lower(std::string_view extension) {
     if (ext == "yaml" || ext == "yml") {
         return FileIcon::Yaml;
     }
-    if (ext == "zip" || ext == "tar" || ext == "gz" || ext == "bz2" || ext == "xz" || ext == "7z"
-        || ext == "rar") {
+    if (ext == "zip" || ext == "tar" || ext == "gz" || ext == "bz2" || ext == "xz" || ext == "7z" || ext == "rar") {
         return FileIcon::Archive;
     }
     if (ext == "cmake") {
@@ -276,9 +263,7 @@ FileIcon icon_for_extension_lower(std::string_view extension) {
 
 } // namespace
 
-const FileIconDescriptor& file_icon_descriptor(FileIcon icon) {
-    return descriptor_or_default(icon);
-}
+const FileIconDescriptor& file_icon_descriptor(FileIcon icon) { return descriptor_or_default(icon); }
 
 std::string file_icon_glyph(FileIcon icon, GlyphSet glyphs) {
     const FileIconDescriptor& descriptor = file_icon_descriptor(icon);
@@ -294,18 +279,14 @@ std::string file_icon_glyph(FileIcon icon, GlyphSet glyphs) {
     return utf8_from(descriptor.nerd_codepoint);
 }
 
-Rgb file_icon_color(FileIcon icon) {
-    return file_icon_descriptor(icon).color;
-}
+Rgb file_icon_color(FileIcon icon) { return file_icon_descriptor(icon).color; }
 
 Style file_icon_style(FileIcon icon, GlyphSet glyphs) {
     (void)glyphs;
     return style_fg(file_icon_color(icon));
 }
 
-FileIcon file_icon_for_extension(std::string_view extension) {
-    return icon_for_extension_lower(extension);
-}
+FileIcon file_icon_for_extension(std::string_view extension) { return icon_for_extension_lower(extension); }
 
 FileIcon file_icon_for_filename(std::string_view filename) {
     const std::string lower = to_lower(std::string(filename));
@@ -343,11 +324,7 @@ FileIcon file_icon_for_path(std::string_view path, bool is_directory, bool folde
     return file_icon_for_filename(basename(path));
 }
 
-std::string file_icon_glyph_for_path(
-    std::string_view path,
-    GlyphSet glyphs,
-    bool is_directory,
-    bool folder_open) {
+std::string file_icon_glyph_for_path(std::string_view path, GlyphSet glyphs, bool is_directory, bool folder_open) {
     return file_icon_glyph(file_icon_for_path(path, is_directory, folder_open), glyphs);
 }
 

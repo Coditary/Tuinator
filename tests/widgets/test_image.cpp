@@ -1,6 +1,3 @@
-#include "render_helper.hpp"
-#include "test_harness.hpp"
-
 #include <tuinator/render/graphics_encode.hpp>
 #include <tuinator/render/graphics_protocol.hpp>
 #include <tuinator/render/terminal_image.hpp>
@@ -8,6 +5,9 @@
 
 #include <string>
 #include <vector>
+
+#include "render_helper.hpp"
+#include "test_harness.hpp"
 
 TUINATOR_TEST(image_view_records_draw_request) {
     tuinator::MemoryTerminalBackend backend({60, 20});
@@ -31,13 +31,7 @@ TUINATOR_TEST(image_view_records_draw_request) {
 
 TUINATOR_TEST(kitty_encoder_emits_graphics_sequence) {
     const tuinator::TerminalImage image = tuinator::TerminalImage::gradient(8, 4);
-    const std::string encoded = tuinator::encode_terminal_image(
-        tuinator::GraphicsProtocol::Kitty,
-        image,
-        2,
-        1,
-        10,
-        4);
+    const std::string encoded = tuinator::encode_terminal_image(tuinator::GraphicsProtocol::Kitty, image, 2, 1, 10, 4);
 
     TUINATOR_CHECK(encoded.find("\033_G") != std::string::npos);
     TUINATOR_CHECK(encoded.find("a=t,f=100") != std::string::npos);

@@ -1,29 +1,24 @@
 #include <tuinator/render/terminal_image.hpp>
 
-#include <zlib.h>
-
 #include <algorithm>
 #include <cctype>
 #include <cmath>
-#include <cstring>
 #include <cstdio>
+#include <cstring>
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <zlib.h>
 
 namespace tuinator {
 
 namespace {
 
-std::uint8_t clamp_u8(int value) {
-    return static_cast<std::uint8_t>(std::clamp(value, 0, 255));
-}
+std::uint8_t clamp_u8(int value) { return static_cast<std::uint8_t>(std::clamp(value, 0, 255)); }
 
 std::uint32_t read_be32(const std::uint8_t* bytes) {
-    return (static_cast<std::uint32_t>(bytes[0]) << 24U)
-        | (static_cast<std::uint32_t>(bytes[1]) << 16U)
-        | (static_cast<std::uint32_t>(bytes[2]) << 8U)
-        | static_cast<std::uint32_t>(bytes[3]);
+    return (static_cast<std::uint32_t>(bytes[0]) << 24U) | (static_cast<std::uint32_t>(bytes[1]) << 16U) |
+           (static_cast<std::uint32_t>(bytes[2]) << 8U) | static_cast<std::uint32_t>(bytes[3]);
 }
 
 int paeth_predictor(int left, int up, int up_left) {
@@ -50,31 +45,19 @@ void unfilter_scanlines(std::vector<std::uint8_t>& pixels, int width, int height
         for (int x = 0; x < width * bytes_per_pixel; ++x) {
             const std::uint8_t raw = row[x];
             const std::uint8_t left = x >= bytes_per_pixel ? row[x - bytes_per_pixel] : 0;
-            const std::uint8_t up =
-                y > 0 ? pixels[static_cast<std::size_t>((y - 1) * row_stride + 1 + x)] : 0;
+            const std::uint8_t up = y > 0 ? pixels[static_cast<std::size_t>((y - 1) * row_stride + 1 + x)] : 0;
             const std::uint8_t up_left =
                 y > 0 && x >= bytes_per_pixel
-                ? pixels[static_cast<std::size_t>((y - 1) * row_stride + 1 + x - bytes_per_pixel)]
-                : 0;
+                    ? pixels[static_cast<std::size_t>((y - 1) * row_stride + 1 + x - bytes_per_pixel)]
+                    : 0;
 
             switch (filter) {
-            case 0:
-                row[x] = raw;
-                break;
-            case 1:
-                row[x] = static_cast<std::uint8_t>(raw + left);
-                break;
-            case 2:
-                row[x] = static_cast<std::uint8_t>(raw + up);
-                break;
-            case 3:
-                row[x] = static_cast<std::uint8_t>(raw + ((left + up) / 2));
-                break;
-            case 4:
-                row[x] = static_cast<std::uint8_t>(raw + paeth_predictor(left, up, up_left));
-                break;
-            default:
-                return;
+            case 0: row[x] = raw; break;
+            case 1: row[x] = static_cast<std::uint8_t>(raw + left); break;
+            case 2: row[x] = static_cast<std::uint8_t>(raw + up); break;
+            case 3: row[x] = static_cast<std::uint8_t>(raw + ((left + up) / 2)); break;
+            case 4: row[x] = static_cast<std::uint8_t>(raw + paeth_predictor(left, up, up_left)); break;
+            default: return;
             }
         }
     }
@@ -163,9 +146,7 @@ std::optional<TerminalImage> TerminalImage::load_png(const std::string& path) {
         return std::nullopt;
     }
 
-    std::vector<std::uint8_t> file(
-        (std::istreambuf_iterator<char>(input)),
-        std::istreambuf_iterator<char>());
+    std::vector<std::uint8_t> file((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
     if (file.size() < 8) {
         return std::nullopt;
     }
@@ -214,16 +195,12 @@ std::optional<TerminalImage> TerminalImage::load_png(const std::string& path) {
         return std::nullopt;
     }
 
-    const std::size_t expected =
-        static_cast<std::size_t>((1 + width * bytes_per_pixel) * height);
+    const std::size_t expected = static_cast<std::size_t>((1 + width * bytes_per_pixel) * height);
 
     uLongf decoded_size = static_cast<uLongf>(expected);
     std::vector<std::uint8_t> decoded(decoded_size);
-    const int inflate_result = uncompress(
-        decoded.data(),
-        &decoded_size,
-        compressed.data(),
-        static_cast<uLong>(compressed.size()));
+    const int inflate_result =
+        uncompress(decoded.data(), &decoded_size, compressed.data(), static_cast<uLong>(compressed.size()));
     if (inflate_result != Z_OK) {
         return std::nullopt;
     }

@@ -43,17 +43,14 @@ std::vector<Dataset> sample_data() {
 }
 
 class DataRoot : public tuinator::VBox {
-public:
-    explicit DataRoot(tuinator::BoxOptions options)
-        : tuinator::VBox(options) {}
+  public:
+    explicit DataRoot(tuinator::BoxOptions options) : tuinator::VBox(options) {}
 
     bool wants_full_screen() const override { return true; }
 };
 
-std::unique_ptr<tuinator::Widget> wrap_panel(
-    const std::string& title,
-    const tuinator::Theme& theme,
-    std::unique_ptr<tuinator::Widget> content) {
+std::unique_ptr<tuinator::Widget> wrap_panel(const std::string& title, const tuinator::Theme& theme,
+                                             std::unique_ptr<tuinator::Widget> content) {
     auto panel = std::make_unique<tuinator::Panel>(title, theme.border, theme.heading);
     panel->set_content(std::move(content));
     panel->set_flex(1);
@@ -122,20 +119,18 @@ int main() {
 
     show_dataset(0);
 
-    auto split = std::make_unique<tuinator::SplitPane>(
-        wrap_panel("Datasets", theme, std::move(list)),
-        wrap_panel("Rows", theme, std::move(table)),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Horizontal,
-            .first_size = 24,
-        });
+    auto split = std::make_unique<tuinator::SplitPane>(wrap_panel("Datasets", theme, std::move(list)),
+                                                       wrap_panel("Rows", theme, std::move(table)),
+                                                       tuinator::SplitPaneOptions{
+                                                           .orientation = tuinator::SplitOrientation::Horizontal,
+                                                           .first_size = 24,
+                                                       });
     split->set_flex(1);
 
     auto root = std::make_unique<DataRoot>(tuinator::BoxOptions{.gap = 1, .padding = 1});
     root->add_child(std::make_unique<tuinator::Label>("Tuinator Data Explorer", theme.heading));
     root->add_child(std::make_unique<tuinator::Label>(
-        "Click or Up/Down on the left list to load rows | Tab switches list/table | Enter confirms",
-        theme.muted));
+        "Click or Up/Down on the left list to load rows | Tab switches list/table | Enter confirms", theme.muted));
     root->add_child(std::move(split));
     root->add_child(std::move(status));
 

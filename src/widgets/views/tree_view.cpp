@@ -1,7 +1,6 @@
-#include <tuinator/widgets/views/tree_view.hpp>
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/views/tree_view.hpp>
 
 #include <algorithm>
 #include <string>
@@ -23,13 +22,10 @@ Style default_selected_style() {
 
 TreeView::TreeView(Style item_style, Style selected_style)
     : item_style_(item_style),
-      selected_style_(selected_style.foreground == Color::Default
-                          && selected_style.background == Color::Default
-                          && !selected_style.bold
-                          && !selected_style.dim
-                          && !selected_style.reverse
-                      ? default_selected_style()
-                      : selected_style) {}
+      selected_style_(selected_style.foreground == Color::Default && selected_style.background == Color::Default &&
+                              !selected_style.bold && !selected_style.dim && !selected_style.reverse
+                          ? default_selected_style()
+                          : selected_style) {}
 
 void TreeView::set_root(TreeNode root) {
     root_ = std::move(root);
@@ -38,9 +34,7 @@ void TreeView::set_root(TreeNode root) {
     mark_dirty();
 }
 
-void TreeView::set_on_select(std::function<void(const std::string&)> callback) {
-    on_select_ = std::move(callback);
-}
+void TreeView::set_on_select(std::function<void(const std::string&)> callback) { on_select_ = std::move(callback); }
 
 void TreeView::append_visible(TreeNode& node, const std::string& path, int depth) {
     visible_.push_back({&node, path, depth});
@@ -160,16 +154,13 @@ bool TreeView::handle_event(const Event& event) {
         mark_dirty();
         return true;
     case Key::Left:
-    case Key::Right:
-        toggle_selected();
-        return true;
+    case Key::Right: toggle_selected(); return true;
     case Key::Enter:
         if (on_select_) {
             on_select_(visible_[static_cast<std::size_t>(selected_index_)].path);
         }
         return true;
-    default:
-        break;
+    default: break;
     }
 
     return false;

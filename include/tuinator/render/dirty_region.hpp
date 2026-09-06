@@ -6,7 +6,7 @@ namespace tuinator {
 
 // Tracks the screen area that needs repainting between frames.
 class DirtyRegion {
-public:
+  public:
     bool needs_render() const { return full_ || has_bounds_; }
     bool is_full() const { return full_; }
     Rect bounds() const { return bounds_; }
@@ -40,7 +40,7 @@ public:
         bounds_ = unite(bounds_, rect);
     }
 
-private:
+  private:
     bool full_ = true;
     bool has_bounds_ = false;
     Rect bounds_{};

@@ -1,6 +1,5 @@
-#include <tuinator/widgets/controls/button.hpp>
-
 #include <tuinator/core/event.hpp>
+#include <tuinator/widgets/controls/button.hpp>
 
 #include <string>
 #include <variant>
@@ -8,9 +7,7 @@
 namespace tuinator {
 
 Button::Button(std::string label, std::function<void()> on_click, Style style)
-    : label_(std::move(label)),
-      on_click_(std::move(on_click)),
-      style_(style) {
+    : label_(std::move(label)), on_click_(std::move(on_click)), style_(style) {
     focused_style_ = style_;
     focused_style_.foreground = Color::Black;
     focused_style_.background = Color::Cyan;

@@ -1,24 +1,15 @@
 #include <tuinator/widgets/capabilities.hpp>
-
 #include <tuinator/widgets/widget.hpp>
 
 namespace tuinator {
 
-Scrollable* as_scrollable(Widget* widget) {
-    return dynamic_cast<Scrollable*>(widget);
-}
+Scrollable* as_scrollable(Widget* widget) { return dynamic_cast<Scrollable*>(widget); }
 
-const Scrollable* as_scrollable(const Widget* widget) {
-    return dynamic_cast<const Scrollable*>(widget);
-}
+const Scrollable* as_scrollable(const Widget* widget) { return dynamic_cast<const Scrollable*>(widget); }
 
-TabHost* as_tab_host(Widget* widget) {
-    return dynamic_cast<TabHost*>(widget);
-}
+TabHost* as_tab_host(Widget* widget) { return dynamic_cast<TabHost*>(widget); }
 
-const TabHost* as_tab_host(const Widget* widget) {
-    return dynamic_cast<const TabHost*>(widget);
-}
+const TabHost* as_tab_host(const Widget* widget) { return dynamic_cast<const TabHost*>(widget); }
 
 bool walk_subtree(Widget* root, const std::function<bool(Widget*)>& visitor) {
     if (root == nullptr) {
@@ -85,10 +76,7 @@ Scrollable* find_scrollable_for_widget(Widget* node, const Widget* target) {
     return found;
 }
 
-bool collect_scrollables_for_widget(
-    Widget* node,
-    const Widget* target,
-    std::vector<Scrollable*>& out) {
+bool collect_scrollables_for_widget(Widget* node, const Widget* target, std::vector<Scrollable*>& out) {
     if (node == nullptr || target == nullptr) {
         return false;
     }

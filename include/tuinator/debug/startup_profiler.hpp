@@ -7,7 +7,7 @@
 namespace tuinator {
 
 class StartupProfiler {
-public:
+  public:
     static StartupProfiler& instance();
 
     void reset();
@@ -17,7 +17,7 @@ public:
 
     void write_report(const std::string& path) const;
 
-private:
+  private:
     StartupProfiler() = default;
 
     bool enabled_ = false;

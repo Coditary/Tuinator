@@ -13,8 +13,7 @@ namespace {
 
 std::size_t now_ns() {
     const auto now = std::chrono::steady_clock::now().time_since_epoch();
-    return static_cast<std::size_t>(
-        std::chrono::duration_cast<std::chrono::nanoseconds>(now).count());
+    return static_cast<std::size_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(now).count());
 }
 
 } // namespace
@@ -63,13 +62,10 @@ void StartupProfiler::write_report(const std::string& path) const {
 
     for (const auto& entry : entries_) {
         out << std::get<0>(entry) << std::string(31 - std::min<std::size_t>(31, std::get<0>(entry).size()), ' ')
-            << std::setw(8) << std::get<1>(entry) << "  "
-            << std::setw(8) << std::get<2>(entry) << '\n';
+            << std::setw(8) << std::get<1>(entry) << "  " << std::setw(8) << std::get<2>(entry) << '\n';
     }
 }
 
-void startup_profile_mark(std::string label) {
-    StartupProfiler::instance().mark(std::move(label));
-}
+void startup_profile_mark(std::string label) { StartupProfiler::instance().mark(std::move(label)); }
 
 } // namespace tuinator

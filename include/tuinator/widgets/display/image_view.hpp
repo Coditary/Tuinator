@@ -6,7 +6,7 @@
 namespace tuinator {
 
 class ImageView : public Widget {
-public:
+  public:
     ImageView(TerminalImage image, Size display_cells = {});
 
     const TerminalImage& image() const { return image_; }
@@ -18,7 +18,7 @@ public:
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
-private:
+  private:
     TerminalImage image_;
     Size display_cells_{};
 };

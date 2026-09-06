@@ -15,7 +15,7 @@ void flush_cli_output() {
 namespace {
 
 class InlineRegionShell : public Widget {
-public:
+  public:
     explicit InlineRegionShell(std::unique_ptr<Widget> child) { add_child(std::move(child)); }
 
     Size preferred_size() const override { return children_.front()->preferred_size(); }
@@ -30,32 +30,23 @@ public:
 
     bool handle_event(const Event& event) override { return children_.front()->handle_event(event); }
 
-    void collect_focusable(std::vector<Widget*>& out) override {
-        children_.front()->collect_focusable(out);
-    }
+    void collect_focusable(std::vector<Widget*>& out) override { children_.front()->collect_focusable(out); }
 
-    void for_each_child(const std::function<void(Widget*)>& visitor) override {
-        visitor(children_.front().get());
-    }
+    void for_each_child(const std::function<void(Widget*)>& visitor) override { visitor(children_.front().get()); }
 
     void for_each_descendant(const std::function<void(Widget*)>& visitor) override {
         children_.front()->for_each_descendant(visitor);
     }
 
     Widget* hit_test(Point point) override { return children_.front()->hit_test(point); }
-    Widget* hit_test_focusable(Point point) override {
-        return children_.front()->hit_test_focusable(point);
-    }
+    Widget* hit_test_focusable(Point point) override { return children_.front()->hit_test_focusable(point); }
 };
 
 } // namespace
 
-InlineView::InlineView(InlineBackendOptions options)
-    : app_(InlineTerminalBackend::create(std::move(options))) {}
+InlineView::InlineView(InlineBackendOptions options) : app_(InlineTerminalBackend::create(std::move(options))) {}
 
-InlineView::~InlineView() {
-    finish();
-}
+InlineView::~InlineView() { finish(); }
 
 void InlineView::set_root(std::unique_ptr<Widget> root) {
     app_.set_root(std::make_unique<InlineRegionShell>(std::move(root)));

@@ -47,7 +47,7 @@ struct SourceControlPanelStyle {
 };
 
 class SourceControlPanel : public Widget {
-public:
+  public:
     explicit SourceControlPanel(SourceControlPanelStyle style = {});
 
     void set_header(std::string title, std::string subtitle);
@@ -65,7 +65,7 @@ public:
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
 
-private:
+  private:
     struct HitTarget {
         int section = -1;
         int entry = -1;

@@ -1,6 +1,5 @@
-#include <tuinator/render/ui_icon.hpp>
-
 #include <tuinator/render/glyphs.hpp>
+#include <tuinator/render/ui_icon.hpp>
 
 #include <array>
 #include <cstring>
@@ -30,22 +29,10 @@ std::string utf8_from(char32_t cp) {
     return out;
 }
 
-constexpr UiIconDescriptor make(
-    UiIcon kind,
-    UiIconSet set,
-    const char* nerd_name,
-    char32_t codepoint,
-    char ascii,
-    std::uint8_t r,
-    std::uint8_t g,
-    std::uint8_t b) {
+constexpr UiIconDescriptor make(UiIcon kind, UiIconSet set, const char* nerd_name, char32_t codepoint, char ascii,
+                                std::uint8_t r, std::uint8_t g, std::uint8_t b) {
     return UiIconDescriptor{
-        kind,
-        set,
-        nerd_name,
-        codepoint,
-        ascii,
-        Rgb{r, g, b},
+        kind, set, nerd_name, codepoint, ascii, Rgb{r, g, b},
     };
 }
 
@@ -61,7 +48,8 @@ constexpr std::array<UiIconDescriptor, 56> kDescriptors{{
     make(UiIcon::GitCompare, UiIconSet::Codicon, "cod-git_compare", 0xEAFD, 'c', 0xBB, 0x9A, 0xF7),
     make(UiIcon::GitMerge, UiIconSet::Codicon, "cod-git_merge", 0xEAFE, 'm', 0xBB, 0x9A, 0xF7),
     make(UiIcon::GitPullRequest, UiIconSet::Codicon, "cod-git_pull_request", 0xEA64, 'p', 0xBB, 0x9A, 0xF7),
-    make(UiIcon::GitPullRequestClosed, UiIconSet::Codicon, "cod-git_pull_request_closed", 0xEBDA, 'p', 0xBB, 0x9A, 0xF7),
+    make(UiIcon::GitPullRequestClosed, UiIconSet::Codicon, "cod-git_pull_request_closed", 0xEBDA, 'p', 0xBB, 0x9A,
+         0xF7),
     make(UiIcon::GitFetch, UiIconSet::Codicon, "cod-git_fetch", 0xEC1D, 'f', 0xBB, 0x9A, 0xF7),
     make(UiIcon::Git, UiIconSet::Devicon, "dev-git", 0xE702, 'g', 0xF1, 0x50, 0x2F),
     make(UiIcon::GitBranch, UiIconSet::Devicon, "dev-git_branch", 0xE725, 'b', 0xBB, 0x9A, 0xF7),
@@ -121,17 +109,11 @@ const UiIconDescriptor& descriptor_or_default(UiIcon icon) {
 
 } // namespace
 
-const UiIconDescriptor& ui_icon_descriptor(UiIcon icon) {
-    return descriptor_or_default(icon);
-}
+const UiIconDescriptor& ui_icon_descriptor(UiIcon icon) { return descriptor_or_default(icon); }
 
-const char* ui_icon_nerd_name(UiIcon icon) {
-    return ui_icon_descriptor(icon).nerd_name;
-}
+const char* ui_icon_nerd_name(UiIcon icon) { return ui_icon_descriptor(icon).nerd_name; }
 
-UiIconSet ui_icon_set(UiIcon icon) {
-    return ui_icon_descriptor(icon).set;
-}
+UiIconSet ui_icon_set(UiIcon icon) { return ui_icon_descriptor(icon).set; }
 
 std::optional<UiIcon> ui_icon_from_nerd_name(std::string_view nerd_name) {
     for (const UiIconDescriptor& descriptor : kDescriptors) {
@@ -156,9 +138,7 @@ std::string ui_icon_glyph(UiIcon icon, GlyphSet glyphs) {
     return utf8_from(descriptor.codepoint);
 }
 
-Rgb ui_icon_color(UiIcon icon) {
-    return ui_icon_descriptor(icon).color;
-}
+Rgb ui_icon_color(UiIcon icon) { return ui_icon_descriptor(icon).color; }
 
 Style ui_icon_style(UiIcon icon, GlyphSet glyphs) {
     (void)glyphs;

@@ -2,26 +2,21 @@
 
 namespace tuinator {
 
-WindowHost::WindowHost()
-    : windows_(nested_window_manager_options()) {
+WindowHost::WindowHost() : windows_(nested_window_manager_options()) {
     windows_.set_on_dirty([this](Rect region) {
         (void)region;
         mark_dirty();
     });
 }
 
-Window* WindowHost::create_window(std::string title, Rect local_bounds,
-                                   std::unique_ptr<Widget> content, WindowOptions options) {
+Window* WindowHost::create_window(std::string title, Rect local_bounds, std::unique_ptr<Widget> content,
+                                  WindowOptions options) {
     return windows_.create_window(std::move(title), local_bounds, std::move(content), options);
 }
 
-void WindowHost::close_window(Window* window) {
-    windows_.close_window(window);
-}
+void WindowHost::close_window(Window* window) { windows_.close_window(window); }
 
-Point WindowHost::to_host_local(Point absolute) const {
-    return {absolute.x - bounds_.x, absolute.y - bounds_.y};
-}
+Point WindowHost::to_host_local(Point absolute) const { return {absolute.x - bounds_.x, absolute.y - bounds_.y}; }
 
 MouseEvent WindowHost::to_host_event(const MouseEvent& event) const {
     MouseEvent local = event;
@@ -29,9 +24,7 @@ MouseEvent WindowHost::to_host_event(const MouseEvent& event) const {
     return local;
 }
 
-Size WindowHost::preferred_size() const {
-    return {36, 14};
-}
+Size WindowHost::preferred_size() const { return {36, 14}; }
 
 void WindowHost::layout(Rect bounds) {
     bounds_ = bounds;
@@ -39,13 +32,9 @@ void WindowHost::layout(Rect bounds) {
     windows_.layout_windows();
 }
 
-void WindowHost::paint(PaintContext& ctx) const {
-    windows_.paint_windows(ctx);
-}
+void WindowHost::paint(PaintContext& ctx) const { windows_.paint_windows(ctx); }
 
-bool WindowHost::captures_pointer() const {
-    return windows_.is_dragging();
-}
+bool WindowHost::captures_pointer() const { return windows_.is_dragging(); }
 
 bool WindowHost::handle_event(const Event& event) {
     if (const auto* mouse = std::get_if<MouseEvent>(&event)) {

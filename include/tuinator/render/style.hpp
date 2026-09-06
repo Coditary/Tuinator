@@ -33,9 +33,7 @@ struct Rgb {
         };
     }
 
-    constexpr bool operator==(const Rgb& other) const {
-        return r == other.r && g == other.g && b == other.b;
-    }
+    constexpr bool operator==(const Rgb& other) const { return r == other.r && g == other.g && b == other.b; }
 
     constexpr bool operator!=(const Rgb& other) const { return !(*this == other); }
 };
@@ -50,9 +48,7 @@ struct Style {
     bool reverse = false;
 };
 
-constexpr Rgb rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b) {
-    return Rgb{r, g, b};
-}
+constexpr Rgb rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b) { return Rgb{r, g, b}; }
 
 inline Style style_fg(Rgb color) {
     Style style{};

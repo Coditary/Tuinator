@@ -1,6 +1,6 @@
-#include "test_harness.hpp"
-
 #include <cstdlib>
+
+#include "test_harness.hpp"
 
 int main() {
 #if !defined(_WIN32)

@@ -1,8 +1,7 @@
-#include <tuinator/widgets/charts/pie_chart.hpp>
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/glyphs.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/charts/pie_chart.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -99,17 +98,12 @@ std::string pie_chart_glyph_for(PieChartStyle style, const std::string& custom) 
 
     if (detect_glyph_set() == GlyphSet::Ascii) {
         switch (style) {
-        case PieChartStyle::Dots:
-            return "O";
+        case PieChartStyle::Dots: return "O";
         case PieChartStyle::FineDots:
-        case PieChartStyle::SmallDots:
-            return ".";
-        case PieChartStyle::Blocks:
-            return "#";
-        case PieChartStyle::Braille:
-            return ":";
-        default:
-            break;
+        case PieChartStyle::SmallDots: return ".";
+        case PieChartStyle::Blocks: return "#";
+        case PieChartStyle::Braille: return ":";
+        default: break;
         }
     }
 
@@ -123,8 +117,7 @@ std::string pie_chart_glyph_for(PieChartStyle style, const std::string& custom) 
 }
 
 PieChart::PieChart(std::vector<PieChartSlice> slices, PieChartOptions options)
-    : slices_(std::move(slices)),
-      options_(std::move(options)) {}
+    : slices_(std::move(slices)), options_(std::move(options)) {}
 
 void PieChart::set_slices(std::vector<PieChartSlice> slices) {
     slices_ = std::move(slices);
@@ -285,27 +278,16 @@ void PieChart::end_drag() {
     drag_start_values_.clear();
 }
 
-void PieChart::paint_cell_glyph(
-    Canvas& canvas,
-    int x,
-    int y,
-    int slice_index,
-    const Layout& /*layout*/) const {
+void PieChart::paint_cell_glyph(Canvas& canvas, int x, int y, int slice_index, const Layout& /*layout*/) const {
     if (slice_index < 0 || slice_index >= static_cast<int>(slices_.size())) {
         return;
     }
 
-    const std::string glyph =
-        pie_chart_glyph_for(options_.style, options_.custom_glyph);
+    const std::string glyph = pie_chart_glyph_for(options_.style, options_.custom_glyph);
     canvas.draw_text({x, y}, glyph, slices_[static_cast<std::size_t>(slice_index)].style);
 }
 
-void PieChart::paint_braille_cell(
-    Canvas& canvas,
-    int x,
-    int y,
-    int slice_index,
-    const bool dots[8]) const {
+void PieChart::paint_braille_cell(Canvas& canvas, int x, int y, int slice_index, const bool dots[8]) const {
     if (slice_index < 0 || slice_index >= static_cast<int>(slices_.size())) {
         return;
     }
@@ -383,8 +365,7 @@ void PieChart::paint_legend(Canvas& canvas, const Layout& layout) const {
         std::ostringstream line;
         line << slice.label;
         if (options_.show_percent && total > 0.0) {
-            line << ' ' << std::fixed << std::setprecision(1)
-                 << (std::max(0.0, slice.value) / total * 100.0) << '%';
+            line << ' ' << std::fixed << std::setprecision(1) << (std::max(0.0, slice.value) / total * 100.0) << '%';
         }
 
         Style style = options_.legend_style;
@@ -439,12 +420,9 @@ bool PieChart::handle_event(const Event& event) {
             return false;
         }
 
-        const bool drag_motion =
-            mouse->action == MouseAction::Move && mouse->left_pressed;
+        const bool drag_motion = mouse->action == MouseAction::Move && mouse->left_pressed;
 
-        if (mouse->action == MouseAction::Click
-            || mouse->action == MouseAction::Press
-            || drag_motion) {
+        if (mouse->action == MouseAction::Click || mouse->action == MouseAction::Press || drag_motion) {
             if (!point_in_chart(local, layout)) {
                 if (mouse->action == MouseAction::Release) {
                     end_drag();
@@ -498,23 +476,17 @@ bool PieChart::handle_event(const Event& event) {
     }
 
     switch (key->key) {
-    case Key::Left:
-        adjust_slice_boundary(focused_slice_, -0.08 * kTwoPi);
-        return true;
-    case Key::Right:
-        adjust_slice_boundary(focused_slice_, 0.08 * kTwoPi);
-        return true;
+    case Key::Left: adjust_slice_boundary(focused_slice_, -0.08 * kTwoPi); return true;
+    case Key::Right: adjust_slice_boundary(focused_slice_, 0.08 * kTwoPi); return true;
     case Key::Up:
-        focused_slice_ = (focused_slice_ + static_cast<int>(slices_.size()) - 1)
-            % static_cast<int>(slices_.size());
+        focused_slice_ = (focused_slice_ + static_cast<int>(slices_.size()) - 1) % static_cast<int>(slices_.size());
         mark_dirty();
         return true;
     case Key::Down:
         focused_slice_ = (focused_slice_ + 1) % static_cast<int>(slices_.size());
         mark_dirty();
         return true;
-    default:
-        break;
+    default: break;
     }
 
     return false;

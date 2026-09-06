@@ -27,7 +27,7 @@ void flush_cli_output();
 /// view.finish();
 /// @endcode
 class InlineView {
-public:
+  public:
     explicit InlineView(InlineBackendOptions options = {});
     ~InlineView();
 
@@ -56,7 +56,7 @@ public:
     Size region_size() const { return app_.terminal_size(); }
     int anchor_row() const;
 
-private:
+  private:
     void begin_inline_output();
 
     Application app_;

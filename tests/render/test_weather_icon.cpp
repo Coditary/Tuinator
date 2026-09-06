@@ -1,15 +1,13 @@
-#include "render_helper.hpp"
-#include "test_harness.hpp"
-
-#include <cstring>
-
 #include <tuinator/backend/memory_backend.hpp>
 #include <tuinator/render/glyphs.hpp>
 #include <tuinator/render/weather_icon.hpp>
 
-TUINATOR_TEST(weather_icon_total_count) {
-    TUINATOR_CHECK_EQ(tuinator::all_weather_icons().size(), 119u);
-}
+#include <cstring>
+
+#include "render_helper.hpp"
+#include "test_harness.hpp"
+
+TUINATOR_TEST(weather_icon_total_count) { TUINATOR_CHECK_EQ(tuinator::all_weather_icons().size(), 119u); }
 
 TUINATOR_TEST(weather_icons_in_category_day) {
     const auto icons = tuinator::weather_icons_in_category(tuinator::WeatherIconCategory::Day);
@@ -17,9 +15,8 @@ TUINATOR_TEST(weather_icons_in_category_day) {
 }
 
 TUINATOR_TEST(weather_icon_category_nesting) {
-    TUINATOR_CHECK_EQ(
-        tuinator::weather_icon_category(tuinator::WeatherIcon::DaySunny),
-        tuinator::WeatherIconCategory::Day);
+    TUINATOR_CHECK_EQ(tuinator::weather_icon_category(tuinator::WeatherIcon::DaySunny),
+                      tuinator::WeatherIconCategory::Day);
 }
 
 TUINATOR_TEST(weather_icon_from_path_nested_lookup) {

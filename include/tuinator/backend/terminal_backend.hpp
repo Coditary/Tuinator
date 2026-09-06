@@ -21,7 +21,7 @@ struct BeginFrameOptions {
 };
 
 class TerminalBackend {
-public:
+  public:
     virtual ~TerminalBackend() = default;
 
     virtual void init() = 0;

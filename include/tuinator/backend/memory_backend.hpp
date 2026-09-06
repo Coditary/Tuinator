@@ -12,7 +12,7 @@ namespace tuinator {
 
 // In-memory terminal backend for tests and snapshot rendering (no real TTY).
 class MemoryTerminalBackend : public TerminalBackend {
-public:
+  public:
     struct Cell {
         char ch = ' ';
         Style style{};
@@ -53,7 +53,7 @@ public:
 
     static std::unique_ptr<MemoryTerminalBackend> create(Size size = {80, 24});
 
-private:
+  private:
     void ensure_cell(int x, int y);
 
     Size size_;

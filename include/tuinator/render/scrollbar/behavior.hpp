@@ -64,18 +64,12 @@ struct ScrollbarScrollActions {
 
 ScrollbarHit scrollbar_hit_test(const ScrollbarLayout& layout, Point local, const ScrollbarBehavior& behavior);
 
-bool handle_scrollbar_mouse(
-    const MouseEvent& mouse,
-    Point local,
-    const ScrollbarLayout& layout,
-    const ScrollbarBehavior& behavior,
-    ScrollbarInteractionState& state,
-    const ScrollbarScrollActions& actions,
-    int scroll_x,
-    int scroll_y,
-    int content_width,
-    int content_height);
+bool handle_scrollbar_mouse(const MouseEvent& mouse, Point local, const ScrollbarLayout& layout,
+                            const ScrollbarBehavior& behavior, ScrollbarInteractionState& state,
+                            const ScrollbarScrollActions& actions, int scroll_x, int scroll_y, int content_width,
+                            int content_height);
 
-bool handle_scrollbar_wheel(const MouseEvent& mouse, const ScrollbarBehavior& behavior, const ScrollbarScrollActions& actions);
+bool handle_scrollbar_wheel(const MouseEvent& mouse, const ScrollbarBehavior& behavior,
+                            const ScrollbarScrollActions& actions);
 
 } // namespace tuinator

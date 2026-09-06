@@ -55,7 +55,7 @@ enum class ScrollbarStyleKind {
 };
 
 class ScrollbarStyle {
-public:
+  public:
     static ScrollbarStyle classic();
     static ScrollbarStyle ascii();
     static ScrollbarStyle minimal();
@@ -81,7 +81,7 @@ public:
 
     ScrollbarStyleKind kind() const { return kind_; }
 
-private:
+  private:
     enum class State {
         Preset,
         Derived,

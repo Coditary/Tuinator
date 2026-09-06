@@ -32,28 +32,19 @@ const nlohmann::json* find_keys(const nlohmann::json& node, std::string_view fir
 
 } // namespace
 
-const nlohmann::json* find(const nlohmann::json& node, std::string_view key) {
-    return find_key(node, key);
-}
+const nlohmann::json* find(const nlohmann::json& node, std::string_view key) { return find_key(node, key); }
 
 const nlohmann::json* find(const nlohmann::json& node, std::string_view key1, std::string_view key2) {
     return find_keys(node, key1, key2);
 }
 
-const nlohmann::json* find(
-    const nlohmann::json& node,
-    std::string_view key1,
-    std::string_view key2,
-    std::string_view key3) {
+const nlohmann::json* find(const nlohmann::json& node, std::string_view key1, std::string_view key2,
+                           std::string_view key3) {
     return find_keys(node, key1, key2, key3);
 }
 
-const nlohmann::json* find(
-    const nlohmann::json& node,
-    std::string_view key1,
-    std::string_view key2,
-    std::string_view key3,
-    std::string_view key4) {
+const nlohmann::json* find(const nlohmann::json& node, std::string_view key1, std::string_view key2,
+                           std::string_view key3, std::string_view key4) {
     return find_keys(node, key1, key2, key3, key4);
 }
 
@@ -129,14 +120,14 @@ Rgb as_rgb(const nlohmann::json& value) {
             auto byte = [&](std::size_t offset) {
                 return static_cast<int>(std::stoul(hex.substr(offset, 2), nullptr, 16));
             };
-            return Rgb{byte(0), byte(2), byte(4)};
+            return Rgb{static_cast<std::uint8_t>(byte(0)), static_cast<std::uint8_t>(byte(2)),
+                       static_cast<std::uint8_t>(byte(4))};
         }
     }
     if (value.is_object()) {
-        return Rgb{
-            as_int(value.value("r", 0), 0),
-            as_int(value.value("g", 0), 0),
-            as_int(value.value("b", 0), 0)};
+        return Rgb{static_cast<std::uint8_t>(as_int(value.value("r", 0), 0)),
+                   static_cast<std::uint8_t>(as_int(value.value("g", 0), 0)),
+                   static_cast<std::uint8_t>(as_int(value.value("b", 0), 0))};
     }
     return Rgb{};
 }
@@ -155,23 +146,16 @@ std::string node_string(const nlohmann::json& node, std::string_view key1, std::
     return {};
 }
 
-std::string node_string(
-    const nlohmann::json& node,
-    std::string_view key1,
-    std::string_view key2,
-    std::string_view key3) {
+std::string node_string(const nlohmann::json& node, std::string_view key1, std::string_view key2,
+                        std::string_view key3) {
     if (const nlohmann::json* value = find_keys(node, key1, key2, key3)) {
         return as_string(*value);
     }
     return {};
 }
 
-std::string node_string(
-    const nlohmann::json& node,
-    std::string_view key1,
-    std::string_view key2,
-    std::string_view key3,
-    std::string_view key4) {
+std::string node_string(const nlohmann::json& node, std::string_view key1, std::string_view key2, std::string_view key3,
+                        std::string_view key4) {
     if (const nlohmann::json* value = find_keys(node, key1, key2, key3, key4)) {
         return as_string(*value);
     }
@@ -185,11 +169,8 @@ std::string node_string_default(const nlohmann::json& node, std::string_view fal
     return std::string(fallback);
 }
 
-std::string node_string_default(
-    const nlohmann::json& node,
-    std::string_view fallback,
-    std::string_view key1,
-    std::string_view key2) {
+std::string node_string_default(const nlohmann::json& node, std::string_view fallback, std::string_view key1,
+                                std::string_view key2) {
     if (const nlohmann::json* value = find_keys(node, key1, key2)) {
         return as_string(*value);
     }
@@ -210,25 +191,16 @@ int node_int(const nlohmann::json& node, int fallback, std::string_view key1, st
     return fallback;
 }
 
-int node_int(
-    const nlohmann::json& node,
-    int fallback,
-    std::string_view key1,
-    std::string_view key2,
-    std::string_view key3) {
+int node_int(const nlohmann::json& node, int fallback, std::string_view key1, std::string_view key2,
+             std::string_view key3) {
     if (const nlohmann::json* value = find_keys(node, key1, key2, key3)) {
         return as_int(*value, fallback);
     }
     return fallback;
 }
 
-int node_int(
-    const nlohmann::json& node,
-    int fallback,
-    std::string_view key1,
-    std::string_view key2,
-    std::string_view key3,
-    std::string_view key4) {
+int node_int(const nlohmann::json& node, int fallback, std::string_view key1, std::string_view key2,
+             std::string_view key3, std::string_view key4) {
     if (const nlohmann::json* value = find_keys(node, key1, key2, key3, key4)) {
         return as_int(*value, fallback);
     }
@@ -276,16 +248,13 @@ std::uint32_t as_hex_color(const nlohmann::json& value) {
     }
     if (value.is_object()) {
         const Rgb rgb = as_rgb(value);
-        return (static_cast<std::uint32_t>(rgb.r) << 16)
-            | (static_cast<std::uint32_t>(rgb.g) << 8)
-            | static_cast<std::uint32_t>(rgb.b);
+        return (static_cast<std::uint32_t>(rgb.r) << 16) | (static_cast<std::uint32_t>(rgb.g) << 8) |
+               static_cast<std::uint32_t>(rgb.b);
     }
     throw std::runtime_error("Invalid gradient color value");
 }
 
-std::vector<ProgressBarGradientStop> build_progress_bar_gradient(
-    const nlohmann::json& stops_json,
-    const Theme&) {
+std::vector<ProgressBarGradientStop> build_progress_bar_gradient(const nlohmann::json& stops_json, const Theme&) {
     std::vector<ProgressBarGradientStop> stops;
     if (!stops_json.is_array()) {
         return stops;
@@ -302,9 +271,7 @@ std::vector<ProgressBarGradientStop> build_progress_bar_gradient(
     return stops;
 }
 
-std::vector<BigTextGradientStop> build_big_text_gradient(
-    const nlohmann::json& stops_json,
-    const Theme&) {
+std::vector<BigTextGradientStop> build_big_text_gradient(const nlohmann::json& stops_json, const Theme&) {
     std::vector<BigTextGradientStop> stops;
     if (!stops_json.is_array()) {
         return stops;
@@ -326,10 +293,9 @@ nlohmann::json merge_options_source(const nlohmann::json& node) {
     if (node.contains("options") && node["options"].is_object()) {
         merged.update(node["options"]);
     }
-    static const char* skip[] = {
-        "type", "id", "children", "content", "first", "second", "tabs", "windows",
-        "properties", "background", "contextMenu", "context_menu", "commandPalette",
-        "command_palette"};
+    static const char* skip[] = {"type",        "id",           "children",       "content",        "first",
+                                 "second",      "tabs",         "windows",        "properties",     "background",
+                                 "contextMenu", "context_menu", "commandPalette", "command_palette"};
     for (auto it = node.begin(); it != node.end(); ++it) {
         const std::string key = it.key();
         bool ignored = false;

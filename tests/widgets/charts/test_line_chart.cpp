@@ -1,10 +1,10 @@
-#include "render_helper.hpp"
-#include "test_harness.hpp"
-
 #include <tuinator/widgets/charts/line_chart.hpp>
 
 #include <cmath>
 #include <vector>
+
+#include "render_helper.hpp"
+#include "test_harness.hpp"
 
 namespace {
 
@@ -24,14 +24,13 @@ TUINATOR_TEST(line_chart_renders_line_mode) {
     tuinator::MemoryTerminalBackend backend({40, 12});
     backend.init();
 
-    tuinator::LineChart chart(
-        {{"sin", sine_points(40), tuinator::Style{.foreground = tuinator::Color::Red}}},
-        tuinator::LineChartOptions{
-            .style = tuinator::ChartGlyphStyle::Dots,
-            .mode = tuinator::LineChartMode::Line,
-            .min_width = 30,
-            .min_height = 8,
-        });
+    tuinator::LineChart chart({{"sin", sine_points(40), tuinator::Style{.foreground = tuinator::Color::Red}}},
+                              tuinator::LineChartOptions{
+                                  .style = tuinator::ChartGlyphStyle::Dots,
+                                  .mode = tuinator::LineChartMode::Line,
+                                  .min_width = 30,
+                                  .min_height = 8,
+                              });
 
     tuinator::test::render_root(chart, backend);
 
@@ -48,9 +47,8 @@ TUINATOR_TEST(line_chart_renders_line_mode) {
 }
 
 TUINATOR_TEST(line_chart_push_value_keeps_max_points) {
-    tuinator::LineChart chart(
-        {{"live", std::vector<double>{}, {}}},
-        tuinator::LineChartOptions{.min_width = 20, .min_height = 6});
+    tuinator::LineChart chart({{"live", std::vector<double>{}, {}}},
+                              tuinator::LineChartOptions{.min_width = 20, .min_height = 6});
 
     for (int i = 0; i < 20; ++i) {
         chart.push_value(0, static_cast<double>(i), 10);
@@ -61,15 +59,13 @@ TUINATOR_TEST(line_chart_push_value_keeps_max_points) {
 }
 
 TUINATOR_TEST(line_chart_sparkline_mode) {
-    tuinator::LineChart chart(
-        {{"srv", sine_points(30), {}}},
-        tuinator::LineChartOptions{
-            .mode = tuinator::LineChartMode::Sparkline,
-            .show_axes = false,
-            .show_grid = false,
-            .min_width = 24,
-            .min_height = 4,
-        });
+    tuinator::LineChart chart({{"srv", sine_points(30), {}}}, tuinator::LineChartOptions{
+                                                                  .mode = tuinator::LineChartMode::Sparkline,
+                                                                  .show_axes = false,
+                                                                  .show_grid = false,
+                                                                  .min_width = 24,
+                                                                  .min_height = 4,
+                                                              });
 
     const tuinator::Size size = chart.preferred_size();
     TUINATOR_CHECK(size.height >= 4);
@@ -96,14 +92,13 @@ TUINATOR_TEST(line_chart_mirror_mode_renders) {
 }
 
 TUINATOR_TEST(line_chart_scatter_mode) {
-    tuinator::LineChart chart(
-        {{"pts", std::vector<double>{1.0, 4.0, 2.0, 5.0, 3.0}, {}}},
-        tuinator::LineChartOptions{
-            .style = tuinator::ChartGlyphStyle::Stars,
-            .mode = tuinator::LineChartMode::Scatter,
-            .min_width = 20,
-            .min_height = 8,
-        });
+    tuinator::LineChart chart({{"pts", std::vector<double>{1.0, 4.0, 2.0, 5.0, 3.0}, {}}},
+                              tuinator::LineChartOptions{
+                                  .style = tuinator::ChartGlyphStyle::Stars,
+                                  .mode = tuinator::LineChartMode::Scatter,
+                                  .min_width = 20,
+                                  .min_height = 8,
+                              });
 
     TUINATOR_CHECK_EQ(chart.series()[0].values.size(), 5U);
 }

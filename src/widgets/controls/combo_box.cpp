@@ -1,7 +1,6 @@
-#include <tuinator/widgets/controls/combo_box.hpp>
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/controls/combo_box.hpp>
 
 #include <algorithm>
 #include <string>
@@ -23,13 +22,10 @@ Style default_selected_style() {
 
 ComboBox::ComboBox(Style item_style, Style selected_style)
     : item_style_(item_style),
-      selected_style_(selected_style.foreground == Color::Default
-                          && selected_style.background == Color::Default
-                          && !selected_style.bold
-                          && !selected_style.dim
-                          && !selected_style.reverse
-                      ? default_selected_style()
-                      : selected_style) {
+      selected_style_(selected_style.foreground == Color::Default && selected_style.background == Color::Default &&
+                              !selected_style.bold && !selected_style.dim && !selected_style.reverse
+                          ? default_selected_style()
+                          : selected_style) {
     focused_style_ = item_style_;
     focused_style_.reverse = true;
 }
@@ -44,9 +40,7 @@ void ComboBox::set_items(std::vector<std::string> items) {
     mark_dirty();
 }
 
-void ComboBox::set_selected_index(int index) {
-    select_index(index, true);
-}
+void ComboBox::set_selected_index(int index) { select_index(index, true); }
 
 void ComboBox::set_on_select(std::function<void(int, const std::string&)> callback) {
     on_select_ = std::move(callback);
@@ -83,8 +77,7 @@ void ComboBox::layout(Rect bounds) {
     if (open_ && selected_index_ < scroll_y_) {
         scroll_y_ = selected_index_;
     }
-    if (open_ && bounds_.height > 1
-        && selected_index_ >= scroll_y_ + bounds_.height - 1) {
+    if (open_ && bounds_.height > 1 && selected_index_ >= scroll_y_ + bounds_.height - 1) {
         scroll_y_ = selected_index_ - bounds_.height + 2;
     }
 }
@@ -184,20 +177,11 @@ bool ComboBox::handle_event(const Event& event) {
     }
 
     switch (key->key) {
-    case Key::Up:
-        select_index(selected_index_ - 1, true);
-        return true;
-    case Key::Down:
-        select_index(selected_index_ + 1, true);
-        return true;
-    case Key::Home:
-        select_index(0, true);
-        return true;
-    case Key::End:
-        select_index(static_cast<int>(items_.size()) - 1, true);
-        return true;
-    default:
-        break;
+    case Key::Up: select_index(selected_index_ - 1, true); return true;
+    case Key::Down: select_index(selected_index_ + 1, true); return true;
+    case Key::Home: select_index(0, true); return true;
+    case Key::End: select_index(static_cast<int>(items_.size()) - 1, true); return true;
+    default: break;
     }
 
     return false;

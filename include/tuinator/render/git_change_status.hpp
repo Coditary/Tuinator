@@ -34,8 +34,6 @@ std::optional<GitChangeStatus> git_change_status_from_char(char ch);
 
 const char* git_change_status_label(GitChangeStatus status);
 
-Rgb git_change_status_color(
-    GitChangeStatus status,
-    GitChangeStatusColorDefaults defaults = {});
+Rgb git_change_status_color(GitChangeStatus status, GitChangeStatusColorDefaults defaults = {});
 
 } // namespace tuinator

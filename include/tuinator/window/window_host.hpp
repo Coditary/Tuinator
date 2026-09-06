@@ -10,7 +10,7 @@ namespace tuinator {
 // Manages floating windows inside a bounded area (e.g. inside another Window).
 // Inner windows use coordinates local to this host and cannot leave its bounds.
 class WindowHost : public Widget {
-public:
+  public:
     WindowHost();
 
     Window* create_window(std::string title, Rect local_bounds, std::unique_ptr<Widget> content,
@@ -27,7 +27,7 @@ public:
 
     Window* active_window() const { return windows_.active_window(); }
 
-private:
+  private:
     Point to_host_local(Point absolute) const;
     MouseEvent to_host_event(const MouseEvent& event) const;
 

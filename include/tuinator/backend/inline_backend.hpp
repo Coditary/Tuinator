@@ -36,7 +36,7 @@ struct InlineBackendOptions {
 /// Renders into a fixed band of terminal rows without taking over the alternate screen.
 /// By default the band starts at the current cursor row (directly below prior output).
 class InlineTerminalBackend : public TerminalBackend {
-public:
+  public:
     explicit InlineTerminalBackend(InlineBackendOptions options = {});
     ~InlineTerminalBackend() override;
 
@@ -60,7 +60,7 @@ public:
 
     static std::unique_ptr<InlineTerminalBackend> create(InlineBackendOptions options = {});
 
-private:
+  private:
     struct Cell {
         std::string text;
         Style style{};

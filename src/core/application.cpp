@@ -1,6 +1,5 @@
-#include <tuinator/core/application.hpp>
-
 #include <tuinator/backend/inline_backend.hpp>
+#include <tuinator/core/application.hpp>
 #include <tuinator/debug/startup_profiler.hpp>
 #include <tuinator/render/graphics_protocol.hpp>
 #include <tuinator/render/paint_context.hpp>
@@ -20,11 +19,11 @@ namespace {
 
 const char* mouse_action_name(MouseAction action) {
     switch (action) {
-    case MouseAction::Press:   return "press";
+    case MouseAction::Press: return "press";
     case MouseAction::Release: return "release";
-    case MouseAction::Click:   return "click";
-    case MouseAction::Move:    return "move";
-    case MouseAction::WheelUp:   return "wheel_up";
+    case MouseAction::Click: return "click";
+    case MouseAction::Move: return "move";
+    case MouseAction::WheelUp: return "wheel_up";
     case MouseAction::WheelDown: return "wheel_down";
     case MouseAction::WheelLeft: return "wheel_left";
     case MouseAction::WheelRight: return "wheel_right";
@@ -39,21 +38,15 @@ void debug_mouse_dispatch(const MouseEvent& mouse, bool hit, bool handled) {
     }
 
     if (FILE* log = std::fopen("/tmp/tuinator-mouse.log", "a")) {
-        std::fprintf(log,
-                     "tuinator-mouse: dispatch action=%s x=%d y=%d hit=%d handled=%d\n",
-                     mouse_action_name(mouse.action),
-                     mouse.position.x,
-                     mouse.position.y,
-                     hit ? 1 : 0,
-                     handled ? 1 : 0);
+        std::fprintf(log, "tuinator-mouse: dispatch action=%s x=%d y=%d hit=%d handled=%d\n",
+                     mouse_action_name(mouse.action), mouse.position.x, mouse.position.y, hit ? 1 : 0, handled ? 1 : 0);
         std::fclose(log);
     }
 }
 
 bool is_mouse_interaction(const MouseEvent& mouse) {
-    return mouse.action == MouseAction::Press
-        || mouse.action == MouseAction::Release
-        || mouse.action == MouseAction::Click;
+    return mouse.action == MouseAction::Press || mouse.action == MouseAction::Release ||
+           mouse.action == MouseAction::Click;
 }
 
 bool is_viewport_scroll_key(const KeyPress& key) {
@@ -61,10 +54,8 @@ bool is_viewport_scroll_key(const KeyPress& key) {
     case Key::PageUp:
     case Key::PageDown:
     case Key::Home:
-    case Key::End:
-        return true;
-    default:
-        return false;
+    case Key::End: return true;
+    default: return false;
     }
 }
 
@@ -77,18 +68,14 @@ bool widget_wants_hover_redraw(Widget* root, Point position) {
     return target != nullptr && target->wants_hover_redraw();
 }
 
-bool widget_is_shell_terminal(const Widget* widget) {
-    return widget != nullptr && widget->is_shell_terminal();
-}
+bool widget_is_shell_terminal(const Widget* widget) { return widget != nullptr && widget->is_shell_terminal(); }
 
 } // namespace
 
-Application::Application()
-    : Application(TerminalBackend::create()) {}
+Application::Application() : Application(TerminalBackend::create()) {}
 
 Application::Application(std::unique_ptr<TerminalBackend> backend)
-    : backend_(std::move(backend)),
-      theme_(dark_theme()) {}
+    : backend_(std::move(backend)), theme_(dark_theme()) {}
 
 Application::~Application() {
     if (backend_ && terminal_ready_) {
@@ -146,9 +133,7 @@ Size Application::terminal_size() const {
     return backend_->terminal_size();
 }
 
-void Application::quit() {
-    running_ = false;
-}
+void Application::quit() { running_ = false; }
 
 TimerId Application::set_interval(int interval_ms, std::function<void()> callback) {
     TimerEntry entry{};
@@ -156,8 +141,7 @@ TimerId Application::set_interval(int interval_ms, std::function<void()> callbac
     entry.interval_ms = std::max(1, interval_ms);
     entry.repeat = true;
     entry.callback = std::move(callback);
-    entry.next_fire =
-        std::chrono::steady_clock::now() + std::chrono::milliseconds(entry.interval_ms);
+    entry.next_fire = std::chrono::steady_clock::now() + std::chrono::milliseconds(entry.interval_ms);
     timers_.push_back(std::move(entry));
     return timers_.back().id;
 }
@@ -168,8 +152,7 @@ TimerId Application::set_timeout(int interval_ms, std::function<void()> callback
     entry.interval_ms = std::max(1, interval_ms);
     entry.repeat = false;
     entry.callback = std::move(callback);
-    entry.next_fire =
-        std::chrono::steady_clock::now() + std::chrono::milliseconds(entry.interval_ms);
+    entry.next_fire = std::chrono::steady_clock::now() + std::chrono::milliseconds(entry.interval_ms);
     timers_.push_back(std::move(entry));
     return timers_.back().id;
 }
@@ -182,10 +165,8 @@ void Application::cancel_timer(TimerId id) {
         }
     }
 
-    timers_.erase(
-        std::remove_if(timers_.begin(), timers_.end(),
-                       [](const TimerEntry& timer) { return !timer.active; }),
-        timers_.end());
+    timers_.erase(std::remove_if(timers_.begin(), timers_.end(), [](const TimerEntry& timer) { return !timer.active; }),
+                  timers_.end());
 }
 
 int Application::compute_poll_timeout_ms() const {
@@ -204,8 +185,7 @@ int Application::compute_poll_timeout_ms() const {
             continue;
         }
 
-        const auto remaining =
-            std::chrono::duration_cast<std::chrono::milliseconds>(timer.next_fire - now).count();
+        const auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(timer.next_fire - now).count();
         const int wait_ms = static_cast<int>(std::max<std::int64_t>(0, remaining));
         if (min_timer_ms < 0 || wait_ms < min_timer_ms) {
             min_timer_ms = wait_ms;
@@ -259,10 +239,8 @@ void Application::process_timers() {
         }
     }
 
-    timers_.erase(
-        std::remove_if(timers_.begin(), timers_.end(),
-                       [](const TimerEntry& timer) { return !timer.active; }),
-        timers_.end());
+    timers_.erase(std::remove_if(timers_.begin(), timers_.end(), [](const TimerEntry& timer) { return !timer.active; }),
+                  timers_.end());
 
     if (fired && !dirty_region_.needs_render()) {
         request_redraw();
@@ -274,9 +252,7 @@ void Application::refresh_focus() {
     update_focus();
 }
 
-void Application::request_redraw() {
-    dirty_region_.mark_full();
-}
+void Application::request_redraw() { dirty_region_.mark_full(); }
 
 void Application::request_redraw(Rect region) {
     if (region.width <= 0 || region.height <= 0) {
@@ -335,9 +311,7 @@ void Application::rebuild_focus_list() {
     }
 }
 
-void Application::sync_mouse_cursor_policy() {
-    backend_->set_mouse_cursor_suppressed(shell_terminal_active());
-}
+void Application::sync_mouse_cursor_policy() { backend_->set_mouse_cursor_suppressed(shell_terminal_active()); }
 
 bool Application::shell_terminal_active() const {
     if (widget_is_shell_terminal(root_.get())) {
@@ -525,15 +499,11 @@ void Application::handle_event(const Event& event) {
 
         // Pure hover motion should not erase and repaint the whole frame — that
         // flickers text and re-places Kitty graphics on every pixel of movement.
-        const bool motion_while_dragging =
-            mouse->action == MouseAction::Move && mouse->left_pressed;
+        const bool motion_while_dragging = mouse->action == MouseAction::Move && mouse->left_pressed;
         const bool hover_needs_redraw =
             mouse->action == MouseAction::Move && widget_wants_hover_redraw(root_.get(), mouse->position);
         const bool needs_redraw =
-            mouse->action != MouseAction::Move
-            || motion_while_dragging
-            || handled
-            || hover_needs_redraw;
+            mouse->action != MouseAction::Move || motion_while_dragging || handled || hover_needs_redraw;
         if (needs_redraw) {
             request_redraw();
         } else if (mouse->action == MouseAction::Move) {
@@ -545,10 +515,8 @@ void Application::handle_event(const Event& event) {
     }
 
     if (const auto* key = std::get_if<KeyPress>(&event)) {
-        const bool shell_focused = !focusable_.empty()
-            && focus_index_ < focusable_.size()
-            && focusable_[focus_index_] != nullptr
-            && focusable_[focus_index_]->is_shell_terminal();
+        const bool shell_focused = !focusable_.empty() && focus_index_ < focusable_.size() &&
+                                   focusable_[focus_index_] != nullptr && focusable_[focus_index_]->is_shell_terminal();
 
         if (key->character == 17 && !shell_focused) {
             quit();

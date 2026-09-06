@@ -1,7 +1,6 @@
-#include <tuinator/widgets/views/list_view.hpp>
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/views/list_view.hpp>
 
 #include <algorithm>
 #include <variant>
@@ -22,13 +21,10 @@ Style default_selected_style() {
 
 ListView::ListView(Style item_style, Style selected_style)
     : item_style_(item_style),
-      selected_style_(selected_style.foreground == Color::Default
-                          && selected_style.background == Color::Default
-                          && !selected_style.bold
-                          && !selected_style.dim
-                          && !selected_style.reverse
-                      ? default_selected_style()
-                      : selected_style) {}
+      selected_style_(selected_style.foreground == Color::Default && selected_style.background == Color::Default &&
+                              !selected_style.bold && !selected_style.dim && !selected_style.reverse
+                          ? default_selected_style()
+                          : selected_style) {}
 
 void ListView::set_items(std::vector<std::string> items) {
     items_ = std::move(items);
@@ -131,26 +127,16 @@ bool ListView::handle_event(const Event& event) {
     }
 
     switch (key->key) {
-    case Key::Up:
-        set_selected_index(selected_index_ - 1);
-        return true;
-    case Key::Down:
-        set_selected_index(selected_index_ + 1);
-        return true;
-    case Key::Home:
-        set_selected_index(0);
-        return true;
-    case Key::End:
-        set_selected_index(static_cast<int>(items_.size()) - 1);
-        return true;
+    case Key::Up: set_selected_index(selected_index_ - 1); return true;
+    case Key::Down: set_selected_index(selected_index_ + 1); return true;
+    case Key::Home: set_selected_index(0); return true;
+    case Key::End: set_selected_index(static_cast<int>(items_.size()) - 1); return true;
     case Key::Enter:
-        if (on_activate_ && selected_index_ >= 0
-            && selected_index_ < static_cast<int>(items_.size())) {
+        if (on_activate_ && selected_index_ >= 0 && selected_index_ < static_cast<int>(items_.size())) {
             on_activate_(selected_index_, items_[static_cast<std::size_t>(selected_index_)]);
         }
         return true;
-    default:
-        break;
+    default: break;
     }
 
     return false;

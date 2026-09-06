@@ -1,7 +1,7 @@
+#include <tuinator/widgets/display/big_text.hpp>
+
 #include "render_helper.hpp"
 #include "test_harness.hpp"
-
-#include <tuinator/widgets/display/big_text.hpp>
 
 TUINATOR_TEST(big_text_block_has_area) {
     tuinator::BigText text("A", tuinator::BigTextKind::Block);
@@ -51,9 +51,7 @@ TUINATOR_TEST(big_text_slant_contains_ascii_art) {
     TUINATOR_CHECK(found_slash);
 }
 
-TUINATOR_TEST(big_text_catalog_is_populated) {
-    TUINATOR_CHECK(tuinator::all_big_text_styles().size() >= 16);
-}
+TUINATOR_TEST(big_text_catalog_is_populated) { TUINATOR_CHECK(tuinator::all_big_text_styles().size() >= 16); }
 
 TUINATOR_TEST(big_text_shadow_uses_separate_style) {
     tuinator::MemoryTerminalBackend backend({20, 12});

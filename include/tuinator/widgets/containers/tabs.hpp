@@ -16,7 +16,7 @@ struct TabsOptions {
 };
 
 class Tabs : public Widget, public TabHost {
-public:
+  public:
     explicit Tabs(TabsOptions options = {});
 
     void add_tab(std::string title, std::unique_ptr<Widget> content);
@@ -37,7 +37,7 @@ public:
     void collect_focusable(std::vector<Widget*>& out) override;
     void for_each_child(const std::function<void(Widget*)>& visitor) override;
 
-private:
+  private:
     struct TabEntry {
         std::string title;
         std::unique_ptr<Widget> content;

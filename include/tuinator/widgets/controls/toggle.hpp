@@ -9,11 +9,8 @@
 namespace tuinator {
 
 class Toggle : public Widget {
-public:
-    Toggle(std::string label,
-           bool checked = false,
-           std::function<void(bool)> on_change = {},
-           Style style = {},
+  public:
+    Toggle(std::string label, bool checked = false, std::function<void(bool)> on_change = {}, Style style = {},
            Style checked_style = {});
 
     const std::string& label() const { return label_; }
@@ -27,7 +24,7 @@ public:
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
 
-private:
+  private:
     void toggle();
 
     std::string label_;

@@ -1,7 +1,7 @@
-#include "test_harness.hpp"
-
 #include <tuinator/render/block_element.hpp>
 #include <tuinator/render/glyphs.hpp>
+
+#include "test_harness.hpp"
 
 TUINATOR_TEST(block_element_descriptor_matches_enum_order) {
     TUINATOR_CHECK_EQ(tuinator::block_element_descriptor(tuinator::BlockElement::Full).codepoint, 0x2588);
@@ -15,10 +15,14 @@ TUINATOR_TEST(block_element_descriptor_matches_enum_order) {
 
 TUINATOR_TEST(block_element_glyph_ascii_fallback) {
     TUINATOR_CHECK_EQ(tuinator::block_element_glyph(tuinator::BlockElement::Full, tuinator::GlyphSet::Ascii), "#");
-    TUINATOR_CHECK_EQ(tuinator::block_element_glyph(tuinator::BlockElement::LightShade, tuinator::GlyphSet::Ascii), ".");
-    TUINATOR_CHECK_EQ(tuinator::block_element_glyph(tuinator::BlockElement::MediumShade, tuinator::GlyphSet::Ascii), ":");
-    TUINATOR_CHECK_EQ(tuinator::block_element_glyph(tuinator::BlockElement::LowerOneEighth, tuinator::GlyphSet::Ascii), "_");
-    TUINATOR_CHECK_EQ(tuinator::block_element_glyph(tuinator::BlockElement::UpperOneEighth, tuinator::GlyphSet::Ascii), "^");
+    TUINATOR_CHECK_EQ(tuinator::block_element_glyph(tuinator::BlockElement::LightShade, tuinator::GlyphSet::Ascii),
+                      ".");
+    TUINATOR_CHECK_EQ(tuinator::block_element_glyph(tuinator::BlockElement::MediumShade, tuinator::GlyphSet::Ascii),
+                      ":");
+    TUINATOR_CHECK_EQ(tuinator::block_element_glyph(tuinator::BlockElement::LowerOneEighth, tuinator::GlyphSet::Ascii),
+                      "_");
+    TUINATOR_CHECK_EQ(tuinator::block_element_glyph(tuinator::BlockElement::UpperOneEighth, tuinator::GlyphSet::Ascii),
+                      "^");
 }
 
 TUINATOR_TEST(block_element_glyph_unicode_differs_from_ascii) {

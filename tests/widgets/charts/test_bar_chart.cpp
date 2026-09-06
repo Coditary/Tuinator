@@ -1,7 +1,7 @@
+#include <tuinator/widgets/charts/bar_chart.hpp>
+
 #include "render_helper.hpp"
 #include "test_harness.hpp"
-
-#include <tuinator/widgets/charts/bar_chart.hpp>
 
 TUINATOR_TEST(bar_chart_renders_vertical_blocks) {
     tuinator::MemoryTerminalBackend backend({40, 14});

@@ -13,7 +13,7 @@ struct TextInputOptions {
 };
 
 class TextInput : public Widget {
-public:
+  public:
     TextInput(TextInputOptions options = {}, Style style = {}, Style focused_style = {});
 
     const std::string& value() const { return value_; }
@@ -29,7 +29,7 @@ public:
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
 
-private:
+  private:
     void insert_char(char ch);
     void delete_before_cursor();
     void delete_at_cursor();

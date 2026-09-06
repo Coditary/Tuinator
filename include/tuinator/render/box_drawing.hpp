@@ -57,12 +57,7 @@ std::string box_drawing_glyph(BoxDrawing kind, GlyphSet glyphs = GlyphSet::Auto)
 std::vector<BoxDrawing> all_box_drawings();
 
 /// Build border glyphs from individual box-drawing parts.
-BorderGlyphs border_glyphs_from_box_drawing(
-    BoxDrawing corner_tl,
-    BoxDrawing corner_tr,
-    BoxDrawing corner_bl,
-    BoxDrawing corner_br,
-    BoxDrawing horizontal,
-    BoxDrawing vertical);
+BorderGlyphs border_glyphs_from_box_drawing(BoxDrawing corner_tl, BoxDrawing corner_tr, BoxDrawing corner_bl,
+                                            BoxDrawing corner_br, BoxDrawing horizontal, BoxDrawing vertical);
 
 } // namespace tuinator

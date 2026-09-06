@@ -19,10 +19,8 @@ struct SplitPaneOptions {
 };
 
 class SplitPane : public Widget {
-public:
-    SplitPane(std::unique_ptr<Widget> first,
-              std::unique_ptr<Widget> second,
-              SplitPaneOptions options = {});
+  public:
+    SplitPane(std::unique_ptr<Widget> first, std::unique_ptr<Widget> second, SplitPaneOptions options = {});
 
     Widget* first() const { return first_.get(); }
     Widget* second() const { return second_.get(); }
@@ -35,7 +33,7 @@ public:
     void collect_focusable(std::vector<Widget*>& out) override;
     void for_each_child(const std::function<void(Widget*)>& visitor) override;
 
-private:
+  private:
     std::unique_ptr<Widget> first_;
     std::unique_ptr<Widget> second_;
     SplitPaneOptions options_;

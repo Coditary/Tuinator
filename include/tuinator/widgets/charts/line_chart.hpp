@@ -42,7 +42,7 @@ struct LineChartOptions {
 };
 
 class LineChart : public Widget {
-public:
+  public:
     LineChart(std::vector<LineChartSeries> series = {}, LineChartOptions options = {});
 
     const std::vector<LineChartSeries>& series() const { return series_; }
@@ -57,7 +57,7 @@ public:
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
-private:
+  private:
     struct PlotArea {
         int left = 0;
         int top = 0;

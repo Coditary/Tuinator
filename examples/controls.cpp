@@ -7,24 +7,18 @@
 namespace {
 
 class ControlsRoot : public tuinator::VBox {
-public:
+  public:
     explicit ControlsRoot(tuinator::BoxOptions options) : tuinator::VBox(options) {}
     bool wants_full_screen() const override { return true; }
 };
 
-void add_progress_row(
-    tuinator::VBox& content,
-    const tuinator::Theme& theme,
-    const char* caption,
-    tuinator::ProgressBarLayout layout,
-    std::vector<tuinator::ProgressBar*>& bars,
-    double value = 0.35,
-    const tuinator::ProgressBarOptions* custom = nullptr) {
+void add_progress_row(tuinator::VBox& content, const tuinator::Theme& theme, const char* caption,
+                      tuinator::ProgressBarLayout layout, std::vector<tuinator::ProgressBar*>& bars,
+                      double value = 0.35, const tuinator::ProgressBarOptions* custom = nullptr) {
     content.add_child(std::make_unique<tuinator::Label>(caption, theme.muted));
 
-    tuinator::ProgressBarOptions options = custom != nullptr
-        ? *custom
-        : tuinator::progress_bar_preset(layout, theme.accent, theme.muted);
+    tuinator::ProgressBarOptions options =
+        custom != nullptr ? *custom : tuinator::progress_bar_preset(layout, theme.accent, theme.muted);
     if (layout == tuinator::ProgressBarLayout::Labeled) {
         options.label = "Progress";
     }
@@ -34,15 +28,9 @@ void add_progress_row(
     content.add_child(std::move(bar));
 }
 
-tuinator::ProgressBarOptions task_row_options(
-    const tuinator::Theme& theme,
-    const std::string& label,
-    double value,
-    bool completed = false) {
-    auto options = tuinator::progress_bar_preset(
-        tuinator::ProgressBarLayout::TaskRow,
-        theme.accent,
-        theme.muted);
+tuinator::ProgressBarOptions task_row_options(const tuinator::Theme& theme, const std::string& label, double value,
+                                              bool completed = false) {
+    auto options = tuinator::progress_bar_preset(tuinator::ProgressBarLayout::TaskRow, theme.accent, theme.muted);
     options.label = label;
     options.completed = completed;
     options.stats.total = 100;
@@ -51,12 +39,8 @@ tuinator::ProgressBarOptions task_row_options(
     return options;
 }
 
-void add_indeterminate_row(
-    tuinator::VBox& content,
-    const tuinator::Theme& theme,
-    const char* caption,
-    tuinator::ProgressBarLayout layout,
-    std::vector<tuinator::ProgressBar*>& animated_bars) {
+void add_indeterminate_row(tuinator::VBox& content, const tuinator::Theme& theme, const char* caption,
+                           tuinator::ProgressBarLayout layout, std::vector<tuinator::ProgressBar*>& animated_bars) {
     content.add_child(std::make_unique<tuinator::Label>(caption, theme.muted));
 
     auto options = tuinator::progress_bar_preset(layout, theme.accent, theme.muted);
@@ -65,15 +49,9 @@ void add_indeterminate_row(
     content.add_child(std::move(bar));
 }
 
-tuinator::ProgressBarOptions braille_metric_options(
-    const tuinator::Theme& theme,
-    const std::string& label,
-    const std::string& metric,
-    tuinator::Color fill_color) {
-    auto options = tuinator::progress_bar_preset(
-        tuinator::ProgressBarLayout::BrailleMetric,
-        theme.accent,
-        theme.muted);
+tuinator::ProgressBarOptions braille_metric_options(const tuinator::Theme& theme, const std::string& label,
+                                                    const std::string& metric, tuinator::Color fill_color) {
+    auto options = tuinator::progress_bar_preset(tuinator::ProgressBarLayout::BrailleMetric, theme.accent, theme.muted);
     options.label = label;
     options.metric_value = metric;
     options.fill_style.foreground = fill_color;
@@ -137,12 +115,11 @@ int main() {
             return item;
         }(),
         tuinator::MenuItem::separator(),
-        tuinator::MenuItem::submenu(
-            "More",
-            {
-                {"Refresh", []() {}},
-                {"Inspect", []() {}},
-            }),
+        tuinator::MenuItem::submenu("More",
+                                    {
+                                        {"Refresh", []() {}},
+                                        {"Inspect", []() {}},
+                                    }),
     });
     std::vector<tuinator::CommandPaletteEntry> palette_entries;
     for (const tuinator::RegisteredAction* action : actions->all()) {
@@ -185,24 +162,22 @@ int main() {
                  item.hint = "Open an existing file";
                  return item;
              }(),
-             tuinator::MenuItem::submenu(
-                 "&Export",
-                 {
-                     [] {
-                         tuinator::MenuItem item{"&PDF", []() {}};
-                         item.icon = "P";
-                         item.hint = "Export as PDF";
-                         return item;
-                     }(),
-                     [] {
-                         tuinator::MenuItem item{"&PNG", []() {}};
-                         item.icon = "I";
-                         item.hint = "Export as PNG";
-                         return item;
-                     }(),
-                 },
-                 {},
-                 ">"),
+             tuinator::MenuItem::submenu("&Export",
+                                         {
+                                             [] {
+                                                 tuinator::MenuItem item{"&PDF", []() {}};
+                                                 item.icon = "P";
+                                                 item.hint = "Export as PDF";
+                                                 return item;
+                                             }(),
+                                             [] {
+                                                 tuinator::MenuItem item{"&PNG", []() {}};
+                                                 item.icon = "I";
+                                                 item.hint = "Export as PNG";
+                                                 return item;
+                                             }(),
+                                         },
+                                         {}, ">"),
              tuinator::MenuItem::separator(),
              [&app] {
                  tuinator::MenuItem item{"&Quit", [&app]() { app.quit(); }, "Ctrl+Q"};
@@ -248,9 +223,7 @@ int main() {
     int elapsed_ms = 0;
 
     auto slider = std::make_unique<tuinator::Slider>(
-        0,
-        100,
-        35,
+        0, 100, 35,
         [status_ptr, status_message, &progress_bars](int value) {
             const double progress = value / 100.0;
             for (tuinator::ProgressBar* bar : progress_bars) {
@@ -259,14 +232,10 @@ int main() {
             *status_message = "Slider: " + std::to_string(value);
             status_ptr->set_text(*status_message);
         },
-        theme.label,
-        28);
+        theme.label, 28);
 
     auto spinner = std::make_unique<tuinator::Spinner>(
-        0,
-        10,
-        3,
-        1,
+        0, 10, 3, 1,
         [status_ptr, status_message](int value) {
             *status_message = "Spinner: " + std::to_string(value);
             status_ptr->set_text(*status_message);
@@ -307,12 +276,9 @@ int main() {
         "Show confirm dialog",
         [desktop_ptr, status_ptr, status_message, &theme]() {
             desktop_ptr->show_modal(
-                "Confirm",
-                {20, 6, 42, 9},
+                "Confirm", {20, 6, 42, 9},
                 tuinator::dialog::make_confirm(
-                    theme,
-                    "Save changes before closing?",
-                    [desktop_ptr, status_ptr, status_message](bool confirmed) {
+                    theme, "Save changes before closing?", [desktop_ptr, status_ptr, status_message](bool confirmed) {
                         desktop_ptr->close_window(desktop_ptr->active_window());
                         *status_message = confirmed ? "Dialog: confirmed" : "Dialog: cancelled";
                         status_ptr->set_text(*status_message);
@@ -324,49 +290,36 @@ int main() {
     content->add_child(std::make_unique<tuinator::Label>("JavaFX-style controls", theme.heading));
     content->add_child(std::move(menu));
 
-    auto progress_panel = std::make_unique<tuinator::Panel>(
-        "Progress",
-        theme.border,
-        theme.heading,
-        theme.glyphs);
+    auto progress_panel = std::make_unique<tuinator::Panel>("Progress", theme.border, theme.heading, theme.glyphs);
     auto panel_body = std::make_unique<tuinator::VBox>(tuinator::BoxOptions{.gap = 1, .padding = 1});
-    panel_body->add_child(std::make_unique<tuinator::Label>(
-        "Determinate — known progress (slider below)",
-        theme.muted));
+    panel_body->add_child(
+        std::make_unique<tuinator::Label>("Determinate — known progress (slider below)", theme.muted));
     {
         auto total = std::make_unique<tuinator::ProgressBar>(
-            0.82,
-            tuinator::progress_bar_filled_label(
-                theme.accent,
-                theme.muted,
-                "Total progress",
-                tuinator::ProgressBarMode::Determinate));
+            0.82, tuinator::progress_bar_filled_label(theme.accent, theme.muted, "Total progress",
+                                                      tuinator::ProgressBarMode::Determinate));
         progress_bars.push_back(total.get());
         panel_body->add_child(std::move(total));
     }
-    panel_body->add_child(std::make_unique<tuinator::Label>(
-        "Indeterminate — unknown progress (pendulum)",
-        theme.muted));
+    panel_body->add_child(
+        std::make_unique<tuinator::Label>("Indeterminate — unknown progress (pendulum)", theme.muted));
     {
         auto loading = std::make_unique<tuinator::ProgressBar>(
-            0.0,
-            tuinator::progress_bar_filled_label(
-                theme.accent,
-                theme.muted,
-                "Loading...",
-                tuinator::ProgressBarMode::Indeterminate));
+            0.0, tuinator::progress_bar_filled_label(theme.accent, theme.muted, "Loading...",
+                                                     tuinator::ProgressBarMode::Indeterminate));
         animated_bars.push_back(loading.get());
         panel_body->add_child(std::move(loading));
     }
     panel_body->add_child(std::make_unique<tuinator::Label>(
-        "Press Esc to quit",
-        tuinator::Style{.foreground = tuinator::Color::White, .dim = true}));
+        "Press Esc to quit", tuinator::Style{.foreground = tuinator::Color::White, .dim = true}));
     progress_panel->set_content(std::move(panel_body));
     content->add_child(std::move(progress_panel));
 
     content->add_child(std::make_unique<tuinator::Label>("Indeterminate loaders", theme.heading));
-    add_indeterminate_row(*content, theme, "Pulse line + placeholders", tuinator::ProgressBarLayout::Pulse, animated_bars);
-    add_indeterminate_row(*content, theme, "Rich shimmer (Loading...)", tuinator::ProgressBarLayout::Shimmer, animated_bars);
+    add_indeterminate_row(*content, theme, "Pulse line + placeholders", tuinator::ProgressBarLayout::Pulse,
+                          animated_bars);
+    add_indeterminate_row(*content, theme, "Rich shimmer (Loading...)", tuinator::ProgressBarLayout::Shimmer,
+                          animated_bars);
     add_indeterminate_row(*content, theme, "Bounce [=   ]", tuinator::ProgressBarLayout::Bounce, animated_bars);
     add_indeterminate_row(*content, theme, "Sliding blocks", tuinator::ProgressBarLayout::SlideBlock, animated_bars);
     add_indeterminate_row(*content, theme, "Moving dot", tuinator::ProgressBarLayout::MovingDot, animated_bars);
@@ -388,17 +341,13 @@ int main() {
         content->add_child(std::move(row));
     }
     {
-        auto row = std::make_unique<tuinator::ProgressBar>(
-            1.0, task_row_options(theme, "Complete Task", 1.0, true));
+        auto row = std::make_unique<tuinator::ProgressBar>(1.0, task_row_options(theme, "Complete Task", 1.0, true));
         content->add_child(std::move(row));
     }
 
     content->add_child(std::make_unique<tuinator::Label>("tqdm-style", theme.muted));
     {
-        auto options = tuinator::progress_bar_preset(
-            tuinator::ProgressBarLayout::Tqdm,
-            theme.label,
-            theme.muted);
+        auto options = tuinator::progress_bar_preset(tuinator::ProgressBarLayout::Tqdm, theme.label, theme.muted);
         options.stats.total = 100;
         options.stats.rate = 9.6;
         auto bar = std::make_unique<tuinator::ProgressBar>(0.42, options);
@@ -429,11 +378,7 @@ int main() {
     }
     {
         auto wave = std::make_unique<tuinator::ProgressBar>(
-            0.0,
-            tuinator::progress_bar_preset(
-                tuinator::ProgressBarLayout::BrailleWave,
-                theme.accent,
-                theme.muted));
+            0.0, tuinator::progress_bar_preset(tuinator::ProgressBarLayout::BrailleWave, theme.accent, theme.muted));
         wave_bar = wave.get();
         content->add_child(std::move(wave));
     }
@@ -447,10 +392,7 @@ int main() {
     add_progress_row(*content, theme, "Labeled", tuinator::ProgressBarLayout::Labeled, progress_bars);
     content->add_child(std::make_unique<tuinator::Label>("Gradient fill (true color)", theme.muted));
     {
-        auto options = tuinator::progress_bar_preset(
-            tuinator::ProgressBarLayout::Blocks,
-            theme.accent,
-            theme.muted);
+        auto options = tuinator::progress_bar_preset(tuinator::ProgressBarLayout::Blocks, theme.accent, theme.muted);
         options.gradient_stops = tuinator::progress_bar_gradient({
             {0.0f, 0x5FB89E},
             {0.5f, 0xB898D0},
@@ -472,10 +414,10 @@ int main() {
     content->add_child(std::move(tree));
     content->add_child(std::move(dialog_button));
     content->add_child(std::make_unique<tuinator::Label>(
-        "Tab = focus | Alt+F menus | Ctrl+P palette | Right-click = context menu",
-        theme.muted));
+        "Tab = focus | Alt+F menus | Ctrl+P palette | Right-click = context menu", theme.muted));
 
-    auto scroll = std::make_unique<tuinator::ScrollView>(std::move(content), tuinator::ScrollViewOptions{.width = 80, .height = 20});
+    auto scroll = std::make_unique<tuinator::ScrollView>(std::move(content),
+                                                         tuinator::ScrollViewOptions{.width = 80, .height = 20});
     scroll->set_flex(1);
 
     auto root = std::make_unique<ControlsRoot>(tuinator::BoxOptions{.gap = 1, .padding = 0});

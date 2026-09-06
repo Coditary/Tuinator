@@ -1,23 +1,19 @@
-#include <tuinator/widgets/chrome/status_bar.hpp>
-
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/chrome/status_bar.hpp>
 
 #include <algorithm>
 #include <string>
 
 namespace tuinator {
 
-StatusBar::StatusBar(std::string text, Style style)
-    : text_(std::move(text)), style_(style) {}
+StatusBar::StatusBar(std::string text, Style style) : text_(std::move(text)), style_(style) {}
 
 void StatusBar::set_text(std::string text) {
     text_ = std::move(text);
     mark_dirty();
 }
 
-Size StatusBar::preferred_size() const {
-    return {std::max(1, text_display_width(text_)), 1};
-}
+Size StatusBar::preferred_size() const { return {std::max(1, text_display_width(text_)), 1}; }
 
 void StatusBar::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;

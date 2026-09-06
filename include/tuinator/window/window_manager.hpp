@@ -24,14 +24,13 @@ WindowManagerOptions desktop_window_manager_options();
 WindowManagerOptions nested_window_manager_options();
 
 class WindowManager {
-public:
+  public:
     explicit WindowManager(WindowManagerOptions options = {});
 
     void set_bounds(Rect bounds);
     void set_on_dirty(std::function<void(Rect)> callback);
 
-    Window* create_window(std::string title, Rect bounds, std::unique_ptr<Widget> content,
-                          WindowOptions options = {});
+    Window* create_window(std::string title, Rect bounds, std::unique_ptr<Widget> content, WindowOptions options = {});
     void close_window(Window* window);
 
     void layout_windows();
@@ -49,7 +48,7 @@ public:
 
     const std::vector<std::unique_ptr<Window>>& windows() const { return windows_; }
 
-private:
+  private:
     enum class DragMode {
         None,
         Move,

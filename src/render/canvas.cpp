@@ -1,5 +1,4 @@
 #include <tuinator/render/canvas.hpp>
-
 #include <tuinator/render/terminal_image.hpp>
 #include <tuinator/render/text.hpp>
 
@@ -8,37 +7,24 @@
 
 namespace tuinator {
 
-Canvas::Canvas(TerminalBackend& backend)
-    : backend_(backend), size_(backend.terminal_size()) {
+Canvas::Canvas(TerminalBackend& backend) : backend_(backend), size_(backend.terminal_size()) {
     clip_ = {0, 0, size_.width, size_.height};
 }
 
 Canvas::Canvas(TerminalBackend& backend, Point origin, Size size, Rect clip, BorderGlyphs glyphs)
     : backend_(backend), origin_(origin), size_(size), clip_(clip), glyphs_(std::move(glyphs)) {}
 
-void Canvas::set_glyphs(BorderGlyphs glyphs) {
-    glyphs_ = std::move(glyphs);
-}
+void Canvas::set_glyphs(BorderGlyphs glyphs) { glyphs_ = std::move(glyphs); }
 
-Size Canvas::size() const {
-    return size_;
-}
+Size Canvas::size() const { return size_; }
 
-Rect Canvas::bounds() const {
-    return {{0, 0}, size_};
-}
+Rect Canvas::bounds() const { return {{0, 0}, size_}; }
 
-Point Canvas::to_terminal(Point local) const {
-    return {origin_.x + local.x, origin_.y + local.y};
-}
+Point Canvas::to_terminal(Point local) const { return {origin_.x + local.x, origin_.y + local.y}; }
 
-bool Canvas::is_visible(Point local) const {
-    return clip_.contains(to_terminal(local));
-}
+bool Canvas::is_visible(Point local) const { return clip_.contains(to_terminal(local)); }
 
-void Canvas::draw_char(Point position, char ch, Style style) {
-    draw_text(position, std::string(1, ch), style);
-}
+void Canvas::draw_char(Point position, char ch, Style style) { draw_text(position, std::string(1, ch), style); }
 
 void Canvas::draw_text(Point position, std::string_view text, Style style) {
     if (text.empty()) {
@@ -95,9 +81,7 @@ void Canvas::draw_text(Point position, std::string_view text, Style style) {
     }
 }
 
-void Canvas::draw_box(Rect rect, Style style) {
-    draw_box(rect, style, glyphs_);
-}
+void Canvas::draw_box(Rect rect, Style style) { draw_box(rect, style, glyphs_); }
 
 void Canvas::draw_box(Rect rect, Style style, const BorderGlyphs& glyphs) {
     if (rect.width < 2 || rect.height < 2) {
@@ -178,8 +162,7 @@ void Canvas::draw_image(Point position, Size cell_size, const TerminalImage& ima
 
 void Canvas::with_clip(Rect rect, const std::function<void(Canvas&)>& draw) const {
     const Point child_origin{origin_.x + rect.x, origin_.y + rect.y};
-    const Rect child_clip =
-        intersect(clip_, {child_origin.x, child_origin.y, rect.width, rect.height});
+    const Rect child_clip = intersect(clip_, {child_origin.x, child_origin.y, rect.width, rect.height});
     if (child_clip.width <= 0 || child_clip.height <= 0) {
         return;
     }

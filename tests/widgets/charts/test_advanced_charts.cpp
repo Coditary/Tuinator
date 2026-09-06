@@ -1,12 +1,12 @@
-#include "render_helper.hpp"
-#include "test_harness.hpp"
-
 #include <tuinator/widgets/charts/candlestick_chart.hpp>
 #include <tuinator/widgets/charts/gauge_chart.hpp>
 #include <tuinator/widgets/charts/heatmap.hpp>
 #include <tuinator/widgets/charts/histogram.hpp>
 #include <tuinator/widgets/charts/stacked_area_chart.hpp>
 #include <tuinator/widgets/charts/waterfall_chart.hpp>
+
+#include "render_helper.hpp"
+#include "test_harness.hpp"
 
 TUINATOR_TEST(histogram_renders_bins) {
     tuinator::MemoryTerminalBackend backend({36, 12});
@@ -28,11 +28,8 @@ TUINATOR_TEST(heatmap_renders_grid) {
     tuinator::MemoryTerminalBackend backend({30, 10});
     backend.init();
 
-    tuinator::Heatmap chart(
-        {{1.0, 2.0}, {3.0, 4.0}},
-        {"R0", "R1"},
-        {"C0", "C1"},
-        tuinator::HeatmapOptions{.min_width = 20, .min_height = 6});
+    tuinator::Heatmap chart({{1.0, 2.0}, {3.0, 4.0}}, {"R0", "R1"}, {"C0", "C1"},
+                            tuinator::HeatmapOptions{.min_width = 20, .min_height = 6});
 
     tuinator::test::render_root(chart, backend);
     TUINATOR_CHECK(tuinator::test::row_has(backend, "R0"));
@@ -42,13 +39,11 @@ TUINATOR_TEST(gauge_chart_renders_value) {
     tuinator::MemoryTerminalBackend backend({24, 10});
     backend.init();
 
-    tuinator::GaugeChart chart(
-        72.0,
-        tuinator::GaugeChartOptions{
-            .style = tuinator::GaugeStyle::Horizontal,
-            .unit = "%",
-            .diameter = 20,
-        });
+    tuinator::GaugeChart chart(72.0, tuinator::GaugeChartOptions{
+                                         .style = tuinator::GaugeStyle::Horizontal,
+                                         .unit = "%",
+                                         .diameter = 20,
+                                     });
 
     tuinator::test::render_root(chart, backend);
 

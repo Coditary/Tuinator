@@ -1,6 +1,5 @@
-#include <tuinator/widgets/menu/context_menu.hpp>
-
 #include <tuinator/core/event.hpp>
+#include <tuinator/widgets/menu/context_menu.hpp>
 #include <tuinator/widgets/menu/menu_common.hpp>
 
 #include <algorithm>
@@ -8,9 +7,7 @@
 
 namespace tuinator {
 
-ContextMenu::ContextMenu() {
-    look_ = menu_bar_look_classic(dark_theme());
-}
+ContextMenu::ContextMenu() { look_ = menu_bar_look_classic(dark_theme()); }
 
 void ContextMenu::set_items(std::vector<MenuItem> items) {
     items_ = std::move(items);
@@ -26,9 +23,7 @@ void ContextMenu::set_on_action(std::function<void(const std::string& item)> cal
     on_action_ = std::move(callback);
 }
 
-void ContextMenu::set_on_hint(std::function<void(const std::string& hint)> callback) {
-    on_hint_ = std::move(callback);
-}
+void ContextMenu::set_on_hint(std::function<void(const std::string& hint)> callback) { on_hint_ = std::move(callback); }
 
 void ContextMenu::show(Point position) {
     anchor_ = position;
@@ -248,8 +243,8 @@ bool ContextMenu::hit_panel(Point local, int& panel_index, int& row) const {
     const std::vector<MenuPanelLayout> panels = open_panels();
     for (int i = static_cast<int>(panels.size()) - 1; i >= 0; --i) {
         const MenuPanelLayout& panel = panels[static_cast<std::size_t>(i)];
-        if (local.x >= panel.x && local.x < panel.x + panel.width
-            && local.y >= panel.y && local.y < panel.y + panel.height) {
+        if (local.x >= panel.x && local.x < panel.x + panel.width && local.y >= panel.y &&
+            local.y < panel.y + panel.height) {
             panel_index = i;
             row = local.y - panel.y - 1;
             return true;
@@ -306,15 +301,9 @@ bool ContextMenu::handle_event(const Event& event) {
     }
 
     switch (key->key) {
-    case Key::Up:
-        move_selection(-1);
-        return true;
-    case Key::Down:
-        move_selection(1);
-        return true;
-    case Key::Enter:
-        activate_item(active_item_);
-        return true;
+    case Key::Up: move_selection(-1); return true;
+    case Key::Down: move_selection(1); return true;
+    case Key::Enter: activate_item(active_item_); return true;
     case Key::Left:
         if (!submenu_path_.empty()) {
             close_submenu();
@@ -327,8 +316,7 @@ bool ContextMenu::handle_event(const Event& event) {
         open_submenu();
         return submenu_path_.size() > depth_before;
     }
-    default:
-        break;
+    default: break;
     }
 
     return true;

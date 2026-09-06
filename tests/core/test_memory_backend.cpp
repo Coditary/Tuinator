@@ -1,9 +1,9 @@
-#include "test_harness.hpp"
-
 #include <tuinator/backend/memory_backend.hpp>
 #include <tuinator/core/event.hpp>
 
 #include <variant>
+
+#include "test_harness.hpp"
 
 TUINATOR_TEST(memory_backend_snapshot_and_resize) {
     tuinator::MemoryTerminalBackend backend({10, 3});

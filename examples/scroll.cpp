@@ -5,37 +5,28 @@
 
 namespace {
 
-std::unique_ptr<tuinator::Widget> make_list_row(
-    int index,
-    const tuinator::Theme& theme,
-    tuinator::Label* status) {
+std::unique_ptr<tuinator::Widget> make_list_row(int index, const tuinator::Theme& theme, tuinator::Label* status) {
     auto row = std::make_unique<tuinator::HBox>(tuinator::BoxOptions{.gap = 2});
 
-    row->add_child(std::make_unique<tuinator::Label>(
-        "Item " + std::to_string(index),
-        theme.label));
+    row->add_child(std::make_unique<tuinator::Label>("Item " + std::to_string(index), theme.label));
 
     row->add_child(std::make_unique<tuinator::Toggle>(
-        "Enable",
-        index % 3 == 0,
+        "Enable", index % 3 == 0,
         [status](bool checked) {
             const std::string state = checked ? "on" : "off";
             status->set_text("Last toggle: " + state);
         },
-        theme.button,
-        theme.success));
+        theme.button, theme.success));
 
     return row;
 }
 
 std::unique_ptr<tuinator::Widget> make_wide_row(int index, const tuinator::Theme& theme) {
     auto row = std::make_unique<tuinator::HBox>(tuinator::BoxOptions{.gap = 1});
-    row->add_child(std::make_unique<tuinator::Label>(
-        "Row " + std::to_string(index) + " | alpha beta gamma delta",
-        theme.label));
-    row->add_child(std::make_unique<tuinator::Label>(
-        "extra-wide tail section " + std::to_string(index * 11),
-        theme.muted));
+    row->add_child(
+        std::make_unique<tuinator::Label>("Row " + std::to_string(index) + " | alpha beta gamma delta", theme.label));
+    row->add_child(
+        std::make_unique<tuinator::Label>("extra-wide tail section " + std::to_string(index * 11), theme.muted));
     return row;
 }
 
@@ -49,8 +40,7 @@ int main() {
 
     root->add_child(std::make_unique<tuinator::Label>("ScrollView demo (vertical + horizontal)", theme.heading));
     root->add_child(std::make_unique<tuinator::Label>(
-        "Mouse: click toggles | drag scrollbars | wheel/tile scroll | Tab moves focus",
-        theme.muted));
+        "Mouse: click toggles | drag scrollbars | wheel/tile scroll | Tab moves focus", theme.muted));
 
     auto status = std::make_unique<tuinator::Label>("Last toggle: (none)", theme.accent);
     auto* status_ptr = status.get();
@@ -89,12 +79,10 @@ int main() {
         .width = 34,
         .height = 12,
         .scrollbars = tuinator::scrollbar_options(theme, tuinator::ScrollbarPreset::Thin)
-            .with_thumb_style(tuinator::style_fg(tuinator::Rgb::hex(0xFFAA44))),
+                          .with_thumb_style(tuinator::style_fg(tuinator::Rgb::hex(0xFFAA44))),
     };
 
-    right_column->add_child(std::make_unique<tuinator::ScrollView>(
-        std::move(wide),
-        horizontal_options));
+    right_column->add_child(std::make_unique<tuinator::ScrollView>(std::move(wide), horizontal_options));
     panels->add_child(std::move(right_column));
 
     root->add_child(std::move(panels));

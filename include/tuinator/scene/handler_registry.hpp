@@ -12,14 +12,14 @@ namespace scene {
 
 /// Maps scene handler names (e.g. onClick: "quit") to C++ callbacks.
 class HandlerRegistry {
-public:
+  public:
     using Handler = std::function<void(Application&)>;
 
     void register_handler(std::string name, Handler handler);
     const Handler* find(const std::string& name) const;
     void invoke(const std::string& name, Application& app) const;
 
-private:
+  private:
     std::unordered_map<std::string, Handler> handlers_;
 };
 

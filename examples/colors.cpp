@@ -33,8 +33,7 @@ void add_gradient_column(tuinator::VBox& column, bool ansi_only) {
     for (int i = 0; i < kGradientSteps; ++i) {
         const float t = static_cast<float>(i) / static_cast<float>(kGradientSteps - 1);
         const tuinator::ColorValue value = tuinator::ColorValue::from_rgb(gradient_color(t));
-        const tuinator::Style style = ansi_only ? value.ansi_foreground_style()
-                                                : value.foreground_style();
+        const tuinator::Style style = ansi_only ? value.ansi_foreground_style() : value.foreground_style();
 
         column.add_child(std::make_unique<tuinator::Label>(kBar, style));
     }
@@ -48,17 +47,11 @@ int main() {
     auto root = std::make_unique<tuinator::VBox>(tuinator::BoxOptions{.gap = 0, .padding = 1});
 
     root->add_child(std::make_unique<tuinator::Label>(
-        "Color Palette (8-color)",
-        tuinator::Style{.foreground = tuinator::Color::White, .bold = true}));
+        "Color Palette (8-color)", tuinator::Style{.foreground = tuinator::Color::White, .bold = true}));
 
     const tuinator::Color colors[] = {
-        tuinator::Color::Red,
-        tuinator::Color::Green,
-        tuinator::Color::Yellow,
-        tuinator::Color::Blue,
-        tuinator::Color::Magenta,
-        tuinator::Color::Cyan,
-        tuinator::Color::White,
+        tuinator::Color::Red,     tuinator::Color::Green, tuinator::Color::Yellow, tuinator::Color::Blue,
+        tuinator::Color::Magenta, tuinator::Color::Cyan,  tuinator::Color::White,
     };
 
     const char* names[] = {
@@ -66,9 +59,8 @@ int main() {
     };
 
     for (std::size_t i = 0; i < sizeof(colors) / sizeof(colors[0]); ++i) {
-        root->add_child(std::make_unique<tuinator::Label>(
-            std::string("* ") + names[i],
-            tuinator::Style{.foreground = colors[i], .bold = true}));
+        root->add_child(std::make_unique<tuinator::Label>(std::string("* ") + names[i],
+                                                          tuinator::Style{.foreground = colors[i], .bold = true}));
     }
 
     root->add_child(std::make_unique<tuinator::Label>(""));
@@ -76,21 +68,18 @@ int main() {
         const char* colorterm = std::getenv("COLORTERM");
         const char* term = std::getenv("TERM");
         root->add_child(std::make_unique<tuinator::Label>(
-            std::string("COLORTERM=") + (colorterm != nullptr ? colorterm : "(unset)")
-                + "  TERM=" + (term != nullptr ? term : "(unset)"),
+            std::string("COLORTERM=") + (colorterm != nullptr ? colorterm : "(unset)") +
+                "  TERM=" + (term != nullptr ? term : "(unset)"),
             tuinator::Style{.foreground = tuinator::Color::Yellow, .dim = true}));
     }
     root->add_child(std::make_unique<tuinator::Label>(
-        "Gradient: true color vs ANSI fallback",
-        tuinator::Style{.foreground = tuinator::Color::White, .bold = true}));
+        "Gradient: true color vs ANSI fallback", tuinator::Style{.foreground = tuinator::Color::White, .bold = true}));
 
     auto headers = std::make_unique<tuinator::HBox>(tuinator::BoxOptions{.gap = 4});
-    headers->add_child(std::make_unique<tuinator::Label>(
-        "True color (24-bit RGB)",
-        tuinator::Style{.foreground = tuinator::Color::Cyan}));
-    headers->add_child(std::make_unique<tuinator::Label>(
-        "ANSI fallback (nearest)",
-        tuinator::Style{.foreground = tuinator::Color::Yellow}));
+    headers->add_child(std::make_unique<tuinator::Label>("True color (24-bit RGB)",
+                                                         tuinator::Style{.foreground = tuinator::Color::Cyan}));
+    headers->add_child(std::make_unique<tuinator::Label>("ANSI fallback (nearest)",
+                                                         tuinator::Style{.foreground = tuinator::Color::Yellow}));
     root->add_child(std::move(headers));
 
     auto gradients = std::make_unique<tuinator::HBox>(tuinator::BoxOptions{.gap = 4});
@@ -104,18 +93,13 @@ int main() {
 
     root->add_child(std::make_unique<tuinator::Label>(""));
     root->add_child(std::make_unique<tuinator::Label>(
-        "bold text",
-        tuinator::Style{.foreground = tuinator::Color::Cyan, .bold = true}));
+        "bold text", tuinator::Style{.foreground = tuinator::Color::Cyan, .bold = true}));
     root->add_child(std::make_unique<tuinator::Label>(
-        "dim text",
-        tuinator::Style{.foreground = tuinator::Color::Yellow, .dim = true}));
-    root->add_child(std::make_unique<tuinator::Label>(
-        "reverse text",
-        tuinator::Style{.reverse = true}));
+        "dim text", tuinator::Style{.foreground = tuinator::Color::Yellow, .dim = true}));
+    root->add_child(std::make_unique<tuinator::Label>("reverse text", tuinator::Style{.reverse = true}));
 
     root->add_child(std::make_unique<tuinator::Label>(
-        "Press q to quit",
-        tuinator::Style{.foreground = tuinator::Color::Yellow, .dim = true}));
+        "Press q to quit", tuinator::Style{.foreground = tuinator::Color::Yellow, .dim = true}));
 
     app.set_root(std::move(root));
     return app.run();

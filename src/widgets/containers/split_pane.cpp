@@ -6,12 +6,8 @@
 
 namespace tuinator {
 
-SplitPane::SplitPane(std::unique_ptr<Widget> first,
-                     std::unique_ptr<Widget> second,
-                     SplitPaneOptions options)
-    : first_(std::move(first)),
-      second_(std::move(second)),
-      options_(options) {}
+SplitPane::SplitPane(std::unique_ptr<Widget> first, std::unique_ptr<Widget> second, SplitPaneOptions options)
+    : first_(std::move(first)), second_(std::move(second)), options_(options) {}
 
 Size SplitPane::preferred_size() const {
     const Size first_size = first_ ? first_->preferred_size() : Size{};
@@ -35,8 +31,7 @@ void SplitPane::layout(Rect bounds) {
 
     if (options_.orientation == SplitOrientation::Horizontal) {
         const int divider = 1;
-        const int first_width =
-            std::clamp(options_.first_size, 0, std::max(0, bounds.width - divider));
+        const int first_width = std::clamp(options_.first_size, 0, std::max(0, bounds.width - divider));
         const int second_width = std::max(0, bounds.width - first_width - divider);
 
         if (first_) {
@@ -49,8 +44,7 @@ void SplitPane::layout(Rect bounds) {
     }
 
     const int divider = 1;
-    const int first_height =
-        std::clamp(options_.first_size, 0, std::max(0, bounds.height - divider));
+    const int first_height = std::clamp(options_.first_size, 0, std::max(0, bounds.height - divider));
     const int second_height = std::max(0, bounds.height - first_height - divider);
 
     if (first_) {
@@ -120,8 +114,7 @@ bool SplitPane::handle_event(const Event& event) {
 }
 
 bool SplitPane::has_focused_descendant() const {
-    return (first_ && first_->has_focused_descendant())
-        || (second_ && second_->has_focused_descendant());
+    return (first_ && first_->has_focused_descendant()) || (second_ && second_->has_focused_descendant());
 }
 
 void SplitPane::collect_focusable(std::vector<Widget*>& out) {

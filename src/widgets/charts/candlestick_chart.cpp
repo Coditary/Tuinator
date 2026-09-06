@@ -1,6 +1,5 @@
-#include <tuinator/widgets/charts/candlestick_chart.hpp>
-
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/charts/candlestick_chart.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -8,8 +7,7 @@
 namespace tuinator {
 
 CandlestickChart::CandlestickChart(std::vector<OhlcBar> bars, CandlestickChartOptions options)
-    : bars_(std::move(bars)),
-      options_(std::move(options)) {}
+    : bars_(std::move(bars)), options_(std::move(options)) {}
 
 void CandlestickChart::set_bars(std::vector<OhlcBar> bars) {
     bars_ = std::move(bars);
@@ -67,8 +65,7 @@ double CandlestickChart::volume_max() const {
 
 Size CandlestickChart::preferred_size() const {
     const int count = static_cast<int>(bars_.size());
-    const int compact_width = count * std::max(1, options_.bar_width)
-        + std::max(0, count - 1) * options_.bar_gap + 8;
+    const int compact_width = count * std::max(1, options_.bar_width) + std::max(0, count - 1) * options_.bar_gap + 8;
     return {
         std::max(options_.min_width, compact_width),
         std::max(options_.min_height, 12 + (options_.title.empty() ? 0 : 1)),
@@ -92,30 +89,19 @@ void CandlestickChart::paint(PaintContext& ctx) const {
 
     const int price_height = options_.show_volume ? std::max(4, plot.height * 2 / 3) : plot.height;
     ChartPlotArea price_plot{plot.left, plot.top, plot.width, price_height, plot.title_rows, 0};
-    chart_paint_horizontal_grid(
-        canvas,
-        price_plot,
-        min_v,
-        max_v,
-        options_.axis_style,
-        options_.grid_style,
-        options_.show_axis);
+    chart_paint_horizontal_grid(canvas, price_plot, min_v, max_v, options_.axis_style, options_.grid_style,
+                                options_.show_axis);
 
     const int count = static_cast<int>(bars_.size());
     const int body_w = std::max(1, options_.bar_width);
     const int gap = std::max(0, options_.bar_gap);
     const int slot = body_w + gap;
     const int total_w = count * slot - gap;
-    const int start_x = options_.compact_layout
-        ? plot.left + std::max(0, (plot.width - total_w) / 2)
-        : plot.left;
-    const int stretch_slot = options_.compact_layout
-        ? slot
-        : std::max(slot, plot.width / std::max(1, count));
+    const int start_x = options_.compact_layout ? plot.left + std::max(0, (plot.width - total_w) / 2) : plot.left;
+    const int stretch_slot = options_.compact_layout ? slot : std::max(slot, plot.width / std::max(1, count));
 
     auto price_to_y = [&](double price) {
-        return plot.top + price_height - 1
-            - static_cast<int>((price - min_v) / span * (price_height - 1) + 0.5);
+        return plot.top + price_height - 1 - static_cast<int>((price - min_v) / span * (price_height - 1) + 0.5);
     };
 
     for (int i = 0; i < count; ++i) {
@@ -157,18 +143,14 @@ void CandlestickChart::paint(PaintContext& ctx) const {
 
         if (options_.show_labels) {
             const int label_slot = options_.compact_layout ? slot : stretch_slot;
-            canvas.draw_text(
-                {slot_x, plot.top + plot.height - plot.volume_rows},
-                bar.label.substr(0, static_cast<std::size_t>(label_slot)),
-                options_.axis_style);
+            canvas.draw_text({slot_x, plot.top + plot.height - plot.volume_rows},
+                             bar.label.substr(0, static_cast<std::size_t>(label_slot)), options_.axis_style);
         }
 
         if (options_.show_volume && bar.volume > 0.0) {
             const double vol_max = volume_max();
-            const int vol_height = std::clamp(
-                static_cast<int>(bar.volume / vol_max * (plot.volume_rows - 1)),
-                0,
-                plot.volume_rows - 1);
+            const int vol_height =
+                std::clamp(static_cast<int>(bar.volume / vol_max * (plot.volume_rows - 1)), 0, plot.volume_rows - 1);
             const int vol_base = plot.top + plot.height - 1;
             for (int vy = 0; vy <= vol_height; ++vy) {
                 canvas.draw_text({x, vol_base - vy}, "▂", body);

@@ -88,14 +88,13 @@ const std::vector<BigTextPreset>& all_big_text_styles();
 const BigTextPreset* big_text_style_named(std::string_view name);
 BigTextKind big_text_kind_named(std::string_view name, BigTextKind fallback = BigTextKind::Block);
 
-std::vector<BigTextGradientStop> big_text_gradient(
-    std::initializer_list<std::pair<float, std::uint32_t>> hex_stops);
+std::vector<BigTextGradientStop> big_text_gradient(std::initializer_list<std::pair<float, std::uint32_t>> hex_stops);
 void apply_big_text_look(BigTextOptions& options, const BigTextLook& look);
 const std::vector<BigTextLook>& all_big_text_looks();
 const BigTextLook* big_text_look_named(std::string_view name);
 
 class BigText : public Widget {
-public:
+  public:
     explicit BigText(std::string text, Style style = {});
     BigText(std::string text, BigTextKind kind, Style style = {});
     BigText(std::string text, const BigTextOptions& options, Style style = {});
@@ -117,7 +116,7 @@ public:
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
-private:
+  private:
     void rebuild() const;
 
     std::string text_;

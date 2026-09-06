@@ -1,11 +1,11 @@
-#include "test_harness.hpp"
-
 #include <tuinator/tuinator.hpp>
 
 #include <cstdio>
 #include <cstdlib>
 #include <memory>
 #include <string>
+
+#include "test_harness.hpp"
 
 #if TUINATOR_PLATFORM_POSIX
 
@@ -16,9 +16,7 @@ struct CaptureOutput {
     size_t length = 0;
     FILE* file = nullptr;
 
-    CaptureOutput() {
-        file = open_memstream(&buffer, &length);
-    }
+    CaptureOutput() { file = open_memstream(&buffer, &length); }
 
     ~CaptureOutput() {
         if (file != nullptr) {
@@ -27,16 +25,12 @@ struct CaptureOutput {
         std::free(buffer);
     }
 
-    std::string text() const {
-        return std::string(buffer != nullptr ? buffer : "", length);
-    }
+    std::string text() const { return std::string(buffer != nullptr ? buffer : "", length); }
 };
 
 } // namespace
 
-TUINATOR_TEST(flush_cli_output_smoke) {
-    tuinator::flush_cli_output();
-}
+TUINATOR_TEST(flush_cli_output_smoke) { tuinator::flush_cli_output(); }
 
 TUINATOR_TEST(inline_view_region_size_matches_height) {
     CaptureOutput capture;
@@ -52,8 +46,7 @@ TUINATOR_TEST(inline_view_start_renders_label) {
 
     tuinator::InlineView view({.height = 3, .clear_on_shutdown = false, .output = capture.file});
     view.set_root(std::make_unique<tuinator::Label>(
-        "hello inline",
-        tuinator::Style{.foreground = tuinator::Color::Green, .bold = true}));
+        "hello inline", tuinator::Style{.foreground = tuinator::Color::Green, .bold = true}));
     view.start();
 
     const std::string out = capture.text();
@@ -94,11 +87,7 @@ TUINATOR_TEST(inline_scene_load_from_string) {
         }
     })json";
 
-    auto scene = tuinator::scene::load_and_build_from_string(
-        kScene,
-        view.app(),
-        view.app().theme(),
-        {});
+    auto scene = tuinator::scene::load_and_build_from_string(kScene, view.app(), view.app().theme(), {});
     TUINATOR_CHECK(scene.root != nullptr);
 
     view.set_root(std::move(scene.root));
@@ -173,11 +162,7 @@ TUINATOR_TEST(inline_scene_button_quit_handler) {
 
     tuinator::scene::LoadOptions options;
     options.handlers = &handlers;
-    auto scene = tuinator::scene::load_and_build_from_string(
-        kScene,
-        view.app(),
-        view.app().theme(),
-        options);
+    auto scene = tuinator::scene::load_and_build_from_string(kScene, view.app(), view.app().theme(), options);
     view.set_root(std::move(scene.root));
     view.start();
     view.finish();

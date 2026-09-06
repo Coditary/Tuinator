@@ -31,7 +31,7 @@ struct StackedAreaChartOptions {
 };
 
 class StackedAreaChart : public Widget {
-public:
+  public:
     StackedAreaChart(std::vector<StackedAreaSeries> series = {}, StackedAreaChartOptions options = {});
 
     const std::vector<StackedAreaSeries>& series() const { return series_; }
@@ -43,7 +43,7 @@ public:
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
-private:
+  private:
     struct PlotArea {
         int left = 0;
         int top = 0;

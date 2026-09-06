@@ -11,7 +11,7 @@
 namespace tuinator {
 
 class Widget {
-public:
+  public:
     virtual ~Widget() = default;
 
     virtual Size preferred_size() const = 0;
@@ -57,7 +57,7 @@ public:
     virtual void for_each_child(const std::function<void(Widget*)>& visitor);
     virtual void for_each_descendant(const std::function<void(Widget*)>& visitor);
 
-protected:
+  protected:
     Rect bounds_{};
     bool focused_ = false;
     int flex_ = 0;

@@ -1,5 +1,4 @@
 #include <tuinator/render/action_icon.hpp>
-
 #include <tuinator/render/glyphs.hpp>
 
 #include <array>
@@ -29,13 +28,8 @@ std::string utf8_from(char32_t cp) {
     return out;
 }
 
-constexpr ActionIconDescriptor make(
-    ActionIcon kind,
-    ActionIconCategory category,
-    const char* path,
-    const char* nerd_suffix,
-    char32_t codepoint,
-    char ascii) {
+constexpr ActionIconDescriptor make(ActionIcon kind, ActionIconCategory category, const char* path,
+                                    const char* nerd_suffix, char32_t codepoint, char ascii) {
     return ActionIconDescriptor{kind, category, path, nerd_suffix, codepoint, ascii};
 }
 
@@ -56,34 +50,24 @@ const ActionIconDescriptor& descriptor_or_default(ActionIcon icon) {
 
 } // namespace
 
-const ActionIconDescriptor& action_icon_descriptor(ActionIcon icon) {
-    return descriptor_or_default(icon);
-}
+const ActionIconDescriptor& action_icon_descriptor(ActionIcon icon) { return descriptor_or_default(icon); }
 
-ActionIconCategory action_icon_category(ActionIcon icon) {
-    return action_icon_descriptor(icon).category;
-}
+ActionIconCategory action_icon_category(ActionIcon icon) { return action_icon_descriptor(icon).category; }
 
-const char* action_icon_path(ActionIcon icon) {
-    return action_icon_descriptor(icon).path;
-}
+const char* action_icon_path(ActionIcon icon) { return action_icon_descriptor(icon).path; }
 
-const char* action_icon_nerd_suffix(ActionIcon icon) {
-    return action_icon_descriptor(icon).nerd_suffix;
-}
+const char* action_icon_nerd_suffix(ActionIcon icon) { return action_icon_descriptor(icon).nerd_suffix; }
 
 const char* action_icon_category_path(ActionIconCategory category) {
     switch (category) {
-    case ActionIconCategory::Action:
-        return "action";
+    case ActionIconCategory::Action: return "action";
     }
     return "action";
 }
 
 const char* action_icon_category_label(ActionIconCategory category) {
     switch (category) {
-    case ActionIconCategory::Action:
-        return "Action";
+    case ActionIconCategory::Action: return "Action";
     }
     return "Other";
 }

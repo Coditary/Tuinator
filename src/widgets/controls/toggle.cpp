@@ -1,28 +1,16 @@
-#include <tuinator/widgets/controls/toggle.hpp>
-
 #include <tuinator/core/event.hpp>
+#include <tuinator/widgets/controls/toggle.hpp>
 
 #include <string>
 #include <variant>
 
 namespace tuinator {
 
-Toggle::Toggle(std::string label,
-               bool checked,
-               std::function<void(bool)> on_change,
-               Style style,
-               Style checked_style)
-    : label_(std::move(label)),
-      checked_(checked),
-      on_change_(std::move(on_change)),
-      style_(style) {
-    if (checked_style.foreground == Color::Default
-        && !checked_style.foreground_rgb.has_value()
-        && checked_style.background == Color::Default
-        && !checked_style.background_rgb.has_value()
-        && !checked_style.bold
-        && !checked_style.dim
-        && !checked_style.reverse) {
+Toggle::Toggle(std::string label, bool checked, std::function<void(bool)> on_change, Style style, Style checked_style)
+    : label_(std::move(label)), checked_(checked), on_change_(std::move(on_change)), style_(style) {
+    if (checked_style.foreground == Color::Default && !checked_style.foreground_rgb.has_value() &&
+        checked_style.background == Color::Default && !checked_style.background_rgb.has_value() &&
+        !checked_style.bold && !checked_style.dim && !checked_style.reverse) {
         checked_style_ = style_;
         checked_style_.foreground = Color::Green;
     } else {

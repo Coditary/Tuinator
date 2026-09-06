@@ -6,9 +6,7 @@ namespace tuinator {
 
 Separator::Separator(Style style) : style_(style) {}
 
-Size Separator::preferred_size() const {
-    return {1, 1};
-}
+Size Separator::preferred_size() const { return {1, 1}; }
 
 void Separator::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;

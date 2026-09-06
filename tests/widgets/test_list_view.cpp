@@ -1,9 +1,9 @@
-#include "render_helper.hpp"
-#include "test_harness.hpp"
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/theme.hpp>
 #include <tuinator/widgets/views/list_view.hpp>
+
+#include "render_helper.hpp"
+#include "test_harness.hpp"
 
 TUINATOR_TEST(list_view_select_with_keys) {
     const tuinator::Theme theme = tuinator::dark_theme();

@@ -1,11 +1,11 @@
-#include "render_helper.hpp"
-#include "test_harness.hpp"
-
 #include <tuinator/backend/memory_backend.hpp>
 #include <tuinator/render/nerd_glyph_catalog.hpp>
 #include <tuinator/widgets/display/nerd_glyph_matrix_gallery.hpp>
 
 #include <cstdio>
+
+#include "render_helper.hpp"
+#include "test_harness.hpp"
 
 #ifndef TUINATOR_DATA_DIR
 #define TUINATOR_DATA_DIR "data"
@@ -13,9 +13,7 @@
 
 namespace {
 
-std::string data_root() {
-    return TUINATOR_DATA_DIR;
-}
+std::string data_root() { return TUINATOR_DATA_DIR; }
 
 } // namespace
 

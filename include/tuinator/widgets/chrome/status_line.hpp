@@ -2,8 +2,8 @@
 
 #include <tuinator/render/file_icon.hpp>
 #include <tuinator/render/line_icon.hpp>
-#include <tuinator/render/ui_icon.hpp>
 #include <tuinator/render/style.hpp>
+#include <tuinator/render/ui_icon.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <optional>
@@ -37,7 +37,7 @@ struct StatusLineStyle {
 };
 
 class StatusLine : public Widget {
-public:
+  public:
     explicit StatusLine(StatusLineStyle style = {});
 
     void set_left(std::vector<StatusSegment> segments);
@@ -51,7 +51,7 @@ public:
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
-private:
+  private:
     int segment_width(const StatusSegment& segment) const;
     Style segment_style(const StatusSegment& segment) const;
     void paint_segment(Canvas& canvas, int x, int y, const StatusSegment& segment) const;

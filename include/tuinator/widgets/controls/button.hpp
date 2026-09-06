@@ -9,7 +9,7 @@
 namespace tuinator {
 
 class Button : public Widget {
-public:
+  public:
     Button(std::string label, std::function<void()> on_click = {}, Style style = {});
 
     const std::string& label() const { return label_; }
@@ -20,7 +20,7 @@ public:
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
 
-private:
+  private:
     std::string label_;
     std::function<void()> on_click_;
     Style style_;

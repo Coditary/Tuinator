@@ -8,19 +8,12 @@ namespace {
 
 Color nearest_from_rgb(Rgb rgb) {
     constexpr Color order[] = {
-        Color::Black, Color::Red, Color::Green, Color::Yellow,
-        Color::Blue, Color::Magenta, Color::Cyan, Color::White,
+        Color::Black, Color::Red, Color::Green, Color::Yellow, Color::Blue, Color::Magenta, Color::Cyan, Color::White,
     };
 
     constexpr Rgb samples[] = {
-        {0, 0, 0},
-        {220, 50, 47},
-        {80, 200, 120},
-        {220, 200, 50},
-        {80, 120, 220},
-        {200, 80, 200},
-        {80, 200, 220},
-        {230, 230, 230},
+        {0, 0, 0},      {220, 50, 47},  {80, 200, 120}, {220, 200, 50},
+        {80, 120, 220}, {200, 80, 200}, {80, 200, 220}, {230, 230, 230},
     };
 
     Color best = Color::White;
@@ -43,22 +36,16 @@ Color nearest_from_rgb(Rgb rgb) {
 
 } // namespace
 
-Color nearest_ansi_color(Rgb rgb) {
-    return nearest_from_rgb(rgb);
-}
+Color nearest_ansi_color(Rgb rgb) { return nearest_from_rgb(rgb); }
 
 ColorValue ColorValue::from_hex(std::uint32_t hex) {
     const Rgb value = Rgb::hex(hex);
     return {nearest_from_rgb(value), value};
 }
 
-ColorValue ColorValue::from_rgb(Rgb value) {
-    return {nearest_from_rgb(value), value};
-}
+ColorValue ColorValue::from_rgb(Rgb value) { return {nearest_from_rgb(value), value}; }
 
-ColorValue ColorValue::from_ansi(Color color) {
-    return {color, std::nullopt};
-}
+ColorValue ColorValue::from_ansi(Color color) { return {color, std::nullopt}; }
 
 Style ColorValue::foreground_style(Style base) const {
     base.foreground = ansi;
@@ -84,13 +71,9 @@ Style ColorValue::ansi_background_style(Style base) const {
     return base;
 }
 
-Style style_hex_fg(std::uint32_t hex, Style base) {
-    return ColorValue::from_hex(hex).foreground_style(base);
-}
+Style style_hex_fg(std::uint32_t hex, Style base) { return ColorValue::from_hex(hex).foreground_style(base); }
 
-Style style_hex_bg(std::uint32_t hex, Style base) {
-    return ColorValue::from_hex(hex).background_style(base);
-}
+Style style_hex_bg(std::uint32_t hex, Style base) { return ColorValue::from_hex(hex).background_style(base); }
 
 Style style_hex_fg_bg(std::uint32_t fg_hex, std::uint32_t bg_hex, Style base) {
     const ColorValue fg = ColorValue::from_hex(fg_hex);

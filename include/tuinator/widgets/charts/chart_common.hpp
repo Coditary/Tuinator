@@ -48,30 +48,15 @@ struct ChartPlotArea {
     int footer_rows = 0;
 };
 
-ChartPlotArea chart_compute_plot(
-    const Rect& bounds,
-    const std::string& title,
-    int footer_rows,
-    bool show_axis,
-    int axis_width = 6);
+ChartPlotArea chart_compute_plot(const Rect& bounds, const std::string& title, int footer_rows, bool show_axis,
+                                 int axis_width = 6);
 
-void chart_paint_horizontal_grid(
-    Canvas& canvas,
-    const ChartPlotArea& plot,
-    double min_v,
-    double max_v,
-    const Style& axis_style,
-    const Style& grid_style,
-    bool show_axis = true,
-    int grid_lines = 4);
+void chart_paint_horizontal_grid(Canvas& canvas, const ChartPlotArea& plot, double min_v, double max_v,
+                                 const Style& axis_style, const Style& grid_style, bool show_axis = true,
+                                 int grid_lines = 4);
 
-void chart_paint_glyph_cell(
-    Canvas& canvas,
-    int x,
-    int y,
-    ChartGlyphStyle style,
-    const std::string& custom_glyph,
-    const Style& cell_style);
+void chart_paint_glyph_cell(Canvas& canvas, int x, int y, ChartGlyphStyle style, const std::string& custom_glyph,
+                            const Style& cell_style);
 
 Style chart_blend_styles(const Style& low, const Style& high, double t);
 

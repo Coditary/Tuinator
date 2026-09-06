@@ -17,7 +17,7 @@ struct CommandPaletteEntry {
 };
 
 class CommandPalette : public Widget {
-public:
+  public:
     CommandPalette();
 
     void set_entries(std::vector<CommandPaletteEntry> entries);
@@ -33,7 +33,7 @@ public:
     bool handle_event(const Event& event) override;
     bool captures_pointer() const override { return open_; }
 
-private:
+  private:
     void rebuild_matches();
     void move_selection(int delta);
     void activate_selection();

@@ -44,16 +44,11 @@ CheckboxOptions checkbox_options_default(const Theme& theme);
 void apply_checkbox_style(CheckboxOptions& options, const CheckboxStyle& style, const Theme& theme);
 
 class Checkbox : public Widget {
-public:
-    Checkbox(std::string label,
-             bool checked = false,
-             CheckboxOptions options = {},
+  public:
+    Checkbox(std::string label, bool checked = false, CheckboxOptions options = {},
              std::function<void(bool)> on_change = {});
 
-    Checkbox(std::string label,
-             bool checked,
-             std::string_view style_name,
-             std::function<void(bool)> on_change = {},
+    Checkbox(std::string label, bool checked, std::string_view style_name, std::function<void(bool)> on_change = {},
              const Theme& theme = dark_theme());
 
     const std::string& label() const { return label_; }
@@ -70,7 +65,7 @@ public:
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
 
-private:
+  private:
     void toggle();
 
     std::string label_;

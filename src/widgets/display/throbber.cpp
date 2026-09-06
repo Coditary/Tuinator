@@ -1,6 +1,5 @@
-#include <tuinator/widgets/display/throbber.hpp>
-
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/display/throbber.hpp>
 
 #include <algorithm>
 #include <string>
@@ -9,12 +8,8 @@ namespace tuinator {
 
 namespace {
 
-ThrobberSet make_set(
-    const char* id,
-    const char* title,
-    int interval_ms,
-    std::initializer_list<const char*> frames,
-    std::initializer_list<const char*> aliases = {}) {
+ThrobberSet make_set(const char* id, const char* title, int interval_ms, std::initializer_list<const char*> frames,
+                     std::initializer_list<const char*> aliases = {}) {
     ThrobberSet set;
     set.id = id;
     set.title = title;
@@ -49,23 +44,33 @@ bool set_matches(const ThrobberSet& set, std::string_view name) {
 const std::vector<ThrobberSet>& all_throbber_sets() {
     static const std::vector<ThrobberSet> sets = {
         make_set("line", "Line", 80, {"|", "/", "-", "\\"}, {"ascii"}),
-        make_set("braille", "Braille", 80, {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}, {"dots", "box_drawing", "braille_six"}),
-        make_set("braille-heavy", "Braille heavy", 80, {"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"}, {"dots2", "braille_six_double"}),
+        make_set("braille", "Braille", 80, {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"},
+                 {"dots", "box_drawing", "braille_six"}),
+        make_set("braille-heavy", "Braille heavy", 80, {"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"},
+                 {"dots2", "braille_six_double"}),
         make_set("braille-twist", "Braille twist", 80, {"⠋", "⠙", "⠚", "⠞", "⠖", "⠦", "⠴", "⠲", "⠳", "⠓"}, {"dots3"}),
-        make_set("braille-wave", "Braille wave", 80, {"⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠", "⠰", "⠸", "⠙", "⠋", "⠇", "⠆"}, {"dots4"}),
-        make_set("braille-orbit", "Braille orbit", 80, {"⡀", "⠄", "⠂", "⠁", "⠈", "⠐", "⠠", "⢀"}, {"dots8", "braille_double", "dots11", "dots12"}),
+        make_set("braille-wave", "Braille wave", 80,
+                 {"⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠", "⠰", "⠸", "⠙", "⠋", "⠇", "⠆"}, {"dots4"}),
+        make_set("braille-orbit", "Braille orbit", 80, {"⡀", "⠄", "⠂", "⠁", "⠈", "⠐", "⠠", "⢀"},
+                 {"dots8", "braille_double", "dots11", "dots12"}),
         make_set("braille-bounce", "Braille bounce", 80, {"⢹", "⢺", "⢼", "⣸", "⣇", "⡧", "⡗", "⡏"}, {"dots9"}),
         make_set("braille-rise", "Braille rise", 80, {"⢄", "⢂", "⢁", "⡁", "⡈", "⡐", "⡠"}, {"dots10"}),
         make_set("braille-fill", "Braille fill", 80, {"⡀", "⡁", "⡂", "⡃", "⡄", "⡅", "⡆", "⡇"}, {"braille_one"}),
         make_set("braille-stack", "Braille stack", 80, {"⢀", "⢠", "⢰", "⢸", "⢹", "⢻", "⢿", "⣿"}, {"braille_eight"}),
-        make_set("braille-build", "Braille build", 80, {"⠁", "⠉", "⠋", "⠛", "⠟", "⠿", "⡿", "⣿"}, {"braille_eight_double"}),
-        make_set("braille-binary", "Braille binary", 80, {"⠀", "⠁", "⠂", "⠃", "⠄", "⠅", "⠆", "⠇", "⡀", "⡁", "⡂", "⡃", "⡄", "⡅", "⡆", "⡇"}, {"dots8Bit"}),
+        make_set("braille-build", "Braille build", 80, {"⠁", "⠉", "⠋", "⠛", "⠟", "⠿", "⡿", "⣿"},
+                 {"braille_eight_double"}),
+        make_set("braille-binary", "Braille binary", 80,
+                 {"⠀", "⠁", "⠂", "⠃", "⠄", "⠅", "⠆", "⠇", "⡀", "⡁", "⡂", "⡃", "⡄", "⡅", "⡆", "⡇"}, {"dots8Bit"}),
         make_set("arrows", "Arrows", 100, {"←", "↖", "↑", "↗", "→", "↘", "↓", "↙"}, {"arrow"}),
         make_set("arrows-double", "Double arrows", 120, {"⇐", "⇖", "⇑", "⇗", "⇒", "⇘", "⇓", "⇙"}, {"double_arrow"}),
         make_set("chevrons", "Chevrons", 80, {"▹▹▹▹▹", "▸▹▹▹▹", "▹▸▹▹▹", "▹▹▸▹▹", "▹▹▹▸▹", "▹▹▹▹▸"}, {"arrow2"}),
-        make_set("chevrons-pulse", "Chevrons pulse", 80, {"▹▹▹▹▹", "▸▹▹▹▹", "▹▸▹▹▹", "▹▹▸▹▹", "▹▹▹▸▹", "▹▹▹▹▸", "▪▪▪▪▪"}, {"arrow3"}),
-        make_set("grow-vertical", "Grow vertical", 80, {"▁", "▃", "▄", "▅", "▆", "▇", "█", "▇", "▆", "▅", "▄", "▃"}, {"vertical_block", "growVertical"}),
-        make_set("grow-horizontal", "Grow horizontal", 80, {"▏", "▎", "▍", "▌", "▋", "▊", "▉", "█", "▉", "▊", "▋", "▌", "▍", "▎"}, {"horizontal_block", "growHorizontal"}),
+        make_set("chevrons-pulse", "Chevrons pulse", 80,
+                 {"▹▹▹▹▹", "▸▹▹▹▹", "▹▸▹▹▹", "▹▹▸▹▹", "▹▹▹▸▹", "▹▹▹▹▸", "▪▪▪▪▪"}, {"arrow3"}),
+        make_set("grow-vertical", "Grow vertical", 80, {"▁", "▃", "▄", "▅", "▆", "▇", "█", "▇", "▆", "▅", "▄", "▃"},
+                 {"vertical_block", "growVertical"}),
+        make_set("grow-horizontal", "Grow horizontal", 80,
+                 {"▏", "▎", "▍", "▌", "▋", "▊", "▉", "█", "▉", "▊", "▋", "▌", "▍", "▎"},
+                 {"horizontal_block", "growHorizontal"}),
         make_set("quadrants", "Quadrants", 80, {"▖", "▘", "▝", "▗"}, {"quadrant_block", "boxBounce"}),
         make_set("box-bounce", "Box bounce", 80, {"▌", "▀", "▐", "▄"}, {"quadrant_block_crack"}),
         make_set("circle-halves", "Circle halves", 80, {"◐", "◓", "◑", "◒"}, {"white_circle", "circleHalves"}),
@@ -82,34 +87,25 @@ const std::vector<ThrobberSet>& all_throbber_sets() {
         make_set("star", "Star", 80, {"✶", "✸", "✹", "✺", "✹", "✷"}),
         make_set("star-ascii", "Star ASCII", 80, {"+", "x", "*"}, {"star2"}),
         make_set("flip", "Flip", 70, {"_", "_", "_", "-", "`", "`", "'", "´", "-", "_", "_", "_"}),
-        make_set("blocks", "Blocks", 80, {"▰▱▱▱▱▱▱", "▰▰▱▱▱▱▱", "▰▰▰▱▱▱▱", "▰▰▰▰▱▱▱", "▰▰▰▰▰▱▱", "▰▰▰▰▰▰▱", "▰▰▰▰▰▰▰", "▱▰▰▰▰▰▰", "▱▱▰▰▰▰▰", "▱▱▱▰▰▰▰", "▱▱▱▱▰▰▰", "▱▱▱▱▱▰▰", "▱▱▱▱▱▱▰", "▱▱▱▱▱▱▱"}, {"aesthetic"}),
-        make_set("bouncing-bar", "Bouncing bar", 80, {
-            "[    ]", "[=   ]", "[==  ]", "[=== ]", "[ ===]", "[  ==]", "[   =]",
-            "[    ]", "[   =]", "[  ==]", "[ ===]", "[=== ]", "[==  ]", "[=   ]"}, {"bouncingBar"}),
-        make_set("bouncing-ball", "Bouncing ball", 80, {
-            "( ●    )", "(  ●   )", "(   ●  )", "(    ● )", "(     ●)",
-            "(    ● )", "(   ●  )", "(  ●   )", "( ●    )", "(●     )"}, {"bouncingBall"}),
-        make_set("sliding-bar", "Sliding bar", 80, {
-            "█▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁",
-            "██▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁",
-            "███▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁",
-            "████▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁",
-            "█████▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁",
-            "▁█████▁▁▁▁▁▁▁▁▁▁▁▁▁▁",
-            "▁▁█████▁▁▁▁▁▁▁▁▁▁▁▁▁",
-            "▁▁▁█████▁▁▁▁▁▁▁▁▁▁▁▁",
-            "▁▁▁▁█████▁▁▁▁▁▁▁▁▁▁▁",
-            "▁▁▁▁▁█████▁▁▁▁▁▁▁▁▁▁",
-            "▁▁▁▁▁▁█████▁▁▁▁▁▁▁▁▁",
-            "▁▁▁▁▁▁▁█████▁▁▁▁▁▁▁▁",
-            "▁▁▁▁▁▁▁▁█████▁▁▁▁▁▁▁",
-            "▁▁▁▁▁▁▁▁▁█████▁▁▁▁▁▁",
-            "▁▁▁▁▁▁▁▁▁▁█████▁▁▁▁▁",
-            "▁▁▁▁▁▁▁▁▁▁▁█████▁▁▁▁",
-            "▁▁▁▁▁▁▁▁▁▁▁▁█████▁▁▁",
-            "▁▁▁▁▁▁▁▁▁▁▁▁▁█████▁▁",
-            "▁▁▁▁▁▁▁▁▁▁▁▁▁▁█████▁",
-            "▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█████"}, {"material"}),
+        make_set("blocks", "Blocks", 80,
+                 {"▰▱▱▱▱▱▱", "▰▰▱▱▱▱▱", "▰▰▰▱▱▱▱", "▰▰▰▰▱▱▱", "▰▰▰▰▰▱▱", "▰▰▰▰▰▰▱", "▰▰▰▰▰▰▰", "▱▰▰▰▰▰▰", "▱▱▰▰▰▰▰",
+                  "▱▱▱▰▰▰▰", "▱▱▱▱▰▰▰", "▱▱▱▱▱▰▰", "▱▱▱▱▱▱▰", "▱▱▱▱▱▱▱"},
+                 {"aesthetic"}),
+        make_set("bouncing-bar", "Bouncing bar", 80,
+                 {"[    ]", "[=   ]", "[==  ]", "[=== ]", "[ ===]", "[  ==]", "[   =]", "[    ]", "[   =]", "[  ==]",
+                  "[ ===]", "[=== ]", "[==  ]", "[=   ]"},
+                 {"bouncingBar"}),
+        make_set("bouncing-ball", "Bouncing ball", 80,
+                 {"( ●    )", "(  ●   )", "(   ●  )", "(    ● )", "(     ●)", "(    ● )", "(   ●  )", "(  ●   )",
+                  "( ●    )", "(●     )"},
+                 {"bouncingBall"}),
+        make_set("sliding-bar", "Sliding bar", 80,
+                 {"█▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁", "██▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁", "███▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁", "████▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁",
+                  "█████▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁", "▁█████▁▁▁▁▁▁▁▁▁▁▁▁▁▁", "▁▁█████▁▁▁▁▁▁▁▁▁▁▁▁▁", "▁▁▁█████▁▁▁▁▁▁▁▁▁▁▁▁",
+                  "▁▁▁▁█████▁▁▁▁▁▁▁▁▁▁▁", "▁▁▁▁▁█████▁▁▁▁▁▁▁▁▁▁", "▁▁▁▁▁▁█████▁▁▁▁▁▁▁▁▁", "▁▁▁▁▁▁▁█████▁▁▁▁▁▁▁▁",
+                  "▁▁▁▁▁▁▁▁█████▁▁▁▁▁▁▁", "▁▁▁▁▁▁▁▁▁█████▁▁▁▁▁▁", "▁▁▁▁▁▁▁▁▁▁█████▁▁▁▁▁", "▁▁▁▁▁▁▁▁▁▁▁█████▁▁▁▁",
+                  "▁▁▁▁▁▁▁▁▁▁▁▁█████▁▁▁", "▁▁▁▁▁▁▁▁▁▁▁▁▁█████▁▁", "▁▁▁▁▁▁▁▁▁▁▁▁▁▁█████▁", "▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█████"},
+                 {"material"}),
         make_set("toggle", "Toggle", 250, {"⊶", "⊷"}),
         make_set("toggle-square", "Toggle square", 80, {"▫", "▪"}, {"toggle2"}),
         make_set("toggle-box", "Toggle box", 120, {"□", "■"}, {"toggle3"}),
@@ -136,64 +132,20 @@ const std::vector<ThrobberSet>& all_throbber_sets() {
         make_set("ogham", "Ogham", 80, {" ", "ᚁ", "ᚂ", "ᚃ", "ᚄ", "ᚅ"}, {"ogham_a"}),
         make_set("ogham-fork", "Ogham fork", 120, {"ᚆ", "ᚇ", "ᚈ", "ᚉ", "ᚊ"}, {"ogham_b"}),
         make_set("ogham-mesh", "Ogham mesh", 120, {"ᚋ", "ᚌ", "ᚍ", "ᚎ", "ᚏ"}, {"ogham_c"}),
-        make_set("pong", "Pong", 80, {
-            "▐⠂       ▌",
-            "▐⠈       ▌",
-            "▐ ⠂      ▌",
-            "▐ ⠠      ▌",
-            "▐  ⡀     ▌",
-            "▐  ⠠     ▌",
-            "▐   ⠂    ▌",
-            "▐   ⠈    ▌",
-            "▐    ⠂   ▌",
-            "▐    ⠠   ▌",
-            "▐     ⡀  ▌",
-            "▐     ⠠  ▌",
-            "▐      ⠂ ▌",
-            "▐      ⠈ ▌",
-            "▐       ⠂▌",
-            "▐       ⠠▌",
-            "▐       ⡀▌",
-            "▐      ⠠ ▌",
-            "▐      ⠂ ▌",
-            "▐     ⠈  ▌",
-            "▐     ⠂  ▌",
-            "▐    ⠠   ▌",
-            "▐    ⡀   ▌",
-            "▐   ⠠    ▌",
-            "▐   ⠂    ▌",
-            "▐  ⠈     ▌",
-            "▐  ⠂     ▌",
-            "▐ ⠠      ▌",
-            "▐ ⡀      ▌",
-            "▐⠠       ▌"}),
-        make_set("shark", "Shark", 120, {
-            "▐|\\____________▌",
-            "▐_|\\___________▌",
-            "▐__|\\__________▌",
-            "▐___|\\_________▌",
-            "▐____|\\________▌",
-            "▐_____|\\_______▌",
-            "▐______|\\______▌",
-            "▐_______|\\_____▌",
-            "▐________|\\____▌",
-            "▐_________|\\___▌",
-            "▐__________|\\__▌",
-            "▐___________|\\_▌",
-            "▐____________|\\▌",
-            "▐____________/|▌",
-            "▐___________/|_▌",
-            "▐__________/|__▌",
-            "▐_________/|___▌",
-            "▐________/|____▌",
-            "▐_______/|_____▌",
-            "▐______/|______▌",
-            "▐_____/|_______▌",
-            "▐____/|________▌",
-            "▐___/|_________▌",
-            "▐__/|__________▌",
-            "▐_/|___________▌",
-            "▐/|____________▌"}),
+        make_set("pong", "Pong", 80,
+                 {"▐⠂       ▌", "▐⠈       ▌", "▐ ⠂      ▌", "▐ ⠠      ▌", "▐  ⡀     ▌", "▐  ⠠     ▌",
+                  "▐   ⠂    ▌", "▐   ⠈    ▌", "▐    ⠂   ▌", "▐    ⠠   ▌", "▐     ⡀  ▌", "▐     ⠠  ▌",
+                  "▐      ⠂ ▌", "▐      ⠈ ▌", "▐       ⠂▌", "▐       ⠠▌", "▐       ⡀▌", "▐      ⠠ ▌",
+                  "▐      ⠂ ▌", "▐     ⠈  ▌", "▐     ⠂  ▌", "▐    ⠠   ▌", "▐    ⡀   ▌", "▐   ⠠    ▌",
+                  "▐   ⠂    ▌", "▐  ⠈     ▌", "▐  ⠂     ▌", "▐ ⠠      ▌", "▐ ⡀      ▌", "▐⠠       ▌"}),
+        make_set("shark", "Shark", 120,
+                 {"▐|\\____________▌", "▐_|\\___________▌", "▐__|\\__________▌", "▐___|\\_________▌",
+                  "▐____|\\________▌", "▐_____|\\_______▌", "▐______|\\______▌", "▐_______|\\_____▌",
+                  "▐________|\\____▌", "▐_________|\\___▌", "▐__________|\\__▌", "▐___________|\\_▌",
+                  "▐____________|\\▌", "▐____________/|▌",  "▐___________/|_▌",  "▐__________/|__▌",
+                  "▐_________/|___▌",  "▐________/|____▌",  "▐_______/|_____▌",  "▐______/|______▌",
+                  "▐_____/|_______▌",  "▐____/|________▌",  "▐___/|_________▌",  "▐__/|__________▌",
+                  "▐_/|___________▌",  "▐/|____________▌"}),
     };
     return sets;
 }
@@ -207,8 +159,7 @@ const ThrobberSet* throbber_set_named(std::string_view name) {
     return nullptr;
 }
 
-Throbber::Throbber(const ThrobberSet& set, Style style)
-    : set_(set), style_(style) {
+Throbber::Throbber(const ThrobberSet& set, Style style) : set_(set), style_(style) {
     if (set_.frames.empty()) {
         set_ = kFallback;
     }
@@ -218,19 +169,21 @@ Throbber::Throbber(const ThrobberSet& set, Style style)
 }
 
 Throbber::Throbber(std::string_view name, Style style)
-    : Throbber(throbber_set_named(name) != nullptr ? *throbber_set_named(name) : kFallback, style) {}
+    : Throbber(
+          [&]() -> const ThrobberSet& {
+              const ThrobberSet* named = throbber_set_named(name);
+              return named != nullptr ? *named : kFallback;
+          }(),
+          style) {}
 
-const std::string& Throbber::frame() const {
-    return set_.frames[static_cast<std::size_t>(frame_)];
-}
+const std::string& Throbber::frame() const { return set_.frames[static_cast<std::size_t>(frame_)]; }
 
 void Throbber::set_frame(int index) {
     if (set_.frames.empty()) {
         return;
     }
-    const int next = ((index % static_cast<int>(set_.frames.size()))
-                      + static_cast<int>(set_.frames.size()))
-        % static_cast<int>(set_.frames.size());
+    const int next = ((index % static_cast<int>(set_.frames.size())) + static_cast<int>(set_.frames.size())) %
+                     static_cast<int>(set_.frames.size());
     if (next == frame_) {
         return;
     }
@@ -268,9 +221,7 @@ void Throbber::tick(int dt_ms) {
     }
 }
 
-Size Throbber::preferred_size() const {
-    return {std::max(1, width_), 1};
-}
+Size Throbber::preferred_size() const { return {std::max(1, width_), 1}; }
 
 void Throbber::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;

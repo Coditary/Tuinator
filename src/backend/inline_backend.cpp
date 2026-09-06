@@ -1,11 +1,10 @@
 #include <tuinator/backend/inline_backend.hpp>
-
 #include <tuinator/render/color.hpp>
 #include <tuinator/render/text.hpp>
 
 #include <algorithm>
-#include <chrono>
 #include <cerrno>
+#include <chrono>
 #include <cstdio>
 #include <cstring>
 #include <fcntl.h>
@@ -27,14 +26,14 @@ namespace {
 int ansi_color_code(Color color, bool foreground) {
     const int base = foreground ? 30 : 40;
     switch (color) {
-    case Color::Black:   return base + 0;
-    case Color::Red:     return base + 1;
-    case Color::Green:   return base + 2;
-    case Color::Yellow:  return base + 3;
-    case Color::Blue:    return base + 4;
+    case Color::Black: return base + 0;
+    case Color::Red: return base + 1;
+    case Color::Green: return base + 2;
+    case Color::Yellow: return base + 3;
+    case Color::Blue: return base + 4;
     case Color::Magenta: return base + 5;
-    case Color::Cyan:    return base + 6;
-    case Color::White:   return base + 7;
+    case Color::Cyan: return base + 6;
+    case Color::White: return base + 7;
     case Color::Default: return -1;
     }
     return -1;
@@ -61,9 +60,7 @@ Size query_terminal_size() {
 
 #else
 
-Size query_terminal_size() {
-    return {80, 24};
-}
+Size query_terminal_size() { return {80, 24}; }
 
 #endif
 
@@ -100,9 +97,7 @@ std::optional<KeyPress> decode_key_byte(unsigned char byte) {
 } // namespace
 
 InlineTerminalBackend::InlineTerminalBackend(InlineBackendOptions options)
-    : options_(std::move(options)),
-      relative_draw_(uses_relative_draw(options_)),
-      true_color_(options_.true_color) {
+    : options_(std::move(options)), relative_draw_(uses_relative_draw(options_)), true_color_(options_.true_color) {
     if (options_.output != nullptr) {
         output_ = options_.output;
     }
@@ -110,6 +105,7 @@ InlineTerminalBackend::InlineTerminalBackend(InlineBackendOptions options)
 
 InlineTerminalBackend::~InlineTerminalBackend() {
     if (initialized_) {
+        // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
         shutdown();
     }
     if (owned_tty_ != nullptr) {
@@ -177,10 +173,9 @@ void InlineTerminalBackend::sync_geometry(const Size& term, bool allow_reanchor)
     region_width_ = term_width;
 
     if (!anchor_locked_ || allow_reanchor) {
-        const int provisional_available =
-            cursor_anchor_row_ > 0 && !options_.pin_to_bottom && options_.anchor_row <= 0
-                ? std::max(1, term_height - cursor_anchor_row_ + 1)
-                : term_height;
+        const int provisional_available = cursor_anchor_row_ > 0 && !options_.pin_to_bottom && options_.anchor_row <= 0
+                                              ? std::max(1, term_height - cursor_anchor_row_ + 1)
+                                              : term_height;
         region_height_ = compute_region_height(term_height, provisional_available);
         place_anchor(term_height);
         const int available = std::max(1, term_height - anchor_row_ + 1);
@@ -255,13 +250,10 @@ void InlineTerminalBackend::shutdown() {
 void InlineTerminalBackend::resize_buffer(int width, int height) {
     region_width_ = std::clamp(width, 1, 512);
     region_height_ = std::clamp(height, 1, 128);
-    cells_.assign(static_cast<std::size_t>(region_height_),
-                  std::vector<Cell>(static_cast<std::size_t>(region_width_)));
+    cells_.assign(static_cast<std::size_t>(region_height_), std::vector<Cell>(static_cast<std::size_t>(region_width_)));
 }
 
-Size InlineTerminalBackend::terminal_size() const {
-    return {region_width_, region_height_};
-}
+Size InlineTerminalBackend::terminal_size() const { return {region_width_, region_height_}; }
 
 void InlineTerminalBackend::acquire_stdin() {
 #if TUINATOR_PLATFORM_POSIX
@@ -416,9 +408,7 @@ std::optional<Event> InlineTerminalBackend::poll_event() {
     return std::nullopt;
 }
 
-void InlineTerminalBackend::set_poll_timeout_ms(int timeout_ms) {
-    poll_timeout_ms_ = timeout_ms;
-}
+void InlineTerminalBackend::set_poll_timeout_ms(int timeout_ms) { poll_timeout_ms_ = timeout_ms; }
 
 void InlineTerminalBackend::begin_frame(BeginFrameOptions options) {
     if (options.full_redraw) {
@@ -445,9 +435,8 @@ void InlineTerminalBackend::begin_frame(BeginFrameOptions options) {
 }
 
 bool InlineTerminalBackend::style_equal(const Style& a, const Style& b) const {
-    return a.foreground == b.foreground && a.background == b.background
-        && a.foreground_rgb == b.foreground_rgb && a.background_rgb == b.background_rgb
-        && a.bold == b.bold && a.dim == b.dim && a.reverse == b.reverse;
+    return a.foreground == b.foreground && a.background == b.background && a.foreground_rgb == b.foreground_rgb &&
+           a.background_rgb == b.background_rgb && a.bold == b.bold && a.dim == b.dim && a.reverse == b.reverse;
 }
 
 bool InlineTerminalBackend::cell_equal(const Cell& a, const Cell& b) const {
@@ -494,8 +483,7 @@ void InlineTerminalBackend::draw_text(int x, int y, std::string_view text, Style
 void InlineTerminalBackend::append_style(std::string& out, const Style& style) const {
     if (true_color_ && style.foreground_rgb.has_value()) {
         const Rgb& rgb = *style.foreground_rgb;
-        out += "\033[38;2;" + std::to_string(rgb.r) + ';' + std::to_string(rgb.g) + ';'
-            + std::to_string(rgb.b) + 'm';
+        out += "\033[38;2;" + std::to_string(rgb.r) + ';' + std::to_string(rgb.g) + ';' + std::to_string(rgb.b) + 'm';
     } else if (style.foreground != Color::Default) {
         const int code = ansi_color_code(style.foreground, true);
         if (code >= 0) {
@@ -505,8 +493,7 @@ void InlineTerminalBackend::append_style(std::string& out, const Style& style) c
 
     if (true_color_ && style.background_rgb.has_value()) {
         const Rgb& rgb = *style.background_rgb;
-        out += "\033[48;2;" + std::to_string(rgb.r) + ';' + std::to_string(rgb.g) + ';'
-            + std::to_string(rgb.b) + 'm';
+        out += "\033[48;2;" + std::to_string(rgb.r) + ';' + std::to_string(rgb.g) + ';' + std::to_string(rgb.b) + 'm';
     } else if (style.background != Color::Default) {
         const int code = ansi_color_code(style.background, false);
         if (code >= 0) {
@@ -534,13 +521,9 @@ int InlineTerminalBackend::last_nonempty_column(int y) const {
         if (!cell.text.empty() && cell.text != " ") {
             return x;
         }
-        if (cell.style.foreground != Color::Default
-            || cell.style.background != Color::Default
-            || cell.style.foreground_rgb.has_value()
-            || cell.style.background_rgb.has_value()
-            || cell.style.bold
-            || cell.style.dim
-            || cell.style.reverse) {
+        if (cell.style.foreground != Color::Default || cell.style.background != Color::Default ||
+            cell.style.foreground_rgb.has_value() || cell.style.background_rgb.has_value() || cell.style.bold ||
+            cell.style.dim || cell.style.reverse) {
             return x;
         }
     }
@@ -637,12 +620,11 @@ void InlineTerminalBackend::emit_frame_relative() {
 
 void InlineTerminalBackend::emit_frame_to_terminal() {
     if (relative_draw_) {
-        const bool size_changed = previous_cells_.size() != cells_.size()
-            || (previous_cells_.empty() ? 0 : previous_cells_.front().size())
-                != (cells_.empty() ? 0 : cells_.front().size());
+        const bool size_changed =
+            previous_cells_.size() != cells_.size() || (previous_cells_.empty() ? 0 : previous_cells_.front().size()) !=
+                                                           (cells_.empty() ? 0 : cells_.front().size());
         if (size_changed) {
-            previous_cells_.assign(cells_.size(),
-                                   std::vector<Cell>(cells_.empty() ? 0 : cells_.front().size()));
+            previous_cells_.assign(cells_.size(), std::vector<Cell>(cells_.empty() ? 0 : cells_.front().size()));
         }
 
         bool changed = size_changed;
@@ -667,9 +649,8 @@ void InlineTerminalBackend::emit_frame_to_terminal() {
         return;
     }
 
-    if (previous_cells_.size() != cells_.size()
-        || (previous_cells_.empty() ? 0 : previous_cells_.front().size())
-            != (cells_.empty() ? 0 : cells_.front().size())) {
+    if (previous_cells_.size() != cells_.size() || (previous_cells_.empty() ? 0 : previous_cells_.front().size()) !=
+                                                       (cells_.empty() ? 0 : cells_.front().size())) {
         previous_cells_.assign(cells_.size(), std::vector<Cell>(cells_.empty() ? 0 : cells_.front().size()));
         for (int y = 0; y < region_height_; ++y) {
             write_row_absolute(anchor_row_ + y, y);

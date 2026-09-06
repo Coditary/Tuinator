@@ -1,9 +1,9 @@
+#include <tuinator/render/theme.hpp>
+#include <tuinator/widgets/containers/panel.hpp>
+#include <tuinator/widgets/controls/checkbox.hpp>
+
 #include "render_helper.hpp"
 #include "test_harness.hpp"
-
-#include <tuinator/render/theme.hpp>
-#include <tuinator/widgets/controls/checkbox.hpp>
-#include <tuinator/widgets/containers/panel.hpp>
 
 TUINATOR_TEST(checkbox_named_style_exists) {
     TUINATOR_CHECK(tuinator::checkbox_style_named("ascii") != nullptr);
@@ -32,14 +32,10 @@ TUINATOR_TEST(checkbox_toggles_with_space) {
 
     bool changed = false;
     bool value = false;
-    tuinator::Checkbox checkbox(
-        "Toggle me",
-        false,
-        tuinator::CheckboxOptions{},
-        [&](bool checked) {
-            changed = true;
-            value = checked;
-        });
+    tuinator::Checkbox checkbox("Toggle me", false, tuinator::CheckboxOptions{}, [&](bool checked) {
+        changed = true;
+        value = checked;
+    });
     checkbox.layout({0, 0, 24, 1});
     checkbox.set_focused(true);
 
@@ -81,12 +77,7 @@ TUINATOR_TEST(checkbox_apply_style_copies_glyphs) {
 
 TUINATOR_TEST(panel_hit_test_focusable_finds_nested_checkbox) {
     const tuinator::Theme theme = tuinator::dark_theme();
-    auto checkbox = std::make_unique<tuinator::Checkbox>(
-        "Inside",
-        false,
-        "basic",
-        std::function<void(bool)>{},
-        theme);
+    auto checkbox = std::make_unique<tuinator::Checkbox>("Inside", false, "basic", std::function<void(bool)>{}, theme);
     tuinator::Checkbox* checkbox_ptr = checkbox.get();
 
     auto panel = std::make_unique<tuinator::Panel>("Box", theme.border, theme.muted);

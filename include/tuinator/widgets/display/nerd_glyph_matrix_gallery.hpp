@@ -18,11 +18,9 @@ struct NerdGlyphMatrixGalleryStyle {
 
 /// Matrix catalog of all exported Nerd Font glyphs (multiple icons per row).
 class NerdGlyphMatrixGallery : public Widget {
-public:
-    NerdGlyphMatrixGallery(
-        std::vector<NerdGlyphDomainSection> sections,
-        int columns = 32,
-        NerdGlyphMatrixGalleryStyle style = {});
+  public:
+    NerdGlyphMatrixGallery(std::vector<NerdGlyphDomainSection> sections, int columns = 32,
+                           NerdGlyphMatrixGalleryStyle style = {});
 
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
@@ -30,7 +28,7 @@ public:
     const std::vector<NerdGlyphDomainSection>& sections() const { return sections_; }
     int columns() const { return columns_; }
 
-private:
+  private:
     std::vector<NerdGlyphDomainSection> sections_;
     int columns_;
     NerdGlyphMatrixGalleryStyle style_;

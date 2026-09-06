@@ -1,9 +1,8 @@
+#include <tuinator/core/event.hpp>
+#include <tuinator/render/text.hpp>
 #include <tuinator/widgets/controls/checkbox.hpp>
 
 #include <algorithm>
-#include <tuinator/core/event.hpp>
-#include <tuinator/render/text.hpp>
-
 #include <string>
 #include <variant>
 
@@ -12,13 +11,9 @@ namespace tuinator {
 namespace {
 
 bool style_is_empty(const Style& style) {
-    return style.foreground == Color::Default
-        && !style.foreground_rgb.has_value()
-        && style.background == Color::Default
-        && !style.background_rgb.has_value()
-        && !style.bold
-        && !style.dim
-        && !style.reverse;
+    return style.foreground == Color::Default && !style.foreground_rgb.has_value() &&
+           style.background == Color::Default && !style.background_rgb.has_value() && !style.bold && !style.dim &&
+           !style.reverse;
 }
 
 void merge_style(Style& target, const std::optional<Style>& overlay) {
@@ -211,15 +206,8 @@ void apply_checkbox_style(CheckboxOptions& options, const CheckboxStyle& style, 
     }
 }
 
-Checkbox::Checkbox(
-    std::string label,
-    bool checked,
-    CheckboxOptions options,
-    std::function<void(bool)> on_change)
-    : label_(std::move(label)),
-      checked_(checked),
-      options_(std::move(options)),
-      on_change_(std::move(on_change)) {
+Checkbox::Checkbox(std::string label, bool checked, CheckboxOptions options, std::function<void(bool)> on_change)
+    : label_(std::move(label)), checked_(checked), options_(std::move(options)), on_change_(std::move(on_change)) {
     if (style_is_empty(options_.marker_style)) {
         options_.marker_style = dark_theme().label;
     }
@@ -242,12 +230,8 @@ Checkbox::Checkbox(
     }
 }
 
-Checkbox::Checkbox(
-    std::string label,
-    bool checked,
-    std::string_view style_name,
-    std::function<void(bool)> on_change,
-    const Theme& theme)
+Checkbox::Checkbox(std::string label, bool checked, std::string_view style_name, std::function<void(bool)> on_change,
+                   const Theme& theme)
     : Checkbox(std::move(label), checked, checkbox_options_default(theme), std::move(on_change)) {
     if (const CheckboxStyle* style = checkbox_style_named(style_name)) {
         apply_checkbox_style(options_, *style, theme);
@@ -298,14 +282,13 @@ void Checkbox::paint(PaintContext& ctx) const {
     const std::string& marker = checked_ ? options_.glyphs.checked : options_.glyphs.unchecked;
 
     Style marker_style = checked_ ? options_.marker_checked_style : options_.marker_style;
-    Style label_style = checked_ && !style_is_empty(options_.label_checked_style)
-        ? options_.label_checked_style
-        : options_.label_style;
+    Style label_style =
+        checked_ && !style_is_empty(options_.label_checked_style) ? options_.label_checked_style : options_.label_style;
 
     if (is_focused() && options_.highlight_row_on_focus) {
         const Style row = options_.focused_style;
-        const int text_width = text_display_width(marker) + text_display_width(options_.glyphs.gap)
-            + text_display_width(label_);
+        const int text_width =
+            text_display_width(marker) + text_display_width(options_.glyphs.gap) + text_display_width(label_);
         const int highlight_width = std::min(bounds_.width, text_width);
         canvas.fill_rect({0, 0, highlight_width, 1}, ' ', row);
         marker_style.background = row.background;

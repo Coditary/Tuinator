@@ -10,7 +10,7 @@
 namespace tuinator {
 
 class ListView : public Widget {
-public:
+  public:
     ListView(Style item_style = {}, Style selected_style = {});
 
     const std::vector<std::string>& items() const { return items_; }
@@ -28,7 +28,7 @@ public:
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
 
-private:
+  private:
     void clamp_selection();
     void ensure_selected_visible();
     int row_at(Point local) const;

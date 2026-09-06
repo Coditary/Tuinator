@@ -1,8 +1,8 @@
-#include "test_harness.hpp"
+#include <tuinator/render/git_change_status.hpp>
 
 #include <cstring>
 
-#include <tuinator/render/git_change_status.hpp>
+#include "test_harness.hpp"
 
 TUINATOR_TEST(git_change_status_char_maps_porcelain_codes) {
     TUINATOR_CHECK_EQ(tuinator::git_change_status_char(tuinator::GitChangeStatus::Modified), 'M');
@@ -16,26 +16,21 @@ TUINATOR_TEST(git_change_status_char_maps_porcelain_codes) {
 }
 
 TUINATOR_TEST(git_change_status_from_char_round_trip) {
-    TUINATOR_CHECK_EQ(
-        tuinator::git_change_status_from_char('M'),
-        tuinator::GitChangeStatus::Modified);
-    TUINATOR_CHECK_EQ(
-        tuinator::git_change_status_from_char('a'),
-        tuinator::GitChangeStatus::Added);
-    TUINATOR_CHECK_EQ(
-        tuinator::git_change_status_from_char('?'),
-        tuinator::GitChangeStatus::Untracked);
+    TUINATOR_CHECK_EQ(tuinator::git_change_status_from_char('M'), tuinator::GitChangeStatus::Modified);
+    TUINATOR_CHECK_EQ(tuinator::git_change_status_from_char('a'), tuinator::GitChangeStatus::Added);
+    TUINATOR_CHECK_EQ(tuinator::git_change_status_from_char('?'), tuinator::GitChangeStatus::Untracked);
     TUINATOR_CHECK(!tuinator::git_change_status_from_char('x').has_value());
 }
 
 TUINATOR_TEST(git_change_status_label) {
-    TUINATOR_CHECK(std::strcmp(tuinator::git_change_status_label(tuinator::GitChangeStatus::Modified), "Modified") == 0);
-    TUINATOR_CHECK(std::strcmp(tuinator::git_change_status_label(tuinator::GitChangeStatus::Untracked), "Untracked") == 0);
+    TUINATOR_CHECK(std::strcmp(tuinator::git_change_status_label(tuinator::GitChangeStatus::Modified), "Modified") ==
+                   0);
+    TUINATOR_CHECK(std::strcmp(tuinator::git_change_status_label(tuinator::GitChangeStatus::Untracked), "Untracked") ==
+                   0);
 }
 
 TUINATOR_TEST(git_change_status_color_uses_defaults) {
-    const tuinator::Rgb modified =
-        tuinator::git_change_status_color(tuinator::GitChangeStatus::Modified);
+    const tuinator::Rgb modified = tuinator::git_change_status_color(tuinator::GitChangeStatus::Modified);
     TUINATOR_CHECK_EQ(modified.r, 0xe0);
     TUINATOR_CHECK_EQ(modified.g, 0xaf);
     TUINATOR_CHECK_EQ(modified.b, 0x68);
@@ -54,8 +49,7 @@ TUINATOR_TEST(git_change_status_color_uses_defaults) {
 TUINATOR_TEST(git_change_status_color_respects_overrides) {
     tuinator::GitChangeStatusColorDefaults colors;
     colors.modified = tuinator::Rgb{1, 2, 3};
-    const tuinator::Rgb modified =
-        tuinator::git_change_status_color(tuinator::GitChangeStatus::Modified, colors);
+    const tuinator::Rgb modified = tuinator::git_change_status_color(tuinator::GitChangeStatus::Modified, colors);
     TUINATOR_CHECK_EQ(modified.r, 1);
     TUINATOR_CHECK_EQ(modified.g, 2);
     TUINATOR_CHECK_EQ(modified.b, 3);

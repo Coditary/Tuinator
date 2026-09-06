@@ -11,10 +11,8 @@
 namespace tuinator {
 
 class Panel : public Widget {
-public:
-    Panel(std::string title,
-          Style border_style = {},
-          Style title_style = {},
+  public:
+    Panel(std::string title, Style border_style = {}, Style title_style = {},
           std::optional<BorderGlyphs> glyphs = std::nullopt);
 
     void set_title(std::string title);
@@ -33,7 +31,7 @@ public:
     void collect_focusable(std::vector<Widget*>& out) override;
     void for_each_child(const std::function<void(Widget*)>& visitor) override;
 
-private:
+  private:
     Rect content_bounds() const;
 
     std::string title_;

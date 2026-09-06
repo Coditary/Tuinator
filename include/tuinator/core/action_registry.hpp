@@ -22,22 +22,22 @@ struct RegisteredAction {
 };
 
 class ActionRegistry {
-public:
-  void register_action(RegisteredAction action);
-  void clear();
+  public:
+    void register_action(RegisteredAction action);
+    void clear();
 
-  const RegisteredAction* find(std::string_view id) const;
-  std::vector<const RegisteredAction*> all() const;
-  std::vector<const RegisteredAction*> in_category(std::string_view category) const;
-  std::vector<std::string> categories() const;
+    const RegisteredAction* find(std::string_view id) const;
+    std::vector<const RegisteredAction*> all() const;
+    std::vector<const RegisteredAction*> in_category(std::string_view category) const;
+    std::vector<std::string> categories() const;
 
-  std::vector<MenuItem> menu_for_category(std::string_view category) const;
-  bool handle_key(const KeyPress& key) const;
+    std::vector<MenuItem> menu_for_category(std::string_view category) const;
+    bool handle_key(const KeyPress& key) const;
 
-private:
-  bool match_shortcut(const std::string& shortcut, const KeyPress& key) const;
+  private:
+    bool match_shortcut(const std::string& shortcut, const KeyPress& key) const;
 
-  std::vector<RegisteredAction> actions_;
+    std::vector<RegisteredAction> actions_;
 };
 
 } // namespace tuinator

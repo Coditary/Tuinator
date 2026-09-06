@@ -1,9 +1,8 @@
-#include <tuinator/widgets/menu/command_palette.hpp>
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/glyphs.hpp>
 #include <tuinator/render/text.hpp>
 #include <tuinator/render/theme.hpp>
+#include <tuinator/widgets/menu/command_palette.hpp>
 
 #include <algorithm>
 #include <cctype>
@@ -23,8 +22,7 @@ bool fuzzy_match(std::string_view haystack, std::string_view needle) {
         const char lower = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
         bool found = false;
         for (std::size_t i = start; i < haystack.size(); ++i) {
-            const char candidate =
-                static_cast<char>(std::tolower(static_cast<unsigned char>(haystack[i])));
+            const char candidate = static_cast<char>(std::tolower(static_cast<unsigned char>(haystack[i])));
             if (candidate == lower) {
                 start = i + 1;
                 found = true;
@@ -53,9 +51,7 @@ void CommandPalette::set_entries(std::vector<CommandPaletteEntry> entries) {
     rebuild_matches();
 }
 
-void CommandPalette::set_on_close(std::function<void()> callback) {
-    on_close_ = std::move(callback);
-}
+void CommandPalette::set_on_close(std::function<void()> callback) { on_close_ = std::move(callback); }
 
 void CommandPalette::open() {
     open_ = true;
@@ -128,7 +124,8 @@ void CommandPalette::activate_selection() {
         return;
     }
 
-    const CommandPaletteEntry& entry = entries_[static_cast<std::size_t>(matches_[static_cast<std::size_t>(selected_)])];
+    const CommandPaletteEntry& entry =
+        entries_[static_cast<std::size_t>(matches_[static_cast<std::size_t>(selected_)])];
     close();
     if (entry.action) {
         entry.action();
@@ -159,8 +156,7 @@ void CommandPalette::paint(PaintContext& ctx) const {
     const int list_y = y + 2;
     const int visible = std::min(8, static_cast<int>(matches_.size()));
     for (int row = 0; row < visible; ++row) {
-        const CommandPaletteEntry& entry =
-            entries_[static_cast<std::size_t>(matches_[static_cast<std::size_t>(row)])];
+        const CommandPaletteEntry& entry = entries_[static_cast<std::size_t>(matches_[static_cast<std::size_t>(row)])];
         const bool selected = row == selected_;
         Style row_style = selected ? theme.button_focused : theme.label;
         std::string line = entry.label;

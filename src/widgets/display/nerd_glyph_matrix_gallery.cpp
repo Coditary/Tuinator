@@ -1,6 +1,5 @@
-#include <tuinator/widgets/display/nerd_glyph_matrix_gallery.hpp>
-
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/display/nerd_glyph_matrix_gallery.hpp>
 
 #include <cstdio>
 #include <string>
@@ -18,13 +17,9 @@ int matrix_rows_for(std::size_t count, int columns) {
 
 } // namespace
 
-NerdGlyphMatrixGallery::NerdGlyphMatrixGallery(
-    std::vector<NerdGlyphDomainSection> sections,
-    int columns,
-    NerdGlyphMatrixGalleryStyle style)
-    : sections_(std::move(sections))
-    , columns_(columns > 0 ? columns : 32)
-    , style_(std::move(style)) {}
+NerdGlyphMatrixGallery::NerdGlyphMatrixGallery(std::vector<NerdGlyphDomainSection> sections, int columns,
+                                               NerdGlyphMatrixGalleryStyle style)
+    : sections_(std::move(sections)), columns_(columns > 0 ? columns : 32), style_(std::move(style)) {}
 
 Size NerdGlyphMatrixGallery::preferred_size() const {
     int rows = 1; // title
@@ -35,9 +30,7 @@ Size NerdGlyphMatrixGallery::preferred_size() const {
         rows += 1; // domain header
         std::string last_category;
         std::size_t category_count = 0;
-        auto flush_category = [&](std::size_t count) {
-            rows += matrix_rows_for(count, columns_);
-        };
+        auto flush_category = [&](std::size_t count) { rows += matrix_rows_for(count, columns_); };
         for (const NerdGlyphEntry& entry : section.entries) {
             if (entry.category != last_category) {
                 if (!last_category.empty()) {
@@ -75,12 +68,8 @@ void NerdGlyphMatrixGallery::paint(PaintContext& ctx) const {
     };
 
     char title[96];
-    std::snprintf(
-        title,
-        sizeof(title),
-        "Nerd Glyph Matrix (%zu glyphs, %d cols)",
-        nerd_glyph_catalog_total(sections_),
-        columns_);
+    std::snprintf(title, sizeof(title), "Nerd Glyph Matrix (%zu glyphs, %d cols)", nerd_glyph_catalog_total(sections_),
+                  columns_);
     draw_line(title, style_.title);
 
     for (const NerdGlyphDomainSection& section : sections_) {
@@ -89,12 +78,7 @@ void NerdGlyphMatrixGallery::paint(PaintContext& ctx) const {
         }
 
         char header[96];
-        std::snprintf(
-            header,
-            sizeof(header),
-            "[[ %s ]] (%zu)",
-            section.domain.c_str(),
-            section.entries.size());
+        std::snprintf(header, sizeof(header), "[[ %s ]] (%zu)", section.domain.c_str(), section.entries.size());
         draw_line(header, style_.domain_header);
 
         std::string last_category;

@@ -8,12 +8,8 @@
 namespace tuinator {
 
 class Slider : public Widget {
-public:
-    Slider(int min_value,
-           int max_value,
-           int value,
-           std::function<void(int)> on_change = {},
-           Style style = {},
+  public:
+    Slider(int min_value, int max_value, int value, std::function<void(int)> on_change = {}, Style style = {},
            int min_width = 20);
 
     int value() const { return value_; }
@@ -24,7 +20,7 @@ public:
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
 
-private:
+  private:
     void set_value_internal(int value, bool notify);
 
     int min_value_;

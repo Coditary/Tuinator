@@ -8,8 +8,7 @@ namespace tuinator {
 namespace {
 
 bool is_mouse_activation(const MouseEvent& mouse) {
-    return mouse.action == MouseAction::Click
-        || mouse.action == MouseAction::Release;
+    return mouse.action == MouseAction::Click || mouse.action == MouseAction::Release;
 }
 
 } // namespace
@@ -57,9 +56,7 @@ bool Widget::handle_event(const Event& event) {
     return false;
 }
 
-bool Widget::contains_point(Point point) const {
-    return bounds_.contains(point);
-}
+bool Widget::contains_point(Point point) const { return bounds_.contains(point); }
 
 Widget* Widget::hit_test(Point point) {
     if (!bounds_.contains(point)) {
@@ -138,9 +135,7 @@ void Widget::set_on_layout(std::function<void()> callback) {
     }
 }
 
-void Widget::set_flex(int flex) {
-    flex_ = std::max(0, flex);
-}
+void Widget::set_flex(int flex) { flex_ = std::max(0, flex); }
 
 void Widget::mark_dirty() {
     if (!on_dirty_) {

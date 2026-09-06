@@ -1,7 +1,7 @@
+#include <tuinator/widgets/chrome/status_line.hpp>
+
 #include "render_helper.hpp"
 #include "test_harness.hpp"
-
-#include <tuinator/widgets/chrome/status_line.hpp>
 
 TUINATOR_TEST(status_line_renders_left_and_right_segments) {
     tuinator::MemoryTerminalBackend backend({120, 1});

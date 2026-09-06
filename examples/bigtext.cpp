@@ -8,25 +8,19 @@
 namespace {
 
 class BigTextRoot : public tuinator::VBox {
-public:
-    explicit BigTextRoot(tuinator::BoxOptions options)
-        : tuinator::VBox(options) {}
+  public:
+    explicit BigTextRoot(tuinator::BoxOptions options) : tuinator::VBox(options) {}
 
     bool wants_full_screen() const override { return true; }
 };
 
 const char* sample_for(tuinator::BigTextKind kind) {
     switch (kind) {
-    case tuinator::BigTextKind::Letter:
-        return "ITSFOSS";
-    case tuinator::BigTextKind::Stacked:
-        return "NEXIS";
-    case tuinator::BigTextKind::Slant:
-        return "awesome";
-    case tuinator::BigTextKind::Doom:
-        return "DOOM";
-    default:
-        return "Hello";
+    case tuinator::BigTextKind::Letter: return "ITSFOSS";
+    case tuinator::BigTextKind::Stacked: return "NEXIS";
+    case tuinator::BigTextKind::Slant: return "awesome";
+    case tuinator::BigTextKind::Doom: return "DOOM";
+    default: return "Hello";
     }
 }
 
@@ -55,10 +49,7 @@ const char* showcase_text(const tuinator::BigTextLook& look) {
     return "COOL";
 }
 
-void add_look_showcase(
-    tuinator::VBox& content,
-    const tuinator::Theme& theme,
-    const tuinator::BigTextLook& look) {
+void add_look_showcase(tuinator::VBox& content, const tuinator::Theme& theme, const tuinator::BigTextLook& look) {
     auto block = std::make_unique<tuinator::VBox>(tuinator::BoxOptions{.gap = 0});
     block->add_child(std::make_unique<tuinator::Label>(look.title, theme.muted));
 
@@ -69,11 +60,8 @@ void add_look_showcase(
     if (std::strcmp(look.id, "latchdark") == 0) {
         tuinator::Style border = theme.border;
         border.foreground_rgb = tuinator::Rgb::hex(0x707070);
-        auto panel = std::make_unique<tuinator::Panel>(
-            "",
-            border,
-            theme.heading,
-            tuinator::unicode_rounded_border_glyphs());
+        auto panel =
+            std::make_unique<tuinator::Panel>("", border, theme.heading, tuinator::unicode_rounded_border_glyphs());
         panel->set_content(std::move(text));
         block->add_child(std::move(panel));
     } else {
@@ -90,9 +78,8 @@ int main() {
     const tuinator::Theme& theme = app.theme();
 
     auto content = std::make_unique<tuinator::VBox>(tuinator::BoxOptions{.gap = 1, .padding = 1});
-    content->add_child(std::make_unique<tuinator::Label>(
-        "Big text  |  q quit  |  wheel/PgUp/PgDn scroll",
-        theme.muted));
+    content->add_child(
+        std::make_unique<tuinator::Label>("Big text  |  q quit  |  wheel/PgUp/PgDn scroll", theme.muted));
 
     content->add_child(std::make_unique<tuinator::Label>("Color themes", theme.heading));
     for (const tuinator::BigTextLook& look : tuinator::all_big_text_looks()) {
@@ -102,13 +89,12 @@ int main() {
     content->add_child(std::make_unique<tuinator::Separator>());
     content->add_child(std::make_unique<tuinator::Label>("All styles", theme.heading));
 
-    auto hello = std::make_unique<tuinator::BigText>(
-        "Hello\nWorld",
-        tuinator::BigTextOptions{
-            .kind = tuinator::BigTextKind::Block,
-            .underline = "▀▄",
-        },
-        theme.heading);
+    auto hello = std::make_unique<tuinator::BigText>("Hello\nWorld",
+                                                     tuinator::BigTextOptions{
+                                                         .kind = tuinator::BigTextKind::Block,
+                                                         .underline = "▀▄",
+                                                     },
+                                                     theme.heading);
     content->add_child(std::move(hello));
 
     for (const tuinator::BigTextPreset& preset : tuinator::all_big_text_styles()) {
@@ -117,8 +103,7 @@ int main() {
 
         tuinator::BigTextOptions options;
         options.kind = preset.kind;
-        options.rainbow = preset.kind == tuinator::BigTextKind::Letter
-            || preset.kind == tuinator::BigTextKind::Banner;
+        options.rainbow = preset.kind == tuinator::BigTextKind::Letter || preset.kind == tuinator::BigTextKind::Banner;
         if (preset.kind == tuinator::BigTextKind::Block) {
             options.underline = "▀▄";
         }
@@ -128,17 +113,13 @@ int main() {
             options.shadow_style = shadow;
         }
 
-        auto text = std::make_unique<tuinator::BigText>(
-            sample_for(preset.kind),
-            options,
-            theme.accent);
+        auto text = std::make_unique<tuinator::BigText>(sample_for(preset.kind), options, theme.accent);
         block->add_child(std::move(text));
         content->add_child(std::move(block));
     }
 
-    auto scroll = std::make_unique<tuinator::ScrollView>(
-        std::move(content),
-        tuinator::ScrollViewOptions{.width = 100, .height = 24});
+    auto scroll = std::make_unique<tuinator::ScrollView>(std::move(content),
+                                                         tuinator::ScrollViewOptions{.width = 100, .height = 24});
     scroll->set_flex(1);
 
     auto root = std::make_unique<BigTextRoot>(tuinator::BoxOptions{.gap = 0, .padding = 0});

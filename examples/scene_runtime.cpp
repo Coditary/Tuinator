@@ -1,18 +1,16 @@
-#include <tuinator/tuinator.hpp>
 #include <tuinator/scene/scene.hpp>
-
-#include "scene_handlers.hpp"
+#include <tuinator/tuinator.hpp>
 
 #include <iostream>
+
+#include "scene_handlers.hpp"
 
 int main(int argc, char** argv) {
     const char* path = (argc > 1) ? argv[1] : "examples/scenes/form.scene.json";
 
     tuinator::Application app;
     tuinator::scene::HandlerRegistry handlers;
-    handlers.register_handler("quit", [](tuinator::Application& application) {
-        scene_handlers::quit(application);
-    });
+    handlers.register_handler("quit", [](tuinator::Application& application) { scene_handlers::quit(application); });
 
     tuinator::scene::LoadOptions options;
     options.handlers = &handlers;

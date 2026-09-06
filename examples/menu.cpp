@@ -7,9 +7,8 @@
 namespace {
 
 class MenuRoot : public tuinator::VBox {
-public:
-    explicit MenuRoot(tuinator::BoxOptions options)
-        : tuinator::VBox(options) {}
+  public:
+    explicit MenuRoot(tuinator::BoxOptions options) : tuinator::VBox(options) {}
 
     bool wants_full_screen() const override { return true; }
 
@@ -40,17 +39,12 @@ public:
         return tuinator::VBox::handle_event(event);
     }
 
-private:
+  private:
     tuinator::MenuBar* menu_ = nullptr;
 };
 
-tuinator::MenuItem action_item(
-    std::string label,
-    std::function<void()> action,
-    std::string shortcut = {},
-    std::string icon = {},
-    std::string hint = {},
-    bool enabled = true) {
+tuinator::MenuItem action_item(std::string label, std::function<void()> action, std::string shortcut = {},
+                               std::string icon = {}, std::string hint = {}, bool enabled = true) {
     tuinator::MenuItem item;
     item.label = std::move(label);
     item.action = std::move(action);
@@ -61,14 +55,9 @@ tuinator::MenuItem action_item(
     return item;
 }
 
-void register_palette_action(
-    tuinator::ActionRegistry& registry,
-    std::string id,
-    std::string label,
-    std::string category,
-    std::string shortcut,
-    std::string hint,
-    std::function<void()> callback) {
+void register_palette_action(tuinator::ActionRegistry& registry, std::string id, std::string label,
+                             std::string category, std::string shortcut, std::string hint,
+                             std::function<void()> callback) {
     tuinator::RegisteredAction action;
     action.id = std::move(id);
     action.label = std::move(label);
@@ -79,9 +68,8 @@ void register_palette_action(
     registry.register_action(std::move(action));
 }
 
-std::vector<tuinator::CommandPaletteEntry> build_palette_entries(
-    const tuinator::ActionRegistry& registry,
-  std::function<void()> quit_action) {
+std::vector<tuinator::CommandPaletteEntry> build_palette_entries(const tuinator::ActionRegistry& registry,
+                                                                 std::function<void()> quit_action) {
     std::vector<tuinator::CommandPaletteEntry> entries;
     for (const tuinator::RegisteredAction* action : registry.all()) {
         entries.push_back({
@@ -110,36 +98,18 @@ int main() {
     tuinator::Desktop* desktop_ptr = desktop.get();
 
     auto actions = std::make_shared<tuinator::ActionRegistry>();
-    register_palette_action(
-        *actions,
-        "file.new",
-        "&New",
-        "File",
-        "Ctrl+N",
-        "Create a blank document",
-        [status_ptr, status_message]() {
-            *status_message = "Action: New";
-            status_ptr->set_text(*status_message);
-        });
-    register_palette_action(
-        *actions,
-        "edit.copy",
-        "&Copy",
-        "Edit",
-        "Ctrl+C",
-        "Copy selection to clipboard",
-        [status_ptr, status_message]() {
-            *status_message = "Action: Copy";
-            status_ptr->set_text(*status_message);
-        });
-    register_palette_action(
-        *actions,
-        "view.palette",
-        "Command &Palette",
-        "View",
-        "Ctrl+P",
-        "Search all commands",
-        [desktop_ptr]() { desktop_ptr->show_command_palette(); });
+    register_palette_action(*actions, "file.new", "&New", "File", "Ctrl+N", "Create a blank document",
+                            [status_ptr, status_message]() {
+                                *status_message = "Action: New";
+                                status_ptr->set_text(*status_message);
+                            });
+    register_palette_action(*actions, "edit.copy", "&Copy", "Edit", "Ctrl+C", "Copy selection to clipboard",
+                            [status_ptr, status_message]() {
+                                *status_message = "Action: Copy";
+                                status_ptr->set_text(*status_message);
+                            });
+    register_palette_action(*actions, "view.palette", "Command &Palette", "View", "Ctrl+P", "Search all commands",
+                            [desktop_ptr]() { desktop_ptr->show_command_palette(); });
     desktop_ptr->set_action_registry(actions);
 
     auto menu = std::make_unique<tuinator::MenuBar>(theme.label, theme.button_focused);
@@ -156,42 +126,51 @@ int main() {
     menu_ptr->set_menus({
         {"&File",
          {
-             action_item("&New", [notify]() { notify("File -> New"); }, "Ctrl+N", "*", "Create a new document"),
-             action_item("&Open", [notify]() { notify("File -> Open"); }, "Ctrl+O", ">", "Open a file"),
-             tuinator::MenuItem::submenu(
-                 "&Open recent",
-                 {
-                     action_item("file_1.txt", [notify]() { notify("Opened file_1.txt"); }, {}, "1"),
-                     action_item("file_2.txt", [notify]() { notify("Opened file_2.txt"); }, {}, "2"),
-                     action_item("notes.md", [notify]() { notify("Opened notes.md"); }, {}, "N"),
-                 },
-                 {},
-                 ">"),
+             action_item(
+                 "&New", [notify]() { notify("File -> New"); }, "Ctrl+N", "*", "Create a new document"),
+             action_item(
+                 "&Open", [notify]() { notify("File -> Open"); }, "Ctrl+O", ">", "Open a file"),
+             tuinator::MenuItem::submenu("&Open recent",
+                                         {
+                                             action_item(
+                                                 "file_1.txt", [notify]() { notify("Opened file_1.txt"); }, {}, "1"),
+                                             action_item(
+                                                 "file_2.txt", [notify]() { notify("Opened file_2.txt"); }, {}, "2"),
+                                             action_item(
+                                                 "notes.md", [notify]() { notify("Opened notes.md"); }, {}, "N"),
+                                         },
+                                         {}, ">"),
              tuinator::MenuItem::submenu(
                  "&Export",
                  {
-                     tuinator::MenuItem::submenu(
-                         "&Format",
-                         {
-                             action_item("&PDF", [notify]() { notify("Export PDF"); }),
-                             action_item("&PNG", [notify]() { notify("Export PNG"); }),
-                             action_item("&SVG", [notify]() { notify("Export SVG"); }),
-                         }),
+                     tuinator::MenuItem::submenu("&Format",
+                                                 {
+                                                     action_item("&PDF", [notify]() { notify("Export PDF"); }),
+                                                     action_item("&PNG", [notify]() { notify("Export PNG"); }),
+                                                     action_item("&SVG", [notify]() { notify("Export SVG"); }),
+                                                 }),
                      action_item("&Current view", [notify]() { notify("Export current view"); }),
                  }),
              tuinator::MenuItem::separator(),
-             action_item("Save &as...", [notify]() { notify("File -> Save as"); }, "Ctrl+S", "S"),
+             action_item(
+                 "Save &as...", [notify]() { notify("File -> Save as"); }, "Ctrl+S", "S"),
              tuinator::MenuItem::separator(),
-             action_item("E&xit", [&app]() { app.quit(); }, "Ctrl+Q", "X", "Close the application"),
+             action_item(
+                 "E&xit", [&app]() { app.quit(); }, "Ctrl+Q", "X", "Close the application"),
          }},
         {"&Edit",
          {
-             action_item("&Undo", [notify]() { notify("Edit -> Undo"); }, "Ctrl+Z", "U", "Undo last change", false),
-             action_item("&Redo", [notify]() { notify("Edit -> Redo"); }, "Ctrl+Y", "R", "Redo last undone change", false),
+             action_item(
+                 "&Undo", [notify]() { notify("Edit -> Undo"); }, "Ctrl+Z", "U", "Undo last change", false),
+             action_item(
+                 "&Redo", [notify]() { notify("Edit -> Redo"); }, "Ctrl+Y", "R", "Redo last undone change", false),
              tuinator::MenuItem::separator(),
-             action_item("Cu&t", [notify]() { notify("Edit -> Cut"); }, "Ctrl+X", "T"),
-             action_item("&Copy", [notify]() { notify("Edit -> Copy"); }, "Ctrl+C", "C"),
-             action_item("&Paste", [notify]() { notify("Edit -> Paste"); }, "Ctrl+V", "V"),
+             action_item(
+                 "Cu&t", [notify]() { notify("Edit -> Cut"); }, "Ctrl+X", "T"),
+             action_item(
+                 "&Copy", [notify]() { notify("Edit -> Copy"); }, "Ctrl+C", "C"),
+             action_item(
+                 "&Paste", [notify]() { notify("Edit -> Paste"); }, "Ctrl+V", "V"),
              tuinator::MenuItem::separator(),
              tuinator::MenuItem::checkbox("&Line numbers", true, [notify]() { notify("Toggled line numbers"); }),
              tuinator::MenuItem::checkbox("&Word wrap", false, [notify]() { notify("Toggled word wrap"); }),
@@ -201,30 +180,35 @@ int main() {
              tuinator::MenuItem::checkbox("&Toolbar", true),
              tuinator::MenuItem::checkbox("&Status bar", true),
              tuinator::MenuItem::separator(),
-             action_item("Zoom &in", [notify]() { notify("View -> Zoom in"); }, "Ctrl++", "+"),
-             action_item("Zoom out", [notify]() { notify("View -> Zoom out"); }, "Ctrl+-", "-", "Decrease zoom", false),
+             action_item(
+                 "Zoom &in", [notify]() { notify("View -> Zoom in"); }, "Ctrl++", "+"),
+             action_item(
+                 "Zoom out", [notify]() { notify("View -> Zoom out"); }, "Ctrl+-", "-", "Decrease zoom", false),
              tuinator::MenuItem::separator(),
              tuinator::MenuItem::submenu(
                  "&Theme",
                  {
-                     action_item("&Classic", [menu_ptr, notify]() {
-                         if (const tuinator::MenuBarLook* look = tuinator::menu_bar_look_named("classic")) {
-                             menu_ptr->apply_look(*look);
-                         }
-                         notify("Theme: classic");
-                     }),
-                     action_item("&Mac", [menu_ptr, notify]() {
-                         if (const tuinator::MenuBarLook* look = tuinator::menu_bar_look_named("mac")) {
-                             menu_ptr->apply_look(*look);
-                         }
-                         notify("Theme: mac");
-                     }),
-                     action_item("&Minimal", [menu_ptr, notify]() {
-                         if (const tuinator::MenuBarLook* look = tuinator::menu_bar_look_named("minimal")) {
-                             menu_ptr->apply_look(*look);
-                         }
-                         notify("Theme: minimal");
-                     }),
+                     action_item("&Classic",
+                                 [menu_ptr, notify]() {
+                                     if (const tuinator::MenuBarLook* look = tuinator::menu_bar_look_named("classic")) {
+                                         menu_ptr->apply_look(*look);
+                                     }
+                                     notify("Theme: classic");
+                                 }),
+                     action_item("&Mac",
+                                 [menu_ptr, notify]() {
+                                     if (const tuinator::MenuBarLook* look = tuinator::menu_bar_look_named("mac")) {
+                                         menu_ptr->apply_look(*look);
+                                     }
+                                     notify("Theme: mac");
+                                 }),
+                     action_item("&Minimal",
+                                 [menu_ptr, notify]() {
+                                     if (const tuinator::MenuBarLook* look = tuinator::menu_bar_look_named("minimal")) {
+                                         menu_ptr->apply_look(*look);
+                                     }
+                                     notify("Theme: minimal");
+                                 }),
                  }),
          }},
         {"&Help",
@@ -234,9 +218,8 @@ int main() {
          }},
     });
 
-    menu_ptr->set_on_action([notify](const std::string& menu_name, const std::string& item) {
-        notify(menu_name + " -> " + item);
-    });
+    menu_ptr->set_on_action(
+        [notify](const std::string& menu_name, const std::string& item) { notify(menu_name + " -> " + item); });
     menu_ptr->set_on_hint([status_ptr, status_message](const std::string& hint) {
         if (!hint.empty()) {
             *status_message = hint;
@@ -245,8 +228,10 @@ int main() {
     });
 
     desktop_ptr->set_context_menu_items({
-        action_item("&Copy", [notify]() { notify("Context -> Copy"); }, "Ctrl+C", "C", "Copy selection"),
-        action_item("&Paste", [notify]() { notify("Context -> Paste"); }, "Ctrl+V", "V", "Paste from clipboard"),
+        action_item(
+            "&Copy", [notify]() { notify("Context -> Copy"); }, "Ctrl+C", "C", "Copy selection"),
+        action_item(
+            "&Paste", [notify]() { notify("Context -> Paste"); }, "Ctrl+V", "V", "Paste from clipboard"),
         tuinator::MenuItem::separator(),
         tuinator::MenuItem::submenu(
             "&More",
@@ -261,7 +246,8 @@ int main() {
                     }),
             }),
         tuinator::MenuItem::separator(),
-        action_item("&Quit", [&app]() { app.quit(); }, "Ctrl+Q", "X"),
+        action_item(
+            "&Quit", [&app]() { app.quit(); }, "Ctrl+Q", "X"),
     });
     desktop_ptr->set_command_palette_entries(build_palette_entries(*actions, [&app]() { app.quit(); }));
 
@@ -273,51 +259,35 @@ int main() {
     auto body = std::make_unique<tuinator::Panel>("Menu catalog", theme.border, theme.heading, theme.glyphs);
     auto panel_body = std::make_unique<tuinator::VBox>(tuinator::BoxOptions{.gap = 0, .padding = 1});
     panel_body->add_child(std::make_unique<tuinator::Label>("MenuBar item types in this demo", theme.heading));
+    panel_body->add_child(
+        std::make_unique<tuinator::Label>("  Action        normal clickable entry with callback", theme.muted));
     panel_body->add_child(std::make_unique<tuinator::Label>(
-        "  Action        normal clickable entry with callback",
-        theme.muted));
-    panel_body->add_child(std::make_unique<tuinator::Label>(
-        "  Submenu       nested panel to the right (File -> Open recent)",
-        theme.muted));
-    panel_body->add_child(std::make_unique<tuinator::Label>(
-        "  Separator     horizontal rule between groups",
-        theme.muted));
-    panel_body->add_child(std::make_unique<tuinator::Label>(
-        "  Checkbox      toggle item, stays open ([x] / [ ])",
-        theme.muted));
-    panel_body->add_child(std::make_unique<tuinator::Label>(
-        "  Disabled      dimmed, not activatable (Edit -> Undo)",
-        theme.muted));
-    panel_body->add_child(std::make_unique<tuinator::Label>(
-        "  Shortcut      right-aligned label (Ctrl+S)",
-        theme.muted));
-    panel_body->add_child(std::make_unique<tuinator::Label>(
-        "  Mnemonic      &letter opens item (Alt+F, Alt+O)",
-        theme.muted));
-    panel_body->add_child(std::make_unique<tuinator::Label>(
-        "  Icon          prefix glyph before label",
-        theme.muted));
-    panel_body->add_child(std::make_unique<tuinator::Label>(
-        "  Hint          shown in status bar on selection",
-        theme.muted));
+        "  Submenu       nested panel to the right (File -> Open recent)", theme.muted));
+    panel_body->add_child(
+        std::make_unique<tuinator::Label>("  Separator     horizontal rule between groups", theme.muted));
+    panel_body->add_child(
+        std::make_unique<tuinator::Label>("  Checkbox      toggle item, stays open ([x] / [ ])", theme.muted));
+    panel_body->add_child(
+        std::make_unique<tuinator::Label>("  Disabled      dimmed, not activatable (Edit -> Undo)", theme.muted));
+    panel_body->add_child(
+        std::make_unique<tuinator::Label>("  Shortcut      right-aligned label (Ctrl+S)", theme.muted));
+    panel_body->add_child(
+        std::make_unique<tuinator::Label>("  Mnemonic      &letter opens item (Alt+F, Alt+O)", theme.muted));
+    panel_body->add_child(std::make_unique<tuinator::Label>("  Icon          prefix glyph before label", theme.muted));
+    panel_body->add_child(
+        std::make_unique<tuinator::Label>("  Hint          shown in status bar on selection", theme.muted));
     panel_body->add_child(std::make_unique<tuinator::Label>("", theme.muted));
     panel_body->add_child(std::make_unique<tuinator::Label>("Other menu surfaces", theme.heading));
+    panel_body->add_child(
+        std::make_unique<tuinator::Label>("  ContextMenu   right-click the panel below", theme.muted));
+    panel_body->add_child(std::make_unique<tuinator::Label>("  CommandPalette  Ctrl+P fuzzy search", theme.muted));
+    panel_body->add_child(
+        std::make_unique<tuinator::Label>("  ActionRegistry  global shortcuts (Ctrl+N, Ctrl+C)", theme.muted));
+    panel_body->add_child(
+        std::make_unique<tuinator::Label>("  Style presets   View -> Theme or keys 1/2/3", theme.muted));
+    panel_body->add_child(std::make_unique<tuinator::Label>("", theme.muted));
     panel_body->add_child(std::make_unique<tuinator::Label>(
-        "  ContextMenu   right-click the panel below",
-        theme.muted));
-    panel_body->add_child(std::make_unique<tuinator::Label>(
-        "  CommandPalette  Ctrl+P fuzzy search",
-        theme.muted));
-    panel_body->add_child(std::make_unique<tuinator::Label>(
-        "  ActionRegistry  global shortcuts (Ctrl+N, Ctrl+C)",
-        theme.muted));
-    panel_body->add_child(std::make_unique<tuinator::Label>(
-        "  Style presets   View -> Theme or keys 1/2/3",
-        theme.muted));
-  panel_body->add_child(std::make_unique<tuinator::Label>("", theme.muted));
-    panel_body->add_child(std::make_unique<tuinator::Label>(
-        "Tab = focus menu | Arrows + Enter | Right-click = context | Ctrl+P = palette | q = quit",
-        theme.muted));
+        "Tab = focus menu | Arrows + Enter | Right-click = context | Ctrl+P = palette | q = quit", theme.muted));
     body->set_content(std::move(panel_body));
 
     auto root = std::make_unique<MenuRoot>(tuinator::BoxOptions{.gap = 0, .padding = 0});

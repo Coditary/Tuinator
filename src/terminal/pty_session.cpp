@@ -2,19 +2,18 @@
 
 #ifndef _WIN32
 
+#include <array>
 #include <cerrno>
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <string>
-#include <unistd.h>
-
-#include <array>
 #include <pty.h>
+#include <string>
 #include <sys/ioctl.h>
 #include <sys/wait.h>
 #include <termios.h>
+#include <unistd.h>
 
 namespace tuinator {
 
@@ -48,9 +47,7 @@ std::string shell_basename(const std::string& shell) {
 
 } // namespace
 
-PtySession::~PtySession() {
-    terminate();
-}
+PtySession::~PtySession() { terminate(); }
 
 void PtySession::set_output_handler(OutputHandler handler) {
     std::lock_guard<std::mutex> lock(handler_mutex_);
@@ -201,9 +198,7 @@ void PtySession::writer_loop() {
         std::string data;
         {
             std::unique_lock<std::mutex> lock(write_mutex_);
-            write_cv_.wait(lock, [this] {
-                return shutdown_.load() || !write_queue_.empty();
-            });
+            write_cv_.wait(lock, [this] { return shutdown_.load() || !write_queue_.empty(); });
             if (shutdown_.load() && write_queue_.empty()) {
                 break;
             }
@@ -217,8 +212,7 @@ void PtySession::writer_loop() {
 
         std::size_t offset = 0;
         while (offset < data.size()) {
-            const ssize_t bytes =
-                ::write(master_fd_, data.data() + offset, data.size() - offset);
+            const ssize_t bytes = ::write(master_fd_, data.data() + offset, data.size() - offset);
             if (bytes < 0) {
                 if (errno == EINTR) {
                     continue;
@@ -268,15 +262,11 @@ void PtySession::set_output_handler(OutputHandler) {}
 
 void PtySession::set_exit_handler(ExitHandler) {}
 
-bool PtySession::start(Size, const std::string&) {
-    return false;
-}
+bool PtySession::start(Size, const std::string&) { return false; }
 
 void PtySession::resize(Size) {}
 
-bool PtySession::enqueue_input(std::string) {
-    return false;
-}
+bool PtySession::enqueue_input(std::string) { return false; }
 
 void PtySession::terminate() {}
 

@@ -1,7 +1,6 @@
-#include <tuinator/widgets/containers/scroll_view.hpp>
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/core/geometry.hpp>
+#include <tuinator/widgets/containers/scroll_view.hpp>
 
 #include <algorithm>
 #include <variant>
@@ -44,24 +43,13 @@ int ScrollView::max_scroll_y() const {
 }
 
 ScrollbarMetrics ScrollView::scrollbar_metrics() const {
-    return compute_scrollbar_metrics(
-        bounds_.width,
-        bounds_.height,
-        content_width_,
-        content_height_,
-        options_.scrollbars.config);
+    return compute_scrollbar_metrics(bounds_.width, bounds_.height, content_width_, content_height_,
+                                     options_.scrollbars.config);
 }
 
 ScrollbarLayout ScrollView::scrollbar_layout() const {
-    return compute_scrollbar_layout(
-        bounds_.width,
-        bounds_.height,
-        content_width_,
-        content_height_,
-        scroll_x_,
-        scroll_y_,
-        options_.scrollbars.config,
-        options_.scrollbars.behavior.show_arrows);
+    return compute_scrollbar_layout(bounds_.width, bounds_.height, content_width_, content_height_, scroll_x_,
+                                    scroll_y_, options_.scrollbars.config, options_.scrollbars.behavior.show_arrows);
 }
 
 ScrollbarScrollActions ScrollView::scrollbar_actions() {
@@ -71,9 +59,7 @@ ScrollbarScrollActions ScrollView::scrollbar_actions() {
     return actions;
 }
 
-Point ScrollView::to_local(Point terminal) const {
-    return {terminal.x - bounds_.x, terminal.y - bounds_.y};
-}
+Point ScrollView::to_local(Point terminal) const { return {terminal.x - bounds_.x, terminal.y - bounds_.y}; }
 
 Point ScrollView::to_content_local(Point terminal) const {
     const Point local = to_local(terminal);
@@ -88,9 +74,7 @@ void ScrollView::scroll_to(int x, int y) {
     mark_dirty();
 }
 
-void ScrollView::scroll_by(int delta_x, int delta_y) {
-    scroll_to(scroll_x_ + delta_x, scroll_y_ + delta_y);
-}
+void ScrollView::scroll_by(int delta_x, int delta_y) { scroll_to(scroll_x_ + delta_x, scroll_y_ + delta_y); }
 
 void ScrollView::set_on_dirty(std::function<void(Rect)> callback) {
     Widget::set_on_dirty(std::move(callback));
@@ -141,9 +125,7 @@ void ScrollView::refresh_content() {
     mark_dirty();
 }
 
-bool ScrollView::contains_widget(const Widget* widget) const {
-    return widget_tree_contains(content_.get(), widget);
-}
+bool ScrollView::contains_widget(const Widget* widget) const { return widget_tree_contains(content_.get(), widget); }
 
 void ScrollView::ensure_visible(const Widget* widget) {
     if (!content_ || widget == nullptr || !contains_widget(widget)) {
@@ -174,9 +156,7 @@ void ScrollView::ensure_visible(const Widget* widget) {
     scroll_to(next_x, next_y);
 }
 
-Size ScrollView::preferred_size() const {
-    return {options_.width, options_.height};
-}
+Size ScrollView::preferred_size() const { return {options_.width, options_.height}; }
 
 void ScrollView::layout(Rect bounds) {
     bounds_ = bounds;
@@ -217,11 +197,10 @@ void ScrollView::paint(PaintContext& ctx) const {
     canvas.fill_rect(viewport, ' ', options_.background);
 
     ctx.with_clip(viewport, [&](PaintContext& clipped_ctx) {
-        clipped_ctx.with_clip(
-            {{-scroll_x_, -scroll_y_},
-             {std::max(content_width_, layout.metrics.viewport_width),
-              std::max(content_height_, layout.metrics.viewport_height)}},
-            [&](PaintContext& content_ctx) { content_->paint(content_ctx); });
+        clipped_ctx.with_clip({{-scroll_x_, -scroll_y_},
+                               {std::max(content_width_, layout.metrics.viewport_width),
+                                std::max(content_height_, layout.metrics.viewport_height)}},
+                              [&](PaintContext& content_ctx) { content_->paint(content_ctx); });
     });
 
     paint_scrollbars(canvas, options_.scrollbars, layout);
@@ -271,28 +250,15 @@ void ScrollView::for_each_child(const std::function<void(Widget*)>& visitor) {
     }
 }
 
-bool ScrollView::has_focused_descendant() const {
-    return content_ && content_->has_focused_descendant();
-}
+bool ScrollView::has_focused_descendant() const { return content_ && content_->has_focused_descendant(); }
 
-bool ScrollView::pointer_active() const {
-    return scrollbar_state_.pointer_active();
-}
+bool ScrollView::pointer_active() const { return scrollbar_state_.pointer_active(); }
 
 bool ScrollView::handle_scrollbar_mouse(const MouseEvent& mouse) {
     const Point local = to_local(mouse.position);
     const auto layout = scrollbar_layout();
-    return tuinator::handle_scrollbar_mouse(
-        mouse,
-        local,
-        layout,
-        options_.scrollbars.behavior,
-        scrollbar_state_,
-        scrollbar_actions(),
-        scroll_x_,
-        scroll_y_,
-        content_width_,
-        content_height_);
+    return tuinator::handle_scrollbar_mouse(mouse, local, layout, options_.scrollbars.behavior, scrollbar_state_,
+                                            scrollbar_actions(), scroll_x_, scroll_y_, content_width_, content_height_);
 }
 
 bool ScrollView::handle_event(const Event& event) {
@@ -314,10 +280,8 @@ bool ScrollView::handle_event(const Event& event) {
         case MouseAction::WheelUp:
         case MouseAction::WheelDown:
         case MouseAction::WheelLeft:
-        case MouseAction::WheelRight:
-            return try_scroll(event);
-        default:
-            break;
+        case MouseAction::WheelRight: return try_scroll(event);
+        default: break;
         }
 
         const Point local = to_local(mouse->position);
@@ -380,26 +344,13 @@ bool ScrollView::try_scroll(const Event& event) {
 
     const auto metrics = scrollbar_metrics();
     switch (key->key) {
-    case Key::PageUp:
-        scroll_by(0, -metrics.viewport_height);
-        return true;
-    case Key::PageDown:
-        scroll_by(0, metrics.viewport_height);
-        return true;
-    case Key::Home:
-        scroll_to(0, 0);
-        return true;
-    case Key::End:
-        scroll_to(max_scroll_x(), max_scroll_y());
-        return true;
-    case Key::Left:
-        scroll_by(-1, 0);
-        return true;
-    case Key::Right:
-        scroll_by(1, 0);
-        return true;
-    default:
-        return false;
+    case Key::PageUp: scroll_by(0, -metrics.viewport_height); return true;
+    case Key::PageDown: scroll_by(0, metrics.viewport_height); return true;
+    case Key::Home: scroll_to(0, 0); return true;
+    case Key::End: scroll_to(max_scroll_x(), max_scroll_y()); return true;
+    case Key::Left: scroll_by(-1, 0); return true;
+    case Key::Right: scroll_by(1, 0); return true;
+    default: return false;
     }
 }
 

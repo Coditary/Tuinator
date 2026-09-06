@@ -1,5 +1,3 @@
-#include "test_harness.hpp"
-
 #include <tuinator/backend/inline_backend.hpp>
 
 #include <cstdio>
@@ -7,6 +5,8 @@
 #include <string>
 #include <unistd.h>
 #include <variant>
+
+#include "test_harness.hpp"
 
 #if TUINATOR_PLATFORM_POSIX
 
@@ -17,9 +17,7 @@ struct CaptureOutput {
     size_t length = 0;
     FILE* file = nullptr;
 
-    CaptureOutput() {
-        file = open_memstream(&buffer, &length);
-    }
+    CaptureOutput() { file = open_memstream(&buffer, &length); }
 
     ~CaptureOutput() {
         if (file != nullptr) {
@@ -28,9 +26,7 @@ struct CaptureOutput {
         std::free(buffer);
     }
 
-    std::string text() const {
-        return std::string(buffer != nullptr ? buffer : "", length);
-    }
+    std::string text() const { return std::string(buffer != nullptr ? buffer : "", length); }
 };
 
 struct StdinPipe {
@@ -48,9 +44,7 @@ struct StdinPipe {
         return true;
     }
 
-    void write_byte(unsigned char byte) {
-        write(fds[1], &byte, 1);
-    }
+    void write_byte(unsigned char byte) { write(fds[1], &byte, 1); }
 
     ~StdinPipe() {
         if (saved >= 0) {
@@ -154,11 +148,7 @@ TUINATOR_TEST(inline_backend_true_color_rgb_sequences) {
     backend.init();
 
     backend.begin_frame();
-    backend.draw_text(
-        0,
-        0,
-        "rgb",
-        tuinator::Style{.foreground_rgb = tuinator::Rgb{0x89, 0xB4, 0xFA}, .bold = true});
+    backend.draw_text(0, 0, "rgb", tuinator::Style{.foreground_rgb = tuinator::Rgb{0x89, 0xB4, 0xFA}, .bold = true});
     backend.end_frame();
 
     const std::string out = capture.text();
@@ -327,14 +317,9 @@ TUINATOR_TEST(inline_backend_ansi_and_background_styles) {
 
     backend.begin_frame();
     backend.draw_text(
-        0,
-        0,
-        "styled",
+        0, 0, "styled",
         tuinator::Style{
-            .foreground = tuinator::Color::Red,
-            .background = tuinator::Color::Blue,
-            .dim = true,
-            .reverse = true});
+            .foreground = tuinator::Color::Red, .background = tuinator::Color::Blue, .dim = true, .reverse = true});
     backend.end_frame();
 
     const std::string out = capture.text();
@@ -351,11 +336,7 @@ TUINATOR_TEST(inline_backend_background_rgb_style) {
     backend.init();
 
     backend.begin_frame();
-    backend.draw_text(
-        0,
-        0,
-        "bg",
-        tuinator::Style{.background_rgb = tuinator::Rgb{0x1E, 0x1E, 0x2E}});
+    backend.draw_text(0, 0, "bg", tuinator::Style{.background_rgb = tuinator::Rgb{0x1E, 0x1E, 0x2E}});
     backend.end_frame();
 
     TUINATOR_CHECK(capture.text().find("\033[48;2;30;30;46m") != std::string::npos);

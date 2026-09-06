@@ -1,5 +1,4 @@
 #include <tuinator/render/astronomy_icon.hpp>
-
 #include <tuinator/render/glyphs.hpp>
 
 #include <array>
@@ -29,13 +28,8 @@ std::string utf8_from(char32_t cp) {
     return out;
 }
 
-constexpr AstronomyIconDescriptor make(
-    AstronomyIcon kind,
-    AstronomyIconCategory category,
-    const char* path,
-    const char* nerd_suffix,
-    char32_t codepoint,
-    char ascii) {
+constexpr AstronomyIconDescriptor make(AstronomyIcon kind, AstronomyIconCategory category, const char* path,
+                                       const char* nerd_suffix, char32_t codepoint, char ascii) {
     return AstronomyIconDescriptor{kind, category, path, nerd_suffix, codepoint, ascii};
 }
 
@@ -44,8 +38,10 @@ constexpr std::array<AstronomyIconDescriptor, 11> kDescriptors{{
     make(AstronomyIcon::Moonset, AstronomyIconCategory::Celestial, "astronomy-moonset", "moonset", 0xE3C2, 'n'),
     make(AstronomyIcon::Sunrise, AstronomyIconCategory::Celestial, "astronomy-sunrise", "sunrise", 0xE34C, 'o'),
     make(AstronomyIcon::Sunset, AstronomyIconCategory::Celestial, "astronomy-sunset", "sunset", 0xE34D, 'o'),
-    make(AstronomyIcon::LunarEclipse, AstronomyIconCategory::Eclipse, "astronomy-lunar-eclipse", "lunar_eclipse", 0xE369, '*'),
-    make(AstronomyIcon::SolarEclipse, AstronomyIconCategory::Eclipse, "astronomy-solar-eclipse", "solar_eclipse", 0xE368, '*'),
+    make(AstronomyIcon::LunarEclipse, AstronomyIconCategory::Eclipse, "astronomy-lunar-eclipse", "lunar_eclipse",
+         0xE369, '*'),
+    make(AstronomyIcon::SolarEclipse, AstronomyIconCategory::Eclipse, "astronomy-solar-eclipse", "solar_eclipse",
+         0xE368, '*'),
     make(AstronomyIcon::Horizon, AstronomyIconCategory::Sky, "astronomy-horizon", "horizon", 0xE343, '*'),
     make(AstronomyIcon::HorizonAlt, AstronomyIconCategory::Sky, "astronomy-horizon-alt", "horizon_alt", 0xE342, '*'),
     make(AstronomyIcon::Stars, AstronomyIconCategory::Sky, "astronomy-stars", "stars", 0xE370, '*'),
@@ -65,46 +61,30 @@ const AstronomyIconDescriptor& descriptor_or_default(AstronomyIcon icon) {
 
 } // namespace
 
-const AstronomyIconDescriptor& astronomy_icon_descriptor(AstronomyIcon icon) {
-    return descriptor_or_default(icon);
-}
+const AstronomyIconDescriptor& astronomy_icon_descriptor(AstronomyIcon icon) { return descriptor_or_default(icon); }
 
-AstronomyIconCategory astronomy_icon_category(AstronomyIcon icon) {
-    return astronomy_icon_descriptor(icon).category;
-}
+AstronomyIconCategory astronomy_icon_category(AstronomyIcon icon) { return astronomy_icon_descriptor(icon).category; }
 
-const char* astronomy_icon_path(AstronomyIcon icon) {
-    return astronomy_icon_descriptor(icon).path;
-}
+const char* astronomy_icon_path(AstronomyIcon icon) { return astronomy_icon_descriptor(icon).path; }
 
-const char* astronomy_icon_nerd_suffix(AstronomyIcon icon) {
-    return astronomy_icon_descriptor(icon).nerd_suffix;
-}
+const char* astronomy_icon_nerd_suffix(AstronomyIcon icon) { return astronomy_icon_descriptor(icon).nerd_suffix; }
 
 const char* astronomy_icon_category_path(AstronomyIconCategory category) {
     switch (category) {
-    case AstronomyIconCategory::Celestial:
-        return "astronomy-celestial";
-    case AstronomyIconCategory::Eclipse:
-        return "astronomy-eclipse";
-    case AstronomyIconCategory::Sky:
-        return "astronomy-sky";
-    case AstronomyIconCategory::Misc:
-        return "astronomy-misc";
+    case AstronomyIconCategory::Celestial: return "astronomy-celestial";
+    case AstronomyIconCategory::Eclipse: return "astronomy-eclipse";
+    case AstronomyIconCategory::Sky: return "astronomy-sky";
+    case AstronomyIconCategory::Misc: return "astronomy-misc";
     }
     return "astronomy";
 }
 
 const char* astronomy_icon_category_label(AstronomyIconCategory category) {
     switch (category) {
-    case AstronomyIconCategory::Celestial:
-        return "Celestial";
-    case AstronomyIconCategory::Eclipse:
-        return "Eclipse";
-    case AstronomyIconCategory::Sky:
-        return "Sky";
-    case AstronomyIconCategory::Misc:
-        return "Misc";
+    case AstronomyIconCategory::Celestial: return "Celestial";
+    case AstronomyIconCategory::Eclipse: return "Eclipse";
+    case AstronomyIconCategory::Sky: return "Sky";
+    case AstronomyIconCategory::Misc: return "Misc";
     }
     return "Other";
 }

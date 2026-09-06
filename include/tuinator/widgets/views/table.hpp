@@ -15,7 +15,7 @@ struct TableColumn {
 };
 
 class Table : public Widget {
-public:
+  public:
     Table(Style header_style = {}, Style cell_style = {}, Style selected_style = {});
 
     const std::vector<TableColumn>& columns() const { return columns_; }
@@ -34,7 +34,7 @@ public:
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
 
-private:
+  private:
     void clamp_selection();
     void ensure_selected_visible();
     int visible_row_capacity() const;

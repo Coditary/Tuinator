@@ -1,7 +1,6 @@
-#include <tuinator/widgets/charts/chart_common.hpp>
-
 #include <tuinator/render/glyphs.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/charts/chart_common.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -40,17 +39,12 @@ std::string chart_glyph_for(ChartGlyphStyle style, const std::string& custom) {
 
     if (detect_glyph_set() == GlyphSet::Ascii) {
         switch (style) {
-        case ChartGlyphStyle::Dots:
-            return "O";
+        case ChartGlyphStyle::Dots: return "O";
         case ChartGlyphStyle::FineDots:
-        case ChartGlyphStyle::SmallDots:
-            return ".";
-        case ChartGlyphStyle::Blocks:
-            return "#";
-        case ChartGlyphStyle::Braille:
-            return ":";
-        default:
-            break;
+        case ChartGlyphStyle::SmallDots: return ".";
+        case ChartGlyphStyle::Blocks: return "#";
+        case ChartGlyphStyle::Braille: return ":";
+        default: break;
         }
     }
 
@@ -130,12 +124,8 @@ std::string chart_format_value(double value) {
     return out.str();
 }
 
-ChartPlotArea chart_compute_plot(
-    const Rect& bounds,
-    const std::string& title,
-    int footer_rows,
-    bool show_axis,
-    int axis_width) {
+ChartPlotArea chart_compute_plot(const Rect& bounds, const std::string& title, int footer_rows, bool show_axis,
+                                 int axis_width) {
     ChartPlotArea plot{};
     plot.title_rows = title.empty() ? 0 : 1;
     plot.footer_rows = footer_rows;
@@ -146,15 +136,8 @@ ChartPlotArea chart_compute_plot(
     return plot;
 }
 
-void chart_paint_horizontal_grid(
-    Canvas& canvas,
-    const ChartPlotArea& plot,
-    double min_v,
-    double max_v,
-    const Style& axis_style,
-    const Style& grid_style,
-    bool show_axis,
-    int grid_lines) {
+void chart_paint_horizontal_grid(Canvas& canvas, const ChartPlotArea& plot, double min_v, double max_v,
+                                 const Style& axis_style, const Style& grid_style, bool show_axis, int grid_lines) {
     if (plot.height <= 1 || grid_lines <= 0) {
         return;
     }
@@ -170,13 +153,8 @@ void chart_paint_horizontal_grid(
     }
 }
 
-void chart_paint_glyph_cell(
-    Canvas& canvas,
-    int x,
-    int y,
-    ChartGlyphStyle style,
-    const std::string& custom_glyph,
-    const Style& cell_style) {
+void chart_paint_glyph_cell(Canvas& canvas, int x, int y, ChartGlyphStyle style, const std::string& custom_glyph,
+                            const Style& cell_style) {
     if (style == ChartGlyphStyle::Braille) {
         bool dots[8] = {};
         for (int i = 0; i < 8; ++i) {

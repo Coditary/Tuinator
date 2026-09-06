@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: clang-format
+        name: clang-format
+        entry: clang-format -i --style=file
+        language: system
+        types: [c++]
+        exclude: \.generated\.(cpp|hpp)$

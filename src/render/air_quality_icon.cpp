@@ -1,5 +1,4 @@
 #include <tuinator/render/air_quality_icon.hpp>
-
 #include <tuinator/render/glyphs.hpp>
 
 #include <array>
@@ -29,13 +28,8 @@ std::string utf8_from(char32_t cp) {
     return out;
 }
 
-constexpr AirQualityIconDescriptor make(
-    AirQualityIcon kind,
-    AirQualityIconCategory category,
-    const char* path,
-    const char* nerd_suffix,
-    char32_t codepoint,
-    char ascii) {
+constexpr AirQualityIconDescriptor make(AirQualityIcon kind, AirQualityIconCategory category, const char* path,
+                                        const char* nerd_suffix, char32_t codepoint, char ascii) {
     return AirQualityIconDescriptor{kind, category, path, nerd_suffix, codepoint, ascii};
 }
 
@@ -57,34 +51,26 @@ const AirQualityIconDescriptor& descriptor_or_default(AirQualityIcon icon) {
 
 } // namespace
 
-const AirQualityIconDescriptor& air_quality_icon_descriptor(AirQualityIcon icon) {
-    return descriptor_or_default(icon);
-}
+const AirQualityIconDescriptor& air_quality_icon_descriptor(AirQualityIcon icon) { return descriptor_or_default(icon); }
 
 AirQualityIconCategory air_quality_icon_category(AirQualityIcon icon) {
     return air_quality_icon_descriptor(icon).category;
 }
 
-const char* air_quality_icon_path(AirQualityIcon icon) {
-    return air_quality_icon_descriptor(icon).path;
-}
+const char* air_quality_icon_path(AirQualityIcon icon) { return air_quality_icon_descriptor(icon).path; }
 
-const char* air_quality_icon_nerd_suffix(AirQualityIcon icon) {
-    return air_quality_icon_descriptor(icon).nerd_suffix;
-}
+const char* air_quality_icon_nerd_suffix(AirQualityIcon icon) { return air_quality_icon_descriptor(icon).nerd_suffix; }
 
 const char* air_quality_icon_category_path(AirQualityIconCategory category) {
     switch (category) {
-    case AirQualityIconCategory::AirQuality:
-        return "air-quality";
+    case AirQualityIconCategory::AirQuality: return "air-quality";
     }
     return "air-quality";
 }
 
 const char* air_quality_icon_category_label(AirQualityIconCategory category) {
     switch (category) {
-    case AirQualityIconCategory::AirQuality:
-        return "Air Quality";
+    case AirQualityIconCategory::AirQuality: return "Air Quality";
     }
     return "Other";
 }

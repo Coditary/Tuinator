@@ -16,12 +16,11 @@ class ContextMenu;
 class CommandPalette;
 
 class Desktop : public Widget {
-public:
+  public:
     Desktop();
     ~Desktop() override;
 
-    Window* create_window(std::string title, Rect bounds, std::unique_ptr<Widget> content,
-                          WindowOptions options = {});
+    Window* create_window(std::string title, Rect bounds, std::unique_ptr<Widget> content, WindowOptions options = {});
     Window* show_modal(std::string title, Rect bounds, std::unique_ptr<Widget> content);
     void close_window(Window* window);
 
@@ -43,7 +42,7 @@ public:
 
     Window* active_window() const { return windows_.active_window(); }
 
-private:
+  private:
     std::unique_ptr<Widget> background_;
     std::unique_ptr<ContextMenu> context_menu_;
     std::unique_ptr<CommandPalette> command_palette_;

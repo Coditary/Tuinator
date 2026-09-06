@@ -1,6 +1,5 @@
-#include <tuinator/widgets/display/image_view.hpp>
-
 #include <tuinator/render/graphics_protocol.hpp>
+#include <tuinator/widgets/display/image_view.hpp>
 
 #include <algorithm>
 

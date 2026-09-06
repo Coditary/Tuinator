@@ -16,7 +16,7 @@ struct WindowOptions {
 };
 
 class Window : public Widget {
-public:
+  public:
     Window(std::string title, Rect bounds, std::unique_ptr<Widget> content, WindowOptions options = {});
 
     const std::string& title() const { return title_; }
@@ -50,7 +50,7 @@ public:
     Rect content_bounds_local() const;
     Rect content_area_in_window() const;
 
-private:
+  private:
     std::string title_;
     WindowOptions options_;
     std::unique_ptr<Widget> content_;

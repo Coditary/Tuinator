@@ -1,7 +1,7 @@
+#include <tuinator/widgets/chrome/source_control_panel.hpp>
+
 #include "render_helper.hpp"
 #include "test_harness.hpp"
-
-#include <tuinator/widgets/chrome/source_control_panel.hpp>
 
 TUINATOR_TEST(source_control_panel_renders_header_and_entry) {
     tuinator::MemoryTerminalBackend backend({56, 8});

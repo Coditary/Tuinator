@@ -1,7 +1,6 @@
-#include <tuinator/widgets/views/table.hpp>
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/views/table.hpp>
 
 #include <algorithm>
 #include <variant>
@@ -41,16 +40,14 @@ std::string clip_cell(std::string_view text, int width) {
 } // namespace
 
 Table::Table(Style header_style, Style cell_style, Style selected_style)
-    : header_style_(header_style.foreground == Color::Default
-                        && header_style.background == Color::Default
-                        && !header_style.bold
-                    ? default_header_style()
-                    : header_style),
+    : header_style_(header_style.foreground == Color::Default && header_style.background == Color::Default &&
+                            !header_style.bold
+                        ? default_header_style()
+                        : header_style),
       cell_style_(cell_style),
-      selected_style_(selected_style.foreground == Color::Default
-                          && selected_style.background == Color::Default
-                      ? default_selected_style()
-                      : selected_style) {}
+      selected_style_(selected_style.foreground == Color::Default && selected_style.background == Color::Default
+                          ? default_selected_style()
+                          : selected_style) {}
 
 void Table::set_columns(std::vector<TableColumn> columns) {
     columns_ = std::move(columns);
@@ -99,9 +96,7 @@ void Table::layout(Rect bounds) {
     ensure_selected_visible();
 }
 
-int Table::visible_row_capacity() const {
-    return std::max(0, bounds_.height - 1);
-}
+int Table::visible_row_capacity() const { return std::max(0, bounds_.height - 1); }
 
 void Table::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;
@@ -179,26 +174,16 @@ bool Table::handle_event(const Event& event) {
     }
 
     switch (key->key) {
-    case Key::Up:
-        set_selected_row(selected_row_ - 1);
-        return true;
-    case Key::Down:
-        set_selected_row(selected_row_ + 1);
-        return true;
-    case Key::Home:
-        set_selected_row(0);
-        return true;
-    case Key::End:
-        set_selected_row(static_cast<int>(rows_.size()) - 1);
-        return true;
+    case Key::Up: set_selected_row(selected_row_ - 1); return true;
+    case Key::Down: set_selected_row(selected_row_ + 1); return true;
+    case Key::Home: set_selected_row(0); return true;
+    case Key::End: set_selected_row(static_cast<int>(rows_.size()) - 1); return true;
     case Key::Enter:
-        if (on_activate_ && selected_row_ >= 0
-            && selected_row_ < static_cast<int>(rows_.size())) {
+        if (on_activate_ && selected_row_ >= 0 && selected_row_ < static_cast<int>(rows_.size())) {
             on_activate_(selected_row_, rows_[static_cast<std::size_t>(selected_row_)]);
         }
         return true;
-    default:
-        break;
+    default: break;
     }
 
     return false;

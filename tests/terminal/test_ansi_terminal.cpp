@@ -1,9 +1,9 @@
-#include "render_helper.hpp"
-#include "test_harness.hpp"
-
 #include <tuinator/backend/memory_backend.hpp>
 #include <tuinator/render/theme.hpp>
 #include <tuinator/terminal/ansi_terminal_buffer.hpp>
+
+#include "render_helper.hpp"
+#include "test_harness.hpp"
 
 TUINATOR_TEST(ansi_terminal_buffer_renders_colored_text) {
     tuinator::AnsiTerminalBuffer buffer;
@@ -14,7 +14,8 @@ TUINATOR_TEST(ansi_terminal_buffer_renders_colored_text) {
     backend.init();
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    tuinator::PaintContext ctx{canvas, tuinator::dark_theme()};
+    const tuinator::Theme theme = tuinator::dark_theme();
+    tuinator::PaintContext ctx{canvas, theme};
     buffer.paint(ctx, {0, 0});
     backend.end_frame();
 
@@ -31,7 +32,8 @@ TUINATOR_TEST(ansi_terminal_buffer_handles_carriage_return) {
     backend.init();
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    tuinator::PaintContext ctx{canvas, tuinator::dark_theme()};
+    const tuinator::Theme theme = tuinator::dark_theme();
+    tuinator::PaintContext ctx{canvas, theme};
     buffer.paint(ctx, {0, 0});
     backend.end_frame();
 
@@ -112,7 +114,8 @@ TUINATOR_TEST(ansi_terminal_buffer_paints_colored_cells_at_grid_columns) {
     backend.init();
     backend.begin_frame();
     tuinator::Canvas canvas(backend);
-    tuinator::PaintContext ctx{canvas, tuinator::dark_theme()};
+    const tuinator::Theme theme = tuinator::dark_theme();
+    tuinator::PaintContext ctx{canvas, theme};
     buffer.paint(ctx, {0, 0});
     backend.end_frame();
 

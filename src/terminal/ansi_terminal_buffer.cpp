@@ -1,6 +1,6 @@
+#include <tuinator/render/color.hpp>
 #include <tuinator/terminal/ansi_terminal_buffer.hpp>
 
-#include <tuinator/render/color.hpp>
 #include <algorithm>
 #include <string>
 
@@ -35,8 +35,7 @@ std::string utf8_from(char32_t cp) {
 
 Color indexed_color(int index) {
     static constexpr Color palette[] = {
-        Color::Black, Color::Red, Color::Green, Color::Yellow,
-        Color::Blue, Color::Magenta, Color::Cyan, Color::White,
+        Color::Black, Color::Red, Color::Green, Color::Yellow, Color::Blue, Color::Magenta, Color::Cyan, Color::White,
     };
 
     if (index >= 0 && index < 8) {
@@ -44,23 +43,16 @@ Color indexed_color(int index) {
     }
     if (index >= 8 && index < 16) {
         static constexpr Color bright_palette[] = {
-            Color::Black, Color::Red, Color::Green, Color::Yellow,
-            Color::Blue, Color::Magenta, Color::Cyan, Color::White,
+            Color::Black, Color::Red,     Color::Green, Color::Yellow,
+            Color::Blue,  Color::Magenta, Color::Cyan,  Color::White,
         };
         return bright_palette[index - 8];
     }
     return Color::Default;
 }
 
-void apply_vterm_color(
-    const VTermScreen* screen,
-    VTermColor color,
-    bool bold,
-    bool is_foreground,
-    Style& style) {
-    const bool is_default = is_foreground
-        ? VTERM_COLOR_IS_DEFAULT_FG(&color)
-        : VTERM_COLOR_IS_DEFAULT_BG(&color);
+void apply_vterm_color(const VTermScreen* screen, VTermColor color, bool bold, bool is_foreground, Style& style) {
+    const bool is_default = is_foreground ? VTERM_COLOR_IS_DEFAULT_FG(&color) : VTERM_COLOR_IS_DEFAULT_BG(&color);
 
     if (is_default) {
         if (is_foreground) {
@@ -117,9 +109,11 @@ Style style_from_cell(const VTermScreen* screen, const VTermScreenCell& cell) {
 VTermModifier modifier_from_key(const KeyPress& key) {
     VTermModifier mod = VTERM_MOD_NONE;
     if (key.ctrl) {
+        // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
         mod = static_cast<VTermModifier>(mod | VTERM_MOD_CTRL);
     }
     if (key.alt) {
+        // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
         mod = static_cast<VTermModifier>(mod | VTERM_MOD_ALT);
     }
     return mod;
@@ -258,6 +252,7 @@ std::string AnsiTerminalBuffer::keyboard_bytes(const KeyPress& key) const {
 
     VTermModifier mod = modifier_from_key(key);
     if (key.key == Key::BackTab) {
+        // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
         mod = static_cast<VTermModifier>(mod | VTERM_MOD_SHIFT);
     }
 
@@ -332,9 +327,7 @@ void AnsiTerminalBuffer::cursor_position(int& row, int& col, bool& visible) cons
 }
 
 bool cell_needs_background_fill(const Style& style) {
-    return style.background != Color::Default
-        || style.background_rgb.has_value()
-        || style.reverse;
+    return style.background != Color::Default || style.background_rgb.has_value() || style.reverse;
 }
 
 void AnsiTerminalBuffer::paint(PaintContext& ctx, Point origin) const {

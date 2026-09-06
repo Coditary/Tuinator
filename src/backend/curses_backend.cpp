@@ -1,9 +1,10 @@
-#include "backend/curses_backend.hpp"
-
-#include "backend/curses_config.hpp"
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/debug/startup_profiler.hpp>
+#include <tuinator/render/color.hpp>
+#include <tuinator/render/graphics_encode.hpp>
+#include <tuinator/render/graphics_protocol.hpp>
+#include <tuinator/render/terminal_image.hpp>
+#include <tuinator/render/text.hpp>
 
 #include <array>
 #include <clocale>
@@ -12,11 +13,9 @@
 #include <cstring>
 #include <cwchar>
 #include <vector>
-#include <tuinator/render/color.hpp>
-#include <tuinator/render/graphics_encode.hpp>
-#include <tuinator/render/graphics_protocol.hpp>
-#include <tuinator/render/terminal_image.hpp>
-#include <tuinator/render/text.hpp>
+
+#include "backend/curses_backend.hpp"
+#include "backend/curses_config.hpp"
 
 namespace tuinator::detail {
 
@@ -26,8 +25,7 @@ constexpr int kColorCount = 8;
 constexpr int kPairSlots = 1 + kColorCount + kColorCount + (kColorCount * kColorCount);
 
 constexpr std::array<Color, kColorCount> kPalette = {
-    Color::Black, Color::Red, Color::Green, Color::Yellow,
-    Color::Blue, Color::Magenta, Color::Cyan, Color::White,
+    Color::Black, Color::Red, Color::Green, Color::Yellow, Color::Blue, Color::Magenta, Color::Cyan, Color::White,
 };
 
 const char* mouse_debug_log_path() {
@@ -48,42 +46,40 @@ const char* mouse_debug_log_path() {
 Key map_key(int ch) {
     switch (ch) {
     case KEY_RESIZE: return Key::Resize;
-    case 27:         return Key::Escape;
+    case 27: return Key::Escape;
     case '\n':
     case '\r':
-    case KEY_ENTER:  return Key::Enter;
-    case '\t':       return Key::Tab;
-    case KEY_BTAB:   return Key::BackTab;
+    case KEY_ENTER: return Key::Enter;
+    case '\t': return Key::Tab;
+    case KEY_BTAB: return Key::BackTab;
     case KEY_BACKSPACE:
     case 127:
-    case 8:          return Key::Backspace;
-    case KEY_UP:     return Key::Up;
-    case KEY_DOWN:   return Key::Down;
-    case KEY_LEFT:   return Key::Left;
-    case KEY_RIGHT:  return Key::Right;
-    case KEY_HOME:   return Key::Home;
-    case KEY_END:    return Key::End;
-    case KEY_PPAGE:  return Key::PageUp;
-    case KEY_NPAGE:  return Key::PageDown;
-    case KEY_DC:     return Key::Delete;
-    default:         return Key::Unknown;
+    case 8: return Key::Backspace;
+    case KEY_UP: return Key::Up;
+    case KEY_DOWN: return Key::Down;
+    case KEY_LEFT: return Key::Left;
+    case KEY_RIGHT: return Key::Right;
+    case KEY_HOME: return Key::Home;
+    case KEY_END: return Key::End;
+    case KEY_PPAGE: return Key::PageUp;
+    case KEY_NPAGE: return Key::PageDown;
+    case KEY_DC: return Key::Delete;
+    default: return Key::Unknown;
     }
 }
 
-int rgb8_to_curses(std::uint8_t value) {
-    return (static_cast<int>(value) * 1000 + 127) / 255;
-}
+int rgb8_to_curses(std::uint8_t value) { return (static_cast<int>(value) * 1000 + 127) / 255; }
 
 int to_curses_color(Color color) {
     switch (color) {
-    case Color::Black:   return COLOR_BLACK;
-    case Color::Red:     return COLOR_RED;
-    case Color::Green:   return COLOR_GREEN;
-    case Color::Yellow:  return COLOR_YELLOW;
-    case Color::Blue:    return COLOR_BLUE;
+    case Color::Black: return COLOR_BLACK;
+    case Color::Red: return COLOR_RED;
+    case Color::Green: return COLOR_GREEN;
+    case Color::Yellow: return COLOR_YELLOW;
+    case Color::Blue: return COLOR_BLUE;
     case Color::Magenta: return COLOR_MAGENTA;
-    case Color::Cyan:    return COLOR_CYAN;
-    case Color::White:   return COLOR_WHITE;
+    case Color::Cyan: return COLOR_CYAN;
+    case Color::White: return COLOR_WHITE;
     case Color::Default: return -1;
     }
     return -1;
@@ -91,22 +87,20 @@ int to_curses_color(Color color) {
 
 Rgb palette_to_rgb(Color color) {
     switch (color) {
-    case Color::Black:   return {0, 0, 0};
-    case Color::Red:     return {220, 50, 47};
-    case Color::Green:   return {80, 200, 120};
-    case Color::Yellow:  return {220, 200, 50};
-    case Color::Blue:    return {80, 120, 220};
+    case Color::Black: return {0, 0, 0};
+    case Color::Red: return {220, 50, 47};
+    case Color::Green: return {80, 200, 120};
+    case Color::Yellow: return {220, 200, 50};
+    case Color::Blue: return {80, 120, 220};
     case Color::Magenta: return {200, 80, 200};
-    case Color::Cyan:    return {80, 200, 220};
-    case Color::White:   return {230, 230, 230};
+    case Color::Cyan: return {80, 200, 220};
+    case Color::White: return {230, 230, 230};
     case Color::Default: return {};
     }
     return {};
 }
 
-FILE* open_tty_output() {
-    return std::fopen("/dev/tty", "we");
-}
+FILE* open_tty_output() { return std::fopen("/dev/tty", "we"); }
 
 void reset_tty_attributes() {
     if (FILE* tty = open_tty_output()) {
@@ -176,16 +170,11 @@ bool terminal_name_suggests_xterm_mouse() {
 #endif
     }
 
-    return std::strstr(term, "xterm") != nullptr
-        || std::strstr(term, "rxvt") != nullptr
-        || std::strstr(term, "screen") != nullptr
-        || std::strstr(term, "tmux") != nullptr
-        || std::strstr(term, "alacritty") != nullptr
-        || std::strstr(term, "kitty") != nullptr
-        || std::strstr(term, "foot") != nullptr
-        || std::strstr(term, "wezterm") != nullptr
-        || std::strstr(term, "ghostty") != nullptr
-        || std::strstr(term, "vscode") != nullptr;
+    return std::strstr(term, "xterm") != nullptr || std::strstr(term, "rxvt") != nullptr ||
+           std::strstr(term, "screen") != nullptr || std::strstr(term, "tmux") != nullptr ||
+           std::strstr(term, "alacritty") != nullptr || std::strstr(term, "kitty") != nullptr ||
+           std::strstr(term, "foot") != nullptr || std::strstr(term, "wezterm") != nullptr ||
+           std::strstr(term, "ghostty") != nullptr || std::strstr(term, "vscode") != nullptr;
 }
 
 bool mouse_debug_enabled() {
@@ -210,8 +199,8 @@ void debug_mouse_event(int ch, const MEVENT& mouse) {
     }
 
     if (FILE* log = std::fopen(mouse_debug_log_path(), "a")) {
-        std::fprintf(log, "tuinator-mouse: ch=%d KEY_MOUSE=%d x=%d y=%d bstate=0x%lx\n",
-                     ch, KEY_MOUSE, mouse.x, mouse.y, static_cast<unsigned long>(mouse.bstate));
+        std::fprintf(log, "tuinator-mouse: ch=%d KEY_MOUSE=%d x=%d y=%d bstate=0x%lx\n", ch, KEY_MOUSE, mouse.x,
+                     mouse.y, static_cast<unsigned long>(mouse.bstate));
         std::fclose(log);
     }
 }
@@ -345,17 +334,13 @@ void restore_terminal_state() {
     }
 }
 
-void atexit_restore_terminal() {
-    restore_terminal_state();
-}
+void atexit_restore_terminal() { restore_terminal_state(); }
 
 } // namespace
 
 CursesBackend::CursesBackend() = default;
 
-CursesBackend::~CursesBackend() {
-    shutdown();
-}
+CursesBackend::~CursesBackend() { shutdown(); }
 
 FILE* CursesBackend::output_stream() const {
     if (tty_out_ != nullptr) {
@@ -365,9 +350,7 @@ FILE* CursesBackend::output_stream() const {
     return stdout;
 }
 
-void CursesBackend::write_tty_sequence(const char* sequence) {
-    send_tty_sequence_to(output_stream(), sequence);
-}
+void CursesBackend::write_tty_sequence(const char* sequence) { send_tty_sequence_to(output_stream(), sequence); }
 
 void CursesBackend::close_terminal_streams() {
     if (tty_in_ != nullptr) {
@@ -439,8 +422,7 @@ void CursesBackend::init() {
         true_color_enabled_ = detect_true_color();
 #if defined(TUINATOR_BACKEND_NCURSES) && defined(NCURSES_EXT_FUNCS)
         if (true_color_enabled_) {
-            extended_colors_available_ =
-                init_extended_color(kExtendedColorBase, 1000, 0, 0) != ERR;
+            extended_colors_available_ = init_extended_color(kExtendedColorBase, 1000, 0, 0) != ERR;
         }
 #else
         extended_colors_available_ = false;
@@ -502,14 +484,11 @@ void CursesBackend::enable_mouse() {
     if (mouse_debug_enabled()) {
         if (FILE* log = std::fopen(mouse_debug_log_path(), "a")) {
             std::fprintf(log,
-                         "tuinator-mouse: backend=%s TERM=%s has_mouse=%d mousemask=0x%lx available=0x%lx xterm_ext=%d track=%d KEY_MOUSE=%d\n",
-                         TUINATOR_BACKEND_NAME,
-                         std::getenv("TERM") ? std::getenv("TERM") : "(null)",
-                         has_mouse() ? 1 : 0,
-                         static_cast<unsigned long>(enabled),
-                         static_cast<unsigned long>(available),
-                         xterm_mouse_enabled_ ? 1 : 0,
-                         mouse_tracking_mode(),
+                         "tuinator-mouse: backend=%s TERM=%s has_mouse=%d mousemask=0x%lx available=0x%lx xterm_ext=%d "
+                         "track=%d KEY_MOUSE=%d\n",
+                         TUINATOR_BACKEND_NAME, std::getenv("TERM") ? std::getenv("TERM") : "(null)",
+                         has_mouse() ? 1 : 0, static_cast<unsigned long>(enabled),
+                         static_cast<unsigned long>(available), xterm_mouse_enabled_ ? 1 : 0, mouse_tracking_mode(),
                          KEY_MOUSE);
             std::fclose(log);
         }
@@ -556,30 +535,24 @@ void CursesBackend::position_hardware_mouse_cursor(FILE* output) {
 
     const Point position = *last_mouse_position_;
     const Size term = terminal_size();
-    if (position.x < 0 || position.y < 0
-        || position.x >= term.width || position.y >= term.height) {
+    if (position.x < 0 || position.y < 0 || position.x >= term.width || position.y >= term.height) {
         send_tty_sequence_to(output, "\033[?25l");
         return;
     }
 
     char sequence[48];
-    std::snprintf(sequence, sizeof(sequence), "\033[%d;%dH\033[?25h",
-                  position.y + 1, position.x + 1);
+    std::snprintf(sequence, sizeof(sequence), "\033[%d;%dH\033[?25h", position.y + 1, position.x + 1);
     send_tty_sequence_to(output, sequence);
 }
 
-void CursesBackend::refresh_mouse_cursor() {
-    position_hardware_mouse_cursor(output_stream());
-}
+void CursesBackend::refresh_mouse_cursor() { position_hardware_mouse_cursor(output_stream()); }
 
 void CursesBackend::set_mouse_cursor_suppressed(bool suppressed) {
     mouse_cursor_suppressed_ = suppressed;
     mouse_cursor_visible_ = mouse_cursor_user_enabled_ && !mouse_cursor_suppressed_;
 }
 
-void CursesBackend::set_text_cursor(std::optional<Point> position) {
-    text_cursor_position_ = position;
-}
+void CursesBackend::set_text_cursor(std::optional<Point> position) { text_cursor_position_ = position; }
 
 void CursesBackend::cleanup_kitty_graphics() {
     if (FILE* output = output_stream()) {
@@ -719,13 +692,9 @@ std::optional<Event> CursesBackend::read_event(bool block) {
     return press;
 }
 
-std::optional<Event> CursesBackend::poll_event() {
-    return read_event(true);
-}
+std::optional<Event> CursesBackend::poll_event() { return read_event(true); }
 
-std::optional<Event> CursesBackend::poll_event_nonblocking() {
-    return read_event(false);
-}
+std::optional<Event> CursesBackend::poll_event_nonblocking() { return read_event(false); }
 
 void CursesBackend::begin_frame(BeginFrameOptions options) {
     pending_ansi_draws_.clear();
@@ -773,9 +742,7 @@ void CursesBackend::clear_region(Rect region) {
     }
 }
 
-void CursesBackend::invalidate_graphics() {
-    cleanup_kitty_graphics();
-}
+void CursesBackend::invalidate_graphics() { cleanup_kitty_graphics(); }
 
 void CursesBackend::prepare_refresh(FILE* output) {
     (void)output;
@@ -793,26 +760,17 @@ void CursesBackend::present_text_cursor(FILE* output) {
 
         if (!hardware_text_cursor_visible_) {
             char sequence[32];
-            std::snprintf(sequence,
-                          sizeof(sequence),
-                          "\033[%d;%dH\033[?25h",
-                          position.y + 1,
-                          position.x + 1);
+            std::snprintf(sequence, sizeof(sequence), "\033[%d;%dH\033[?25h", position.y + 1, position.x + 1);
             send_tty_sequence_to(output, sequence);
             hardware_text_cursor_visible_ = true;
             placed_text_cursor_ = position;
             return;
         }
 
-        if (!placed_text_cursor_.has_value()
-            || placed_text_cursor_->x != position.x
-            || placed_text_cursor_->y != position.y) {
+        if (!placed_text_cursor_.has_value() || placed_text_cursor_->x != position.x ||
+            placed_text_cursor_->y != position.y) {
             char sequence[32];
-            std::snprintf(sequence,
-                          sizeof(sequence),
-                          "\033[%d;%dH",
-                          position.y + 1,
-                          position.x + 1);
+            std::snprintf(sequence, sizeof(sequence), "\033[%d;%dH", position.y + 1, position.x + 1);
             send_tty_sequence_to(output, sequence);
             placed_text_cursor_ = position;
         }
@@ -852,9 +810,7 @@ void CursesBackend::present_frame() {
     }
 }
 
-void CursesBackend::end_frame() {
-    present_frame();
-}
+void CursesBackend::end_frame() { present_frame(); }
 
 void CursesBackend::setup_default_color_pair() {
     init_pair(1, -1, -1);
@@ -877,10 +833,8 @@ int CursesBackend::ensure_color_pair(int fg_code, int bg_code) {
 }
 
 int CursesBackend::ensure_extended_color(Rgb rgb) {
-    const std::uint32_t key =
-        (static_cast<std::uint32_t>(rgb.r) << 16U)
-        | (static_cast<std::uint32_t>(rgb.g) << 8U)
-        | static_cast<std::uint32_t>(rgb.b);
+    const std::uint32_t key = (static_cast<std::uint32_t>(rgb.r) << 16U) | (static_cast<std::uint32_t>(rgb.g) << 8U) |
+                              static_cast<std::uint32_t>(rgb.b);
 
     if (const auto it = extended_color_cache_.find(key); it != extended_color_cache_.end()) {
         return it->second;
@@ -898,8 +852,7 @@ int CursesBackend::ensure_extended_color(Rgb rgb) {
 
 int CursesBackend::ensure_extended_pair(int fg_id, int bg_id) {
     const std::uint64_t key =
-        (static_cast<std::uint64_t>(static_cast<std::uint32_t>(fg_id)) << 32U)
-        | static_cast<std::uint32_t>(bg_id);
+        (static_cast<std::uint64_t>(static_cast<std::uint32_t>(fg_id)) << 32U) | static_cast<std::uint32_t>(bg_id);
 
     if (const auto it = extended_pair_cache_.find(key); it != extended_pair_cache_.end()) {
         return it->second;
@@ -936,21 +889,17 @@ bool CursesBackend::detect_true_color() const {
 #else
     const char* colorterm = std::getenv("COLORTERM");
     if (colorterm != nullptr) {
-        if (std::strstr(colorterm, "truecolor") != nullptr
-            || std::strstr(colorterm, "24bit") != nullptr
-            || std::strstr(colorterm, "true-color") != nullptr) {
+        if (std::strstr(colorterm, "truecolor") != nullptr || std::strstr(colorterm, "24bit") != nullptr ||
+            std::strstr(colorterm, "true-color") != nullptr) {
             return true;
         }
     }
 
     const char* term = std::getenv("TERM");
     if (term != nullptr) {
-        if (std::strstr(term, "direct") != nullptr
-            || std::strstr(term, "ghostty") != nullptr
-            || std::strstr(term, "kitty") != nullptr
-            || std::strstr(term, "wezterm") != nullptr
-            || std::strstr(term, "alacritty") != nullptr
-            || std::strstr(term, "foot") != nullptr) {
+        if (std::strstr(term, "direct") != nullptr || std::strstr(term, "ghostty") != nullptr ||
+            std::strstr(term, "kitty") != nullptr || std::strstr(term, "wezterm") != nullptr ||
+            std::strstr(term, "alacritty") != nullptr || std::strstr(term, "foot") != nullptr) {
             return true;
         }
     }
@@ -982,14 +931,12 @@ void CursesBackend::draw_text_ansi(FILE* output, int x, int y, std::string_view 
 
     if (style.foreground_rgb.has_value()) {
         const Rgb& rgb = *style.foreground_rgb;
-        hlen += std::snprintf(header + hlen, sizeof(header) - hlen,
-                              "\033[38;2;%u;%u;%um", rgb.r, rgb.g, rgb.b);
+        hlen += std::snprintf(header + hlen, sizeof(header) - hlen, "\033[38;2;%u;%u;%um", rgb.r, rgb.g, rgb.b);
     }
 
     if (style.background_rgb.has_value()) {
         const Rgb& rgb = *style.background_rgb;
-        hlen += std::snprintf(header + hlen, sizeof(header) - hlen,
-                              "\033[48;2;%u;%u;%um", rgb.r, rgb.g, rgb.b);
+        hlen += std::snprintf(header + hlen, sizeof(header) - hlen, "\033[48;2;%u;%u;%um", rgb.r, rgb.g, rgb.b);
     }
 
     if (style.bold) {
@@ -1047,11 +994,9 @@ void CursesBackend::flush_image_draws(FILE* output) {
 
     for (const ImageDraw& draw : pending_image_draws_) {
         if (!draw.place.empty()) {
-            const bool placement_changed =
-                draw.x != last_kitty_placement_.x
-                || draw.y != last_kitty_placement_.y
-                || draw.cols != last_kitty_placement_.cols
-                || draw.rows != last_kitty_placement_.rows;
+            const bool placement_changed = draw.x != last_kitty_placement_.x || draw.y != last_kitty_placement_.y ||
+                                           draw.cols != last_kitty_placement_.cols ||
+                                           draw.rows != last_kitty_placement_.rows;
 
             if (!draw.transmit.empty()) {
                 std::fwrite(draw.transmit.data(), 1, draw.transmit.size(), output);
@@ -1086,12 +1031,7 @@ void CursesBackend::draw_image(int x, int y, Size cell_size, const TerminalImage
     const GraphicsProtocol protocol = active_graphics_protocol();
     if (protocol == GraphicsProtocol::Kitty) {
         ImageDraw draw{
-            x,
-            y,
-            cell_size.width,
-            cell_size.height,
-            {},
-            encode_kitty_place(cell_size.width, cell_size.height),
+            x, y, cell_size.width, cell_size.height, {}, encode_kitty_place(cell_size.width, cell_size.height),
         };
 
         const std::uint32_t hash = terminal_image_content_hash(image);
@@ -1131,20 +1071,21 @@ int CursesBackend::color_pair_for(Style style) {
         return 0;
     }
 
-    const bool wants_rgb =
-        style.foreground_rgb.has_value() || style.background_rgb.has_value();
+    const bool wants_rgb = style.foreground_rgb.has_value() || style.background_rgb.has_value();
 
     if (true_color_enabled_ && wants_rgb && extended_colors_available_) {
         return extended_color_pair_for(style);
     }
 
     if (wants_rgb) {
-        const Color fg_palette = style.foreground != Color::Default
-            ? style.foreground
-            : (style.foreground_rgb.has_value() ? nearest_ansi_color(*style.foreground_rgb) : Color::Default);
-        const Color bg_palette = style.background != Color::Default
-            ? style.background
-            : (style.background_rgb.has_value() ? nearest_ansi_color(*style.background_rgb) : Color::Default);
+        const Color fg_palette =
+            style.foreground != Color::Default
+                ? style.foreground
+                : (style.foreground_rgb.has_value() ? nearest_ansi_color(*style.foreground_rgb) : Color::Default);
+        const Color bg_palette =
+            style.background != Color::Default
+                ? style.background
+                : (style.background_rgb.has_value() ? nearest_ansi_color(*style.background_rgb) : Color::Default);
 
         const int fg = fg_palette == Color::Default ? -1 : to_curses_color(fg_palette);
         const int bg = bg_palette == Color::Default ? -1 : to_curses_color(bg_palette);
@@ -1187,8 +1128,7 @@ void CursesBackend::draw_text(int x, int y, std::string_view text, Style style) 
     }
 
     const int pair = color_pair_for(style);
-    const bool has_rgb =
-        style.foreground_rgb.has_value() || style.background_rgb.has_value();
+    const bool has_rgb = style.foreground_rgb.has_value() || style.background_rgb.has_value();
     const bool use_ansi_draw = true_color_enabled_ && has_rgb;
 
     if (use_ansi_draw) {

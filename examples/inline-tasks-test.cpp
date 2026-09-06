@@ -21,55 +21,46 @@ struct DemoUi {
     std::vector<tuinator::Throbber*> showcase_throbbers;
 };
 
-void add_showcase_throbber(
-    tuinator::HBox& row,
-    std::string_view name,
-    std::string_view label,
-    DemoUi& ui) {
+void add_showcase_throbber(tuinator::HBox& row, std::string_view name, std::string_view label, DemoUi& ui) {
     const tuinator::ThrobberSet* set = tuinator::throbber_set_named(name);
     if (set == nullptr) {
         return;
     }
 
     auto throbber = std::make_unique<tuinator::Throbber>(
-        *set,
-        tuinator::Style{.foreground_rgb = tuinator::Rgb::hex(0x89B4FA), .bold = true});
+        *set, tuinator::Style{.foreground_rgb = tuinator::Rgb::hex(0x89B4FA), .bold = true});
     ui.showcase_throbbers.push_back(throbber.get());
     row.add_child(std::move(throbber));
     row.add_child(std::make_unique<tuinator::Label>(
-        std::string(label),
-        tuinator::Style{.foreground_rgb = tuinator::Rgb::hex(0x6C7086), .dim = true}));
+        std::string(label), tuinator::Style{.foreground_rgb = tuinator::Rgb::hex(0x6C7086), .dim = true}));
 }
 
 std::unique_ptr<tuinator::Widget> build_ui(TaskState& state, DemoUi& ui) {
     auto root = std::make_unique<tuinator::VBox>(tuinator::BoxOptions{.gap = 0});
     root->set_flex(1);
 
-    auto list = std::make_unique<tuinator::ListView>(
-        tuinator::Style{.foreground = tuinator::Color::Default},
-        tuinator::Style{.foreground = tuinator::Color::Green, .bold = true});
+    auto list =
+        std::make_unique<tuinator::ListView>(tuinator::Style{.foreground = tuinator::Color::Default},
+                                             tuinator::Style{.foreground = tuinator::Color::Green, .bold = true});
     list->set_items(state.completed);
     list->set_flex(1);
     ui.list = list.get();
 
     auto scroll = std::make_unique<tuinator::ScrollView>(
-        std::move(list),
-        tuinator::ScrollViewOptions{
-            .width = 80,
-            .height = 8,
-            .background = tuinator::style_bg(tuinator::Rgb::hex(0x1E1E2E)),
-        });
+        std::move(list), tuinator::ScrollViewOptions{
+                             .width = 80,
+                             .height = 8,
+                             .background = tuinator::style_bg(tuinator::Rgb::hex(0x1E1E2E)),
+                         });
     scroll->set_flex(1);
     root->add_child(std::move(scroll));
 
     auto active = std::make_unique<tuinator::Throbber>(
-        "braille-heavy",
-        tuinator::Style{.foreground_rgb = tuinator::Rgb::hex(0xF9E2AF), .bold = true});
-    auto status = std::make_unique<tuinator::StatusLine>(
-        tuinator::StatusLineStyle{
-            .background = tuinator::style_bg(tuinator::Rgb::hex(0x313244)),
-            .accent_bar_rgb = tuinator::Rgb::hex(0x89B4FA),
-        });
+        "braille-heavy", tuinator::Style{.foreground_rgb = tuinator::Rgb::hex(0xF9E2AF), .bold = true});
+    auto status = std::make_unique<tuinator::StatusLine>(tuinator::StatusLineStyle{
+        .background = tuinator::style_bg(tuinator::Rgb::hex(0x313244)),
+        .accent_bar_rgb = tuinator::Rgb::hex(0x89B4FA),
+    });
     status->set_left({
         {.kind = tuinator::StatusSegmentKind::Text,
          .text = active->frame(),
@@ -131,12 +122,9 @@ int main() {
     std::cout << "Normal CLI output stays above the live TUI band.\n\n";
 
     const std::vector<std::string> files = {
-        "src/core/application.cpp",
-        "src/backend/curses_backend.cpp",
-        "src/widgets/controls/button.cpp",
-        "src/render/canvas.cpp",
-        "include/tuinator/tuinator.hpp",
-        "examples/counter.cpp",
+        "src/core/application.cpp",           "src/backend/curses_backend.cpp",
+        "src/widgets/controls/button.cpp",    "src/render/canvas.cpp",
+        "include/tuinator/tuinator.hpp",      "examples/counter.cpp",
         "tests/core/test_memory_backend.cpp",
     };
 
@@ -178,8 +166,7 @@ int main() {
         if (file_index < files.size()) {
             state.completed.push_back("✓  " + files[file_index]);
             ++file_index;
-            state.current = file_index < files.size() ? "Linting " + files[file_index] + "…"
-                                                      : "Finishing…";
+            state.current = file_index < files.size() ? "Linting " + files[file_index] + "…" : "Finishing…";
             state.progress = 0;
             return;
         }

@@ -22,11 +22,9 @@ inline void check(bool condition, const char* expr, const char* file, int line) 
     }
 }
 
-#define TUINATOR_CHECK(expr) \
-    ::tuinator::test::check(static_cast<bool>(expr), #expr, __FILE__, __LINE__)
+#define TUINATOR_CHECK(expr) ::tuinator::test::check(static_cast<bool>(expr), #expr, __FILE__, __LINE__)
 
-#define TUINATOR_CHECK_EQ(a, b) \
-    ::tuinator::test::check((a) == (b), #a " == " #b, __FILE__, __LINE__)
+#define TUINATOR_CHECK_EQ(a, b) ::tuinator::test::check((a) == (b), #a " == " #b, __FILE__, __LINE__)
 
 struct TestCase {
     const char* name;
@@ -39,14 +37,12 @@ inline std::vector<TestCase>& registry() {
 }
 
 struct Registrar {
-    Registrar(const char* name, void (*run)()) {
-        registry().push_back({name, run});
-    }
+    Registrar(const char* name, void (*run)()) { registry().push_back({name, run}); }
 };
 
-#define TUINATOR_TEST(name) \
-    void tuinator_test_##name(); \
-    static ::tuinator::test::Registrar tuinator_registrar_##name(#name, tuinator_test_##name); \
+#define TUINATOR_TEST(name)                                                                                            \
+    void tuinator_test_##name();                                                                                       \
+    static ::tuinator::test::Registrar tuinator_registrar_##name(#name, tuinator_test_##name);                         \
     void tuinator_test_##name()
 
 inline int run_all() {

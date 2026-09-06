@@ -36,7 +36,7 @@ struct WaterfallChartOptions {
 };
 
 class WaterfallChart : public Widget {
-public:
+  public:
     WaterfallChart(std::vector<WaterfallStep> steps = {}, WaterfallChartOptions options = {});
 
     const std::vector<WaterfallStep>& steps() const { return steps_; }
@@ -48,7 +48,7 @@ public:
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
-private:
+  private:
     struct Segment {
         double start = 0.0;
         double end = 0.0;

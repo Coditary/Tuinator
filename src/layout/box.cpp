@@ -15,11 +15,8 @@ int total_gap(int gap, std::size_t child_count) {
     return gap * static_cast<int>(child_count - 1);
 }
 
-void layout_vertical_children(
-    const Rect& bounds,
-    int gap,
-    int padding,
-    const std::vector<std::unique_ptr<Widget>>& children) {
+void layout_vertical_children(const Rect& bounds, int gap, int padding,
+                              const std::vector<std::unique_ptr<Widget>>& children) {
     const int content_width = std::max(0, bounds.width - padding * 2);
     const int content_height = std::max(0, bounds.height - padding * 2);
 
@@ -45,10 +42,8 @@ void layout_vertical_children(
         }
     }
 
-    const int remaining =
-        content_height - fixed_height - total_gap(gap, rows.size());
-    const int extra_per_flex =
-        flex_total > 0 ? std::max(0, remaining) / flex_total : 0;
+    const int remaining = content_height - fixed_height - total_gap(gap, rows.size());
+    const int extra_per_flex = flex_total > 0 ? std::max(0, remaining) / flex_total : 0;
     int leftover = flex_total > 0 ? std::max(0, remaining) % flex_total : 0;
 
     int y = bounds.y + padding;
@@ -67,11 +62,8 @@ void layout_vertical_children(
     }
 }
 
-void layout_horizontal_children(
-    const Rect& bounds,
-    int gap,
-    int padding,
-    const std::vector<std::unique_ptr<Widget>>& children) {
+void layout_horizontal_children(const Rect& bounds, int gap, int padding,
+                                const std::vector<std::unique_ptr<Widget>>& children) {
     const int content_width = std::max(0, bounds.width - padding * 2);
     const int content_height = std::max(0, bounds.height - padding * 2);
 
@@ -97,10 +89,8 @@ void layout_horizontal_children(
         }
     }
 
-    const int remaining =
-        content_width - fixed_width - total_gap(gap, columns.size());
-    const int extra_per_flex =
-        flex_total > 0 ? std::max(0, remaining) / flex_total : 0;
+    const int remaining = content_width - fixed_width - total_gap(gap, columns.size());
+    const int extra_per_flex = flex_total > 0 ? std::max(0, remaining) / flex_total : 0;
     int leftover = flex_total > 0 ? std::max(0, remaining) % flex_total : 0;
 
     int x = bounds.x + padding;
@@ -126,8 +116,7 @@ void layout_horizontal_children(
 
 } // namespace
 
-VBox::VBox(BoxOptions options)
-    : gap_(options.gap), padding_(options.padding) {}
+VBox::VBox(BoxOptions options) : gap_(options.gap), padding_(options.padding) {}
 
 Size VBox::preferred_size() const {
     int width = 0;
@@ -197,8 +186,7 @@ bool VBox::handle_event(const Event& event) {
     return false;
 }
 
-HBox::HBox(BoxOptions options)
-    : gap_(options.gap), padding_(options.padding) {}
+HBox::HBox(BoxOptions options) : gap_(options.gap), padding_(options.padding) {}
 
 Size HBox::preferred_size() const {
     int width = padding_ * 2;
@@ -280,9 +268,7 @@ Widget* HBox::hit_test(Point point) {
     return this;
 }
 
-Widget* HBox::hit_test_focusable(Point point) {
-    return focusable_child_at(point);
-}
+Widget* HBox::hit_test_focusable(Point point) { return focusable_child_at(point); }
 
 bool HBox::handle_event(const Event& event) {
     if (const auto* mouse = std::get_if<MouseEvent>(&event)) {
@@ -301,8 +287,7 @@ bool HBox::handle_event(const Event& event) {
                 }
             }
             return false;
-        default:
-            break;
+        default: break;
         }
 
         if (Widget* target = focusable_child_at(mouse->position)) {

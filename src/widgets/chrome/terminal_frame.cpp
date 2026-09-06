@@ -1,7 +1,6 @@
-#include <tuinator/widgets/chrome/terminal_frame.hpp>
-
 #include <tuinator/render/glyphs.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/chrome/terminal_frame.hpp>
 
 #include <algorithm>
 #include <variant>
@@ -15,14 +14,9 @@ constexpr int kMinHeight = 6;
 
 } // namespace
 
-TerminalFrame::TerminalFrame(
-    std::string title,
-    std::unique_ptr<Widget> content,
-    TerminalFrameOptions options)
-    : title_(std::move(title))
-    , options_(std::move(options))
-    , status_line_(options_.style.status_line)
-    , surface_(std::make_unique<MemoryTerminalBackend>(Size{80, 24})) {
+TerminalFrame::TerminalFrame(std::string title, std::unique_ptr<Widget> content, TerminalFrameOptions options)
+    : title_(std::move(title)), options_(std::move(options)), status_line_(options_.style.status_line),
+      surface_(std::make_unique<MemoryTerminalBackend>(Size{80, 24})) {
     set_content(std::move(content));
     surface_->init();
 }
@@ -76,9 +70,7 @@ void TerminalFrame::bind_content_callbacks() {
     }
 }
 
-BorderGlyphs TerminalFrame::border_glyphs() const {
-    return border_glyphs_for(options_.style.border_style);
-}
+BorderGlyphs TerminalFrame::border_glyphs() const { return border_glyphs_for(options_.style.border_style); }
 
 Rect TerminalFrame::content_bounds() const {
     const int status_rows = options_.show_status_line ? 1 : 0;
@@ -176,8 +168,8 @@ void TerminalFrame::blit_surface(Canvas& canvas, Point origin) const {
         for (std::size_t x = 0; x < cells[y].size(); ++x) {
             const MemoryTerminalBackend::Cell& cell = cells[y][x];
             Style style = cell.style;
-            if (cell.ch == ' ' && !style.foreground_rgb.has_value() && !style.background_rgb.has_value()
-                && style.foreground == Color::Default && style.background == Color::Default) {
+            if (cell.ch == ' ' && !style.foreground_rgb.has_value() && !style.background_rgb.has_value() &&
+                style.foreground == Color::Default && style.background == Color::Default) {
                 style = options_.style.content_background;
             }
             canvas.draw_char({origin.x + static_cast<int>(x), origin.y + static_cast<int>(y)}, cell.ch, style);
@@ -272,9 +264,7 @@ void TerminalFrame::paint(PaintContext& ctx) const {
             status.width,
             status.height,
         };
-        ctx.with_clip(local_status, [&](PaintContext& status_ctx) {
-            status_line_.paint(status_ctx);
-        });
+        ctx.with_clip(local_status, [&](PaintContext& status_ctx) { status_line_.paint(status_ctx); });
     }
 }
 
@@ -384,9 +374,7 @@ Widget* TerminalFrame::hit_test_focusable(Point point) {
     return nullptr;
 }
 
-bool TerminalFrame::has_focused_descendant() const {
-    return content_ && content_->has_focused_descendant();
-}
+bool TerminalFrame::has_focused_descendant() const { return content_ && content_->has_focused_descendant(); }
 
 void TerminalFrame::collect_focusable(std::vector<Widget*>& out) {
     if (content_) {

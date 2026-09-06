@@ -1,13 +1,12 @@
-#include <tuinator/widgets/display/progress_bar.hpp>
-
 #include <tuinator/render/color.hpp>
 #include <tuinator/render/glyphs.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/display/progress_bar.hpp>
 
 #include <algorithm>
 #include <cmath>
-#include <iomanip>
 #include <initializer_list>
+#include <iomanip>
 #include <sstream>
 #include <string>
 
@@ -15,9 +14,7 @@ namespace tuinator {
 
 namespace {
 
-ProgressBarGlyphs plain_glyphs() {
-    return {"=", ">", " ", "", ""};
-}
+ProgressBarGlyphs plain_glyphs() { return {"=", ">", " ", "", ""}; }
 
 ProgressBarGlyphs bracket_glyphs() {
     ProgressBarGlyphs glyphs = plain_glyphs();
@@ -56,7 +53,7 @@ ProgressBarGlyphs dot_glyphs() {
     return {
         "\xe2\x97\x8f", // ●
         "",
-        "\xc2\xb7",     // ·
+        "\xc2\xb7", // ·
         "",
         "",
     };
@@ -82,7 +79,7 @@ ProgressBarGlyphs tqdm_glyphs() {
         glyphs.fill = "#";
         glyphs.empty = "-";
     } else {
-        glyphs.fill = "\xe2\x96\x88"; // █
+        glyphs.fill = "\xe2\x96\x88";  // █
         glyphs.empty = "\xe2\x96\x91"; // ░
     }
     return glyphs;
@@ -98,8 +95,7 @@ std::string format_clock(int ms) {
     const int minutes = total_seconds / 60;
     const int seconds = total_seconds % 60;
     std::ostringstream out;
-    out << std::setw(2) << std::setfill('0') << minutes << ':'
-        << std::setw(2) << std::setfill('0') << seconds;
+    out << std::setw(2) << std::setfill('0') << minutes << ':' << std::setw(2) << std::setfill('0') << seconds;
     return out.str();
 }
 
@@ -113,9 +109,8 @@ std::string format_eta_hms(int ms, bool unknown) {
     const int minutes = (total_seconds % 3600) / 60;
     const int seconds = total_seconds % 60;
     std::ostringstream out;
-    out << hours << ':'
-        << std::setw(2) << std::setfill('0') << minutes << ':'
-        << std::setw(2) << std::setfill('0') << seconds;
+    out << hours << ':' << std::setw(2) << std::setfill('0') << minutes << ':' << std::setw(2) << std::setfill('0')
+        << seconds;
     return out.str();
 }
 
@@ -192,16 +187,8 @@ Style apply_gradient_color(const Style& base, Rgb rgb) {
     return ColorValue::from_rgb(rgb).foreground_style(base);
 }
 
-void draw_label_on_fill(
-    Canvas& canvas,
-    int x,
-    int y,
-    std::string_view text,
-    int fill_start,
-    int fill_end,
-    const Style& base_style,
-    const Style& fill_style,
-    const Style& track_style) {
+void draw_label_on_fill(Canvas& canvas, int x, int y, std::string_view text, int fill_start, int fill_end,
+                        const Style& base_style, const Style& fill_style, const Style& track_style) {
     int cursor = x;
     for (std::size_t index = 0; index < text.size();) {
         const std::size_t byte_length = text_byte_length_for_width(text.substr(index), 1);
@@ -234,31 +221,22 @@ void draw_label_on_fill(
 
 ProgressBarGlyphs progress_bar_glyphs_for(ProgressBarLayout layout) {
     switch (layout) {
-    case ProgressBarLayout::Plain:
-        return plain_glyphs();
+    case ProgressBarLayout::Plain: return plain_glyphs();
     case ProgressBarLayout::Bracketed:
-    case ProgressBarLayout::Labeled:
-        return bracket_glyphs();
+    case ProgressBarLayout::Labeled: return bracket_glyphs();
     case ProgressBarLayout::Blocks:
-    case ProgressBarLayout::FilledLabel:
-        return block_glyphs();
-    case ProgressBarLayout::Dots:
-        return dot_glyphs();
-    case ProgressBarLayout::Pill:
-        return pill_glyphs();
-    case ProgressBarLayout::Tqdm:
-        return tqdm_glyphs();
+    case ProgressBarLayout::FilledLabel: return block_glyphs();
+    case ProgressBarLayout::Dots: return dot_glyphs();
+    case ProgressBarLayout::Pill: return pill_glyphs();
+    case ProgressBarLayout::Tqdm: return tqdm_glyphs();
     case ProgressBarLayout::BrailleMetric:
-    case ProgressBarLayout::BrailleWave:
-        return braille_glyphs();
+    case ProgressBarLayout::BrailleWave: return braille_glyphs();
     case ProgressBarLayout::Pulse:
     case ProgressBarLayout::Shimmer:
-    case ProgressBarLayout::TaskRow:
-        return tqdm_glyphs();
+    case ProgressBarLayout::TaskRow: return tqdm_glyphs();
     case ProgressBarLayout::Bounce:
     case ProgressBarLayout::SlideBlock:
-    case ProgressBarLayout::MovingDot:
-        return plain_glyphs();
+    case ProgressBarLayout::MovingDot: return plain_glyphs();
     }
 
     return plain_glyphs();
@@ -280,9 +258,7 @@ ProgressBarOptions progress_bar_preset(ProgressBarLayout layout, const Style& fi
     options.eta_style = text_only_style(track);
 
     switch (layout) {
-    case ProgressBarLayout::Plain:
-        options.min_width = 24;
-        break;
+    case ProgressBarLayout::Plain: options.min_width = 24; break;
     case ProgressBarLayout::Bracketed:
         options.min_width = 22;
         options.show_percent = true;
@@ -294,9 +270,7 @@ ProgressBarOptions progress_bar_preset(ProgressBarLayout layout, const Style& fi
         options.show_percent = true;
         options.percent_position = ProgressBarPercentPosition::Right;
         break;
-    case ProgressBarLayout::Pill:
-        options.min_width = 22;
-        break;
+    case ProgressBarLayout::Pill: options.min_width = 22; break;
     case ProgressBarLayout::Labeled:
         options.label = "Progress";
         options.min_width = 18;
@@ -377,11 +351,8 @@ ProgressBarOptions progress_bar_preset(ProgressBarLayout layout, const Style& fi
     return options;
 }
 
-ProgressBarOptions progress_bar_filled_label(
-    const Style& fill,
-    const Style& track,
-    std::string inside_label,
-    ProgressBarMode mode) {
+ProgressBarOptions progress_bar_filled_label(const Style& fill, const Style& track, std::string inside_label,
+                                             ProgressBarMode mode) {
     ProgressBarOptions options = progress_bar_preset(ProgressBarLayout::FilledLabel, fill, track);
     options.inside_label = std::move(inside_label);
     options.inside_label_style.background = Color::Default;
@@ -392,8 +363,8 @@ ProgressBarOptions progress_bar_filled_label(
     return options;
 }
 
-std::vector<ProgressBarGradientStop> progress_bar_gradient(
-    std::initializer_list<std::pair<float, std::uint32_t>> hex_stops) {
+std::vector<ProgressBarGradientStop>
+progress_bar_gradient(std::initializer_list<std::pair<float, std::uint32_t>> hex_stops) {
     std::vector<ProgressBarGradientStop> stops;
     stops.reserve(hex_stops.size());
     for (const auto& [position, hex] : hex_stops) {
@@ -476,17 +447,12 @@ void ProgressBar::set_completed(bool completed) {
 int ProgressBar::bar_column_count() const {
     int reserved = 0;
 
-    if (!options_.label.empty()
-        && options_.layout != ProgressBarLayout::BrailleMetric
-        && options_.layout != ProgressBarLayout::BrailleWave
-        && options_.layout != ProgressBarLayout::Tqdm
-        && options_.layout != ProgressBarLayout::FilledLabel
-        && options_.layout != ProgressBarLayout::Pulse
-        && options_.layout != ProgressBarLayout::Shimmer
-        && options_.layout != ProgressBarLayout::Bounce
-        && options_.layout != ProgressBarLayout::SlideBlock
-        && options_.layout != ProgressBarLayout::MovingDot
-        && options_.layout != ProgressBarLayout::TaskRow) {
+    if (!options_.label.empty() && options_.layout != ProgressBarLayout::BrailleMetric &&
+        options_.layout != ProgressBarLayout::BrailleWave && options_.layout != ProgressBarLayout::Tqdm &&
+        options_.layout != ProgressBarLayout::FilledLabel && options_.layout != ProgressBarLayout::Pulse &&
+        options_.layout != ProgressBarLayout::Shimmer && options_.layout != ProgressBarLayout::Bounce &&
+        options_.layout != ProgressBarLayout::SlideBlock && options_.layout != ProgressBarLayout::MovingDot &&
+        options_.layout != ProgressBarLayout::TaskRow) {
         reserved += text_display_width(options_.label) + 1;
     }
 
@@ -505,26 +471,20 @@ int ProgressBar::rendered_bar_width(int bar_width) const {
     const int empty_width = std::max(1, text_display_width(options_.glyphs.empty));
     const int head_width = options_.glyphs.head.empty() ? 0 : text_display_width(options_.glyphs.head);
 
-    const int filled_columns =
-        std::clamp(static_cast<int>(value_ * bar_width + 0.5), 0, bar_width);
+    const int filled_columns = std::clamp(static_cast<int>(value_ * bar_width + 0.5), 0, bar_width);
     const bool use_head = head_width > 0 && filled_columns > 0 && filled_columns < bar_width;
     const int solid_columns = use_head ? filled_columns - 1 : filled_columns;
     const int empty_columns = bar_width - filled_columns;
 
-    return text_display_width(options_.glyphs.left_cap)
-        + solid_columns * fill_width
-        + (use_head ? head_width : 0)
-        + empty_columns * empty_width
-        + text_display_width(options_.glyphs.right_cap);
+    return text_display_width(options_.glyphs.left_cap) + solid_columns * fill_width + (use_head ? head_width : 0) +
+           empty_columns * empty_width + text_display_width(options_.glyphs.right_cap);
 }
 
 Size ProgressBar::preferred_size() const {
     switch (options_.layout) {
     case ProgressBarLayout::BrailleMetric:
-    case ProgressBarLayout::BrailleWave:
-        return {options_.min_width, 2};
-    default:
-        break;
+    case ProgressBarLayout::BrailleWave: return {options_.min_width, 2};
+    default: break;
     }
 
     int width = options_.min_width;
@@ -544,15 +504,8 @@ Style ProgressBar::fill_style_at(const Style& base, int column, int bar_width) c
     return apply_gradient_color(base, sample_gradient(options_.gradient_stops, t));
 }
 
-void ProgressBar::fill_rect_gradient(
-    Canvas& canvas,
-    int x,
-    int y,
-    int width,
-    int height,
-    char ch,
-    const Style& base,
-    int bar_width) const {
+void ProgressBar::fill_rect_gradient(Canvas& canvas, int x, int y, int width, int height, char ch, const Style& base,
+                                     int bar_width) const {
     if (width <= 0 || height <= 0) {
         return;
     }
@@ -583,10 +536,8 @@ void ProgressBar::paint_bar_at(Canvas& canvas, int x, int y, int bar_width, cons
         cursor += text_display_width(options_.glyphs.left_cap);
     }
 
-    const int filled_columns =
-        std::clamp(static_cast<int>(value_ * bar_width + 0.5), 0, bar_width);
-    const bool use_head =
-        head_width > 0 && filled_columns > 0 && filled_columns < bar_width;
+    const int filled_columns = std::clamp(static_cast<int>(value_ * bar_width + 0.5), 0, bar_width);
+    const bool use_head = head_width > 0 && filled_columns > 0 && filled_columns < bar_width;
     const int solid_columns = use_head ? filled_columns - 1 : filled_columns;
 
     for (int col = 0; col < bar_width; ++col) {
@@ -617,9 +568,7 @@ void ProgressBar::paint_filled_label(Canvas& canvas) const {
     int fill_end = std::clamp(static_cast<int>(value_ * width + 0.5), 0, width);
 
     if (options_.indeterminate) {
-        const int pulse_width = std::max(
-            options_.pulse_width,
-            std::max(4, width / 4));
+        const int pulse_width = std::max(options_.pulse_width, std::max(4, width / 4));
         const int travel = std::max(0, width - pulse_width);
         fill_start = bounce_position(normalized_phase(options_.animation_phase), travel);
         fill_end = fill_start + pulse_width;
@@ -643,24 +592,11 @@ void ProgressBar::paint_filled_label(Canvas& canvas) const {
 
     const int label_width = text_display_width(options_.inside_label);
     const int x = std::max(0, (width - label_width) / 2);
-    draw_label_on_fill(
-        canvas,
-        x,
-        0,
-        options_.inside_label,
-        fill_start,
-        fill_end,
-        options_.inside_label_style,
-        options_.fill_style,
-        options_.track_style);
+    draw_label_on_fill(canvas, x, 0, options_.inside_label, fill_start, fill_end, options_.inside_label_style,
+                       options_.fill_style, options_.track_style);
 }
 
-void ProgressBar::paint_shimmer_bar(
-    Canvas& canvas,
-    int x,
-    int y,
-    int bar_width,
-    const Style* fill_override) const {
+void ProgressBar::paint_shimmer_bar(Canvas& canvas, int x, int y, int bar_width, const Style* fill_override) const {
     if (bar_width <= 0) {
         return;
     }
@@ -682,10 +618,7 @@ void ProgressBar::paint_shimmer_bar(
         if (draw_x >= x + bar_width) {
             break;
         }
-        canvas.draw_text(
-            {draw_x, y},
-            options_.glyphs.fill,
-            fill_style_at(pulse_style, pos + column, bar_width));
+        canvas.draw_text({draw_x, y}, options_.glyphs.fill, fill_style_at(pulse_style, pos + column, bar_width));
     }
 }
 
@@ -706,10 +639,7 @@ void ProgressBar::paint_pulse(Canvas& canvas) const {
     Style pulse_style = options_.fill_style;
     pulse_style.bold = true;
     for (int column = 0; column < pulse_width; ++column) {
-        canvas.draw_text(
-            {pos + column, 0},
-            pulse_glyph,
-            fill_style_at(pulse_style, pos + column, bar_width));
+        canvas.draw_text({pos + column, 0}, pulse_glyph, fill_style_at(pulse_style, pos + column, bar_width));
     }
 
     std::string metrics;
@@ -717,13 +647,10 @@ void ProgressBar::paint_pulse(Canvas& canvas) const {
         metrics = " --%  --:--:--";
     } else {
         const ProgressBarStats& stats = options_.stats;
-        const int current = stats.total > 0
-            ? std::clamp(static_cast<int>(value_ * stats.total + 0.5), 0, stats.total)
-            : stats.current;
+        const int current =
+            stats.total > 0 ? std::clamp(static_cast<int>(value_ * stats.total + 0.5), 0, stats.total) : stats.current;
         const int remaining = std::max(0, stats.total - current);
-        const int eta_ms = stats.rate > 0.0
-            ? static_cast<int>(remaining / stats.rate * 1000.0)
-            : 0;
+        const int eta_ms = stats.rate > 0.0 ? static_cast<int>(remaining / stats.rate * 1000.0) : 0;
         metrics = ' ' + percent_text(value_) + "  " + format_eta_hms(eta_ms, stats.rate <= 0.0);
     }
 
@@ -751,17 +678,14 @@ void ProgressBar::paint_bounce(Canvas& canvas) const {
     for (int column = 0; column < inner_width; ++column) {
         const bool filled = column >= pos && column < pos + block_width;
         const char ch = filled ? '=' : ' ';
-        canvas.draw_text(
-            {1 + column, 0},
-            std::string(1, ch),
-            filled ? options_.fill_style : options_.track_style);
+        canvas.draw_text({1 + column, 0}, std::string(1, ch), filled ? options_.fill_style : options_.track_style);
     }
     canvas.draw_text({1 + inner_width, 0}, "]", options_.track_style);
 }
 
 void ProgressBar::paint_slide_block(Canvas& canvas) const {
     const bool unicode = detect_glyph_set() != GlyphSet::Ascii;
-    const char* empty_slot = unicode ? "\xe2\x96\xa1" : "[ ]"; // □ or [ ]
+    const char* empty_slot = unicode ? "\xe2\x96\xa1" : "[ ]";  // □ or [ ]
     const char* filled_slot = unicode ? "\xe2\x96\xa0" : "[#]"; // ■ or [#]
     const int slot_width = text_display_width(empty_slot);
     const int gap = 1;
@@ -771,10 +695,8 @@ void ProgressBar::paint_slide_block(Canvas& canvas) const {
     int x = 0;
     for (int slot = 0; slot < slots && x < bounds_.width; ++slot) {
         const bool filled = slot == active;
-        canvas.draw_text(
-            {x, 0},
-            filled ? filled_slot : empty_slot,
-            filled ? options_.fill_style : options_.track_style);
+        canvas.draw_text({x, 0}, filled ? filled_slot : empty_slot,
+                         filled ? options_.fill_style : options_.track_style);
         x += slot_width + gap;
     }
 }
@@ -798,9 +720,7 @@ void ProgressBar::paint_task_row(Canvas& canvas) const {
     const int label_width = 15;
     const int percent_width = 5;
     const int eta_width = 8;
-    const int bar_width = std::max(
-        4,
-        bounds_.width - label_width - percent_width - eta_width - 2);
+    const int bar_width = std::max(4, bounds_.width - label_width - percent_width - eta_width - 2);
 
     Style label_style = options_.label_style;
     if (options_.completed) {
@@ -838,10 +758,8 @@ void ProgressBar::paint_task_row(Canvas& canvas) const {
         if (value_ >= 1.0 || options_.completed) {
             eta = format_eta_hms(0, false);
         } else if (options_.stats.rate > 0.0 && options_.stats.total > 0) {
-            const int current = std::clamp(
-                static_cast<int>(value_ * options_.stats.total + 0.5),
-                0,
-                options_.stats.total);
+            const int current =
+                std::clamp(static_cast<int>(value_ * options_.stats.total + 0.5), 0, options_.stats.total);
             const int remaining = std::max(0, options_.stats.total - current);
             eta = format_eta_hms(static_cast<int>(remaining / options_.stats.rate * 1000.0), false);
         } else {
@@ -864,21 +782,15 @@ void ProgressBar::paint_tqdm(Canvas& canvas) const {
     }
 
     const ProgressBarStats& stats = options_.stats;
-    const int current = stats.total > 0
-        ? std::clamp(static_cast<int>(value_ * stats.total + 0.5), 0, stats.total)
-        : stats.current;
+    const int current =
+        stats.total > 0 ? std::clamp(static_cast<int>(value_ * stats.total + 0.5), 0, stats.total) : stats.current;
     const int remaining = std::max(0, stats.total - current);
-    const int eta_ms = stats.rate > 0.0
-        ? static_cast<int>(remaining / stats.rate * 1000.0)
-        : 0;
+    const int eta_ms = stats.rate > 0.0 ? static_cast<int>(remaining / stats.rate * 1000.0) : 0;
 
     std::ostringstream out;
-    out << options_.label << ": "
-        << std::setw(3) << std::setfill(' ') << std::lround(value_ * 100.0) << "%|"
-        << bar << "| "
-        << current << '/' << stats.total
-        << " [" << format_clock(stats.elapsed_ms) << '<' << format_clock(eta_ms) << ", "
-        << std::fixed << std::setprecision(1) << stats.rate << stats.unit << "/s]";
+    out << options_.label << ": " << std::setw(3) << std::setfill(' ') << std::lround(value_ * 100.0) << "%|" << bar
+        << "| " << current << '/' << stats.total << " [" << format_clock(stats.elapsed_ms) << '<'
+        << format_clock(eta_ms) << ", " << std::fixed << std::setprecision(1) << stats.rate << stats.unit << "/s]";
 
     canvas.draw_text({0, 0}, out.str(), options_.label_style);
 }
@@ -980,39 +892,17 @@ void ProgressBar::paint(PaintContext& ctx) const {
     }
 
     switch (options_.layout) {
-    case ProgressBarLayout::FilledLabel:
-        paint_filled_label(canvas);
-        return;
-    case ProgressBarLayout::Tqdm:
-        paint_tqdm(canvas);
-        return;
-    case ProgressBarLayout::BrailleMetric:
-        paint_braille_metric(canvas);
-        return;
-    case ProgressBarLayout::BrailleWave:
-        paint_braille_wave(canvas);
-        return;
-    case ProgressBarLayout::Pulse:
-        paint_pulse(canvas);
-        return;
-    case ProgressBarLayout::Shimmer:
-        paint_shimmer(canvas);
-        return;
-    case ProgressBarLayout::Bounce:
-        paint_bounce(canvas);
-        return;
-    case ProgressBarLayout::SlideBlock:
-        paint_slide_block(canvas);
-        return;
-    case ProgressBarLayout::MovingDot:
-        paint_moving_dot(canvas);
-        return;
-    case ProgressBarLayout::TaskRow:
-        paint_task_row(canvas);
-        return;
-    default:
-        paint_glyph_bar(canvas);
-        return;
+    case ProgressBarLayout::FilledLabel: paint_filled_label(canvas); return;
+    case ProgressBarLayout::Tqdm: paint_tqdm(canvas); return;
+    case ProgressBarLayout::BrailleMetric: paint_braille_metric(canvas); return;
+    case ProgressBarLayout::BrailleWave: paint_braille_wave(canvas); return;
+    case ProgressBarLayout::Pulse: paint_pulse(canvas); return;
+    case ProgressBarLayout::Shimmer: paint_shimmer(canvas); return;
+    case ProgressBarLayout::Bounce: paint_bounce(canvas); return;
+    case ProgressBarLayout::SlideBlock: paint_slide_block(canvas); return;
+    case ProgressBarLayout::MovingDot: paint_moving_dot(canvas); return;
+    case ProgressBarLayout::TaskRow: paint_task_row(canvas); return;
+    default: paint_glyph_bar(canvas); return;
     }
 }
 

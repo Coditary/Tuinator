@@ -1,17 +1,16 @@
 #include <tuinator/scene/detail/binding_engine.hpp>
-
 #include <tuinator/scene/detail/json_node.hpp>
+#include <tuinator/widgets/chrome/status_bar.hpp>
 #include <tuinator/widgets/controls/checkbox.hpp>
 #include <tuinator/widgets/controls/combo_box.hpp>
 #include <tuinator/widgets/controls/slider.hpp>
-#include <tuinator/widgets/display/spinner.hpp>
 #include <tuinator/widgets/controls/text_area.hpp>
 #include <tuinator/widgets/controls/text_input.hpp>
 #include <tuinator/widgets/controls/toggle.hpp>
 #include <tuinator/widgets/display/big_text.hpp>
 #include <tuinator/widgets/display/label.hpp>
 #include <tuinator/widgets/display/progress_bar.hpp>
-#include <tuinator/widgets/chrome/status_bar.hpp>
+#include <tuinator/widgets/display/spinner.hpp>
 #include <tuinator/widgets/views/list_view.hpp>
 
 #include <stdexcept>
@@ -71,23 +70,27 @@ std::string default_source_property(const std::string& type, const std::string& 
         (event == "select" || event == "onSelect" || event == "on_select")) {
         return "selectedItem";
     }
-    if (type == "Checkbox" || type == "Toggle") return "checked";
-    if (type == "Slider" || type == "Spinner") return "value";
+    if (type == "Checkbox" || type == "Toggle")
+        return "checked";
+    if (type == "Slider" || type == "Spinner")
+        return "value";
     return "value";
 }
 
 std::string default_target_property(const std::string& type) {
-    if (type == "Label" || type == "StatusBar" || type == "BigText") return "text";
-    if (type == "TextInput" || type == "TextArea") return "value";
-    if (type == "Checkbox" || type == "Toggle") return "checked";
-    if (type == "Slider" || type == "Spinner" || type == "ProgressBar") return "value";
+    if (type == "Label" || type == "StatusBar" || type == "BigText")
+        return "text";
+    if (type == "TextInput" || type == "TextArea")
+        return "value";
+    if (type == "Checkbox" || type == "Toggle")
+        return "checked";
+    if (type == "Slider" || type == "Spinner" || type == "ProgressBar")
+        return "value";
     return "text";
 }
 
-std::string format_template(
-    const std::string& template_text,
-    const std::string& string_value,
-    const std::string& fallback) {
+std::string format_template(const std::string& template_text, const std::string& string_value,
+                            const std::string& fallback) {
     const std::string placeholder = "{value}";
     const auto pos = template_text.find(placeholder);
     if (pos == std::string::npos) {
@@ -101,31 +104,34 @@ std::string format_template(
 }
 
 std::string bool_to_string(bool value, const std::string& converter) {
-    if (converter == "yesNo") return value ? "Yes" : "No";
-    if (converter == "onOff") return value ? "ON" : "OFF";
+    if (converter == "yesNo")
+        return value ? "Yes" : "No";
+    if (converter == "onOff")
+        return value ? "ON" : "OFF";
     return value ? "true" : "false";
 }
 
 std::string combo_selected_item(const ComboBox* widget) {
-    if (widget == nullptr) return {};
+    if (widget == nullptr)
+        return {};
     const auto& items = widget->items();
     const int index = widget->selected_index();
-    if (index < 0 || index >= static_cast<int>(items.size())) return {};
+    if (index < 0 || index >= static_cast<int>(items.size()))
+        return {};
     return items[index];
 }
 
 std::string list_selected_item(const ListView* widget) {
-    if (widget == nullptr) return {};
+    if (widget == nullptr)
+        return {};
     const auto& items = widget->items();
     const int index = widget->selected_index();
-    if (index < 0 || index >= static_cast<int>(items.size())) return {};
+    if (index < 0 || index >= static_cast<int>(items.size()))
+        return {};
     return items[index];
 }
 
-void set_target_string(
-    WidgetEntry& target,
-    const std::string& value,
-    const BindingSpec& spec) {
+void set_target_string(WidgetEntry& target, const std::string& value, const BindingSpec& spec) {
     std::string text = value;
     if (!spec.template_text.empty()) {
         text = format_template(spec.template_text, value, spec.fallback);
@@ -175,10 +181,7 @@ void set_target_double(WidgetEntry& target, double value) {
     }
 }
 
-void apply_text_binding_from_string(
-    WidgetEntry& target,
-    const std::string& value,
-    const BindingSpec& spec) {
+void apply_text_binding_from_string(WidgetEntry& target, const std::string& value, const BindingSpec& spec) {
     std::string text = value;
     if (!spec.fallback.empty() && text.empty()) {
         text = spec.fallback;
@@ -195,12 +198,10 @@ void apply_binding_once(const BindingSpec& spec, SceneContext& ctx) {
     if (source == nullptr || target == nullptr) {
         throw std::runtime_error("Binding references unknown widget id");
     }
-    const std::string source_property = spec.source_property.empty()
-        ? default_source_property(source->type, spec.event)
-        : spec.source_property;
-    const std::string target_property = spec.target_property.empty()
-        ? default_target_property(target->type)
-        : spec.target_property;
+    const std::string source_property =
+        spec.source_property.empty() ? default_source_property(source->type, spec.event) : spec.source_property;
+    const std::string target_property =
+        spec.target_property.empty() ? default_target_property(target->type) : spec.target_property;
 
     if (source->type == "TextInput" && source_property == "value") {
         const auto* input = static_cast<TextInput*>(source->ptr);
@@ -242,7 +243,8 @@ void apply_binding_once(const BindingSpec& spec, SceneContext& ctx) {
             set_target_int(*target, value);
         } else if (target_property == "text") {
             std::string text = std::to_string(value);
-            if (spec.converter == "percent") text += "%";
+            if (spec.converter == "percent")
+                text += "%";
             set_target_string(*target, text, spec);
         }
         return;
@@ -261,7 +263,8 @@ void apply_binding_once(const BindingSpec& spec, SceneContext& ctx) {
     if (source->type == "ComboBox") {
         const auto* combo = static_cast<ComboBox*>(source->ptr);
         if (source_property == "selectedIndex") {
-            if (target_property == "value") set_target_int(*target, combo->selected_index());
+            if (target_property == "value")
+                set_target_int(*target, combo->selected_index());
         } else {
             apply_text_binding_from_string(*target, combo_selected_item(combo), spec);
         }
@@ -270,15 +273,15 @@ void apply_binding_once(const BindingSpec& spec, SceneContext& ctx) {
     if (source->type == "ListView") {
         const auto* list = static_cast<ListView*>(source->ptr);
         if (source_property == "selectedIndex") {
-            if (target_property == "value") set_target_int(*target, list->selected_index());
+            if (target_property == "value")
+                set_target_int(*target, list->selected_index());
         } else {
             apply_text_binding_from_string(*target, list_selected_item(list), spec);
         }
         return;
     }
-    throw std::runtime_error(
-        "Unsupported binding from " + source->type + "." + source_property + " to " + target->type + "." +
-        target_property);
+    throw std::runtime_error("Unsupported binding from " + source->type + "." + source_property + " to " +
+                             target->type + "." + target_property);
 }
 
 void subscribe_binding(const BindingSpec& spec, SceneContext& ctx) {
@@ -287,22 +290,19 @@ void subscribe_binding(const BindingSpec& spec, SceneContext& ctx) {
     if (source == nullptr || target == nullptr) {
         throw std::runtime_error("Binding references unknown widget id");
     }
-    const std::string source_property = spec.source_property.empty()
-        ? default_source_property(source->type, spec.event)
-        : spec.source_property;
+    const std::string source_property =
+        spec.source_property.empty() ? default_source_property(source->type, spec.event) : spec.source_property;
 
     if (source->type == "TextInput") {
         auto* input = static_cast<TextInput*>(source->ptr);
-        input->set_on_change([target, spec](const std::string& value) {
-            apply_text_binding_from_string(*target, value, spec);
-        });
+        input->set_on_change(
+            [target, spec](const std::string& value) { apply_text_binding_from_string(*target, value, spec); });
         return;
     }
     if (source->type == "TextArea") {
         auto* area = static_cast<TextArea*>(source->ptr);
-        area->set_on_change([target, spec](const std::string& value) {
-            apply_text_binding_from_string(*target, value, spec);
-        });
+        area->set_on_change(
+            [target, spec](const std::string& value) { apply_text_binding_from_string(*target, value, spec); });
         return;
     }
     if (source->type == "ComboBox") {
@@ -348,9 +348,10 @@ void apply_bindings(const nlohmann::json& bindings, SceneContext& ctx) {
             apply_binding_once(spec, ctx);
         }
         WidgetEntry* source = ctx.find_widget(spec.source_id);
-        if (source == nullptr) continue;
-        if (source->type == "TextInput" || source->type == "TextArea" ||
-            source->type == "ComboBox" || source->type == "ListView") {
+        if (source == nullptr)
+            continue;
+        if (source->type == "TextInput" || source->type == "TextArea" || source->type == "ComboBox" ||
+            source->type == "ListView") {
             subscribe_binding(spec, ctx);
         }
     }

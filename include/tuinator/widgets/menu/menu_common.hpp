@@ -44,17 +44,11 @@ std::string menu_item_hint(const MenuItem& item);
 int menu_panel_width(const std::vector<MenuItem>& items);
 void menu_move_selection(const std::vector<MenuItem>& items, int& active_item, int delta);
 
-const std::vector<MenuItem>* menu_follow_path(
-    const std::vector<MenuItem>& root,
-    const std::vector<int>& path);
+const std::vector<MenuItem>* menu_follow_path(const std::vector<MenuItem>& root, const std::vector<int>& path);
 
 void paint_menu_label(Canvas& canvas, int x, int y, std::string_view label, const Style& style);
 
-void paint_menu_panel(
-    Canvas& canvas,
-    const MenuPanelLayout& layout,
-    const std::vector<MenuItem>& items,
-    int active_item,
-    const MenuBarLook& look);
+void paint_menu_panel(Canvas& canvas, const MenuPanelLayout& layout, const std::vector<MenuItem>& items,
+                      int active_item, const MenuBarLook& look);
 
 } // namespace tuinator

@@ -32,9 +32,7 @@ const GitChangeStatusDescriptor& descriptor(GitChangeStatus status) {
 
 } // namespace
 
-char git_change_status_char(GitChangeStatus status) {
-    return descriptor(status).ch;
-}
+char git_change_status_char(GitChangeStatus status) { return descriptor(status).ch; }
 
 std::optional<GitChangeStatus> git_change_status_from_char(char ch) {
     const char normalized = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
@@ -46,28 +44,19 @@ std::optional<GitChangeStatus> git_change_status_from_char(char ch) {
     return std::nullopt;
 }
 
-const char* git_change_status_label(GitChangeStatus status) {
-    return descriptor(status).label;
-}
+const char* git_change_status_label(GitChangeStatus status) { return descriptor(status).label; }
 
 Rgb git_change_status_color(GitChangeStatus status, GitChangeStatusColorDefaults defaults) {
     switch (status) {
-    case GitChangeStatus::Modified:
-        return defaults.modified;
+    case GitChangeStatus::Modified: return defaults.modified;
     case GitChangeStatus::Added:
-    case GitChangeStatus::Copied:
-        return defaults.added;
-    case GitChangeStatus::Deleted:
-        return defaults.deleted;
-    case GitChangeStatus::Renamed:
-        return defaults.text;
+    case GitChangeStatus::Copied: return defaults.added;
+    case GitChangeStatus::Deleted: return defaults.deleted;
+    case GitChangeStatus::Renamed: return defaults.text;
     case GitChangeStatus::Untracked:
-    case GitChangeStatus::Unmerged:
-        return defaults.text;
-    case GitChangeStatus::Ignored:
-        return defaults.muted;
-    case GitChangeStatus::Unknown:
-        return defaults.muted;
+    case GitChangeStatus::Unmerged: return defaults.text;
+    case GitChangeStatus::Ignored: return defaults.muted;
+    case GitChangeStatus::Unknown: return defaults.muted;
     }
     return defaults.muted;
 }

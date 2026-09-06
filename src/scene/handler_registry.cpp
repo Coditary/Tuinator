@@ -1,6 +1,5 @@
-#include <tuinator/scene/handler_registry.hpp>
-
 #include <tuinator/core/application.hpp>
+#include <tuinator/scene/handler_registry.hpp>
 
 #include <stdexcept>
 

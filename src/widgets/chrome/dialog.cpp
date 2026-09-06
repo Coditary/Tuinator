@@ -1,6 +1,5 @@
-#include <tuinator/widgets/chrome/dialog.hpp>
-
 #include <tuinator/layout/box.hpp>
+#include <tuinator/widgets/chrome/dialog.hpp>
 #include <tuinator/widgets/controls/button.hpp>
 #include <tuinator/widgets/display/label.hpp>
 
@@ -8,10 +7,7 @@
 
 namespace tuinator::dialog {
 
-std::unique_ptr<Widget> make_message(
-    const Theme& theme,
-    std::string message,
-    std::function<void()> on_ok) {
+std::unique_ptr<Widget> make_message(const Theme& theme, std::string message, std::function<void()> on_ok) {
     auto box = std::make_unique<VBox>(BoxOptions{.gap = 1, .padding = 1});
     box->add_child(std::make_unique<Label>(std::move(message), theme.label));
     box->add_child(std::make_unique<Button>(
@@ -25,10 +21,8 @@ std::unique_ptr<Widget> make_message(
     return box;
 }
 
-std::unique_ptr<Widget> make_confirm(
-    const Theme& theme,
-    std::string message,
-    std::function<void(bool confirmed)> on_result) {
+std::unique_ptr<Widget> make_confirm(const Theme& theme, std::string message,
+                                     std::function<void(bool confirmed)> on_result) {
     auto box = std::make_unique<VBox>(BoxOptions{.gap = 1, .padding = 1});
     box->add_child(std::make_unique<Label>(std::move(message), theme.label));
 

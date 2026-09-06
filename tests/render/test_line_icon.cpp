@@ -1,29 +1,26 @@
-#include "test_harness.hpp"
-
-#include <cstring>
-
 #include <tuinator/render/glyphs.hpp>
 #include <tuinator/render/line_icon.hpp>
 
+#include <cstring>
+
+#include "test_harness.hpp"
+
 TUINATOR_TEST(line_icon_categories_are_grouped) {
-    TUINATOR_CHECK_EQ(tuinator::line_icon_category(tuinator::LineIcon::Branch),
-        tuinator::LineIconCategory::Powerline);
+    TUINATOR_CHECK_EQ(tuinator::line_icon_category(tuinator::LineIcon::Branch), tuinator::LineIconCategory::Powerline);
     TUINATOR_CHECK_EQ(tuinator::line_icon_category(tuinator::LineIcon::RightHardDivider),
-        tuinator::LineIconCategory::PowerlineExtra);
+                      tuinator::LineIconCategory::PowerlineExtra);
     TUINATOR_CHECK_EQ(tuinator::line_icon_category(tuinator::LineIcon::BoxHorizontalDash),
-        tuinator::LineIconCategory::BoxDrawing);
+                      tuinator::LineIconCategory::BoxDrawing);
     TUINATOR_CHECK_EQ(tuinator::line_icon_category(tuinator::LineIcon::BlockMediumShade),
-        tuinator::LineIconCategory::BlockElement);
-    TUINATOR_CHECK_EQ(tuinator::line_icon_category(tuinator::LineIcon::DiffFill),
-        tuinator::LineIconCategory::Diff);
+                      tuinator::LineIconCategory::BlockElement);
+    TUINATOR_CHECK_EQ(tuinator::line_icon_category(tuinator::LineIcon::DiffFill), tuinator::LineIconCategory::Diff);
 }
 
 TUINATOR_TEST(line_icon_powerline_uses_nerd_fonts_codepoints) {
     TUINATOR_CHECK_EQ(tuinator::line_icon_descriptor(tuinator::LineIcon::RightHardDivider).codepoint, 0xE0B2);
     TUINATOR_CHECK_EQ(tuinator::line_icon_descriptor(tuinator::LineIcon::RightHalfCircleThin).codepoint, 0xE0B5);
     TUINATOR_CHECK(std::strcmp(tuinator::line_icon_nerd_name(tuinator::LineIcon::RightHardDivider),
-                      "ple-right_hard_divider")
-        == 0);
+                               "ple-right_hard_divider") == 0);
 }
 
 TUINATOR_TEST(line_icon_box_and_block_use_unicode_codepoints) {
@@ -56,7 +53,7 @@ TUINATOR_TEST(line_icons_in_category_lists_powerline_sets) {
 
 TUINATOR_TEST(diff_glyph_helpers_delegate_to_line_icon) {
     TUINATOR_CHECK_EQ(tuinator::diff_fill_glyph(tuinator::GlyphSet::Ascii),
-        tuinator::line_icon_glyph(tuinator::LineIcon::DiffFill, tuinator::GlyphSet::Ascii));
+                      tuinator::line_icon_glyph(tuinator::LineIcon::DiffFill, tuinator::GlyphSet::Ascii));
     TUINATOR_CHECK_EQ(tuinator::diff_sign_glyph(tuinator::GlyphSet::Unicode),
-        tuinator::line_icon_glyph(tuinator::LineIcon::DiffSign, tuinator::GlyphSet::Unicode));
+                      tuinator::line_icon_glyph(tuinator::LineIcon::DiffSign, tuinator::GlyphSet::Unicode));
 }

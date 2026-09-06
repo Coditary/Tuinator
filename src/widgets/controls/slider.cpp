@@ -1,6 +1,5 @@
-#include <tuinator/widgets/controls/slider.hpp>
-
 #include <tuinator/core/event.hpp>
+#include <tuinator/widgets/controls/slider.hpp>
 
 #include <algorithm>
 #include <string>
@@ -8,26 +7,15 @@
 
 namespace tuinator {
 
-Slider::Slider(int min_value,
-               int max_value,
-               int value,
-               std::function<void(int)> on_change,
-               Style style,
-               int min_width)
-    : min_value_(min_value),
-      max_value_(max_value),
-      value_(value),
-      min_width_(min_width),
-      on_change_(std::move(on_change)),
-      style_(style) {
+Slider::Slider(int min_value, int max_value, int value, std::function<void(int)> on_change, Style style, int min_width)
+    : min_value_(min_value), max_value_(max_value), value_(value), min_width_(min_width),
+      on_change_(std::move(on_change)), style_(style) {
     focused_style_ = style_;
     focused_style_.reverse = true;
     set_value_internal(value, false);
 }
 
-void Slider::set_value(int value) {
-    set_value_internal(value, true);
-}
+void Slider::set_value(int value) { set_value_internal(value, true); }
 
 void Slider::set_value_internal(int value, bool notify) {
     const int clamped = std::clamp(value, min_value_, max_value_);
@@ -43,9 +31,7 @@ void Slider::set_value_internal(int value, bool notify) {
     }
 }
 
-Size Slider::preferred_size() const {
-    return {min_width_, 1};
-}
+Size Slider::preferred_size() const { return {min_width_, 1}; }
 
 void Slider::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;
@@ -55,10 +41,7 @@ void Slider::paint(PaintContext& ctx) const {
 
     const int width = std::max(3, bounds_.width);
     const int range = std::max(1, max_value_ - min_value_);
-    const int thumb = std::clamp(
-        (value_ - min_value_) * (width - 1) / range,
-        0,
-        width - 1);
+    const int thumb = std::clamp((value_ - min_value_) * (width - 1) / range, 0, width - 1);
 
     std::string track(static_cast<std::size_t>(width), '-');
     track[static_cast<std::size_t>(thumb)] = 'O';
@@ -91,20 +74,11 @@ bool Slider::handle_event(const Event& event) {
     }
 
     switch (key->key) {
-    case Key::Left:
-        set_value(value_ - 1);
-        return true;
-    case Key::Right:
-        set_value(value_ + 1);
-        return true;
-    case Key::Home:
-        set_value(min_value_);
-        return true;
-    case Key::End:
-        set_value(max_value_);
-        return true;
-    default:
-        break;
+    case Key::Left: set_value(value_ - 1); return true;
+    case Key::Right: set_value(value_ + 1); return true;
+    case Key::Home: set_value(min_value_); return true;
+    case Key::End: set_value(max_value_); return true;
+    default: break;
     }
 
     return false;

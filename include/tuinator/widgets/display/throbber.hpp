@@ -21,7 +21,7 @@ const std::vector<ThrobberSet>& all_throbber_sets();
 const ThrobberSet* throbber_set_named(std::string_view name);
 
 class Throbber : public Widget {
-public:
+  public:
     explicit Throbber(const ThrobberSet& set, Style style = {});
     explicit Throbber(std::string_view name, Style style = {});
 
@@ -38,7 +38,7 @@ public:
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
-private:
+  private:
     void advance();
 
     ThrobberSet set_;

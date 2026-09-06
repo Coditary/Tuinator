@@ -10,7 +10,7 @@
 namespace tuinator {
 
 class ContextMenu : public Widget {
-public:
+  public:
     ContextMenu();
 
     void set_items(std::vector<MenuItem> items);
@@ -28,7 +28,7 @@ public:
     bool handle_event(const Event& event) override;
     bool captures_pointer() const override { return open_; }
 
-private:
+  private:
     const std::vector<MenuItem>* current_items() const;
     void open_submenu();
     void close_submenu();

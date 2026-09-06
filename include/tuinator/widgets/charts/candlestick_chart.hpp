@@ -41,7 +41,7 @@ struct CandlestickChartOptions {
 };
 
 class CandlestickChart : public Widget {
-public:
+  public:
     CandlestickChart(std::vector<OhlcBar> bars = {}, CandlestickChartOptions options = {});
 
     const std::vector<OhlcBar>& bars() const { return bars_; }
@@ -53,7 +53,7 @@ public:
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
-private:
+  private:
     struct PlotArea {
         int left = 0;
         int top = 0;

@@ -40,9 +40,8 @@ bool term_contains(const char* haystack, const char* needle) {
 GraphicsProtocol detect_graphics_protocol() {
     const char* term_program = std::getenv("TERM_PROGRAM");
     if (term_program != nullptr) {
-        if (std::strcmp(term_program, "ghostty") == 0
-            || std::strcmp(term_program, "kitty") == 0
-            || std::strcmp(term_program, "WezTerm") == 0) {
+        if (std::strcmp(term_program, "ghostty") == 0 || std::strcmp(term_program, "kitty") == 0 ||
+            std::strcmp(term_program, "WezTerm") == 0) {
             return GraphicsProtocol::Kitty;
         }
         if (std::strcmp(term_program, "iTerm.app") == 0) {
@@ -84,14 +83,10 @@ GraphicsProtocol active_graphics_protocol() {
 
 std::string graphics_protocol_name(GraphicsProtocol protocol) {
     switch (protocol) {
-    case GraphicsProtocol::Kitty:
-        return "kitty";
-    case GraphicsProtocol::Iterm2:
-        return "iterm2";
-    case GraphicsProtocol::Sixel:
-        return "sixel";
-    case GraphicsProtocol::None:
-        return "none";
+    case GraphicsProtocol::Kitty: return "kitty";
+    case GraphicsProtocol::Iterm2: return "iterm2";
+    case GraphicsProtocol::Sixel: return "sixel";
+    case GraphicsProtocol::None: return "none";
     }
 
     return "none";

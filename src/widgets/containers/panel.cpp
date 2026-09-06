@@ -5,14 +5,8 @@
 
 namespace tuinator {
 
-Panel::Panel(std::string title,
-             Style border_style,
-             Style title_style,
-             std::optional<BorderGlyphs> glyphs)
-    : title_(std::move(title)),
-      border_style_(border_style),
-      title_style_(title_style),
-      glyphs_(std::move(glyphs)) {}
+Panel::Panel(std::string title, Style border_style, Style title_style, std::optional<BorderGlyphs> glyphs)
+    : title_(std::move(title)), border_style_(border_style), title_style_(title_style), glyphs_(std::move(glyphs)) {}
 
 void Panel::set_title(std::string title) {
     title_ = std::move(title);
@@ -149,9 +143,7 @@ Widget* Panel::hit_test_focusable(Point point) {
     return nullptr;
 }
 
-bool Panel::has_focused_descendant() const {
-    return content_ && content_->has_focused_descendant();
-}
+bool Panel::has_focused_descendant() const { return content_ && content_->has_focused_descendant(); }
 
 void Panel::collect_focusable(std::vector<Widget*>& out) {
     if (content_) {

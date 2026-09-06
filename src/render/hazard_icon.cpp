@@ -1,6 +1,5 @@
-#include <tuinator/render/hazard_icon.hpp>
-
 #include <tuinator/render/glyphs.hpp>
+#include <tuinator/render/hazard_icon.hpp>
 
 #include <array>
 #include <string>
@@ -29,13 +28,8 @@ std::string utf8_from(char32_t cp) {
     return out;
 }
 
-constexpr HazardIconDescriptor make(
-    HazardIcon kind,
-    HazardIconCategory category,
-    const char* path,
-    const char* nerd_suffix,
-    char32_t codepoint,
-    char ascii) {
+constexpr HazardIconDescriptor make(HazardIcon kind, HazardIconCategory category, const char* path,
+                                    const char* nerd_suffix, char32_t codepoint, char ascii) {
     return HazardIconDescriptor{kind, category, path, nerd_suffix, codepoint, ascii};
 }
 
@@ -60,34 +54,24 @@ const HazardIconDescriptor& descriptor_or_default(HazardIcon icon) {
 
 } // namespace
 
-const HazardIconDescriptor& hazard_icon_descriptor(HazardIcon icon) {
-    return descriptor_or_default(icon);
-}
+const HazardIconDescriptor& hazard_icon_descriptor(HazardIcon icon) { return descriptor_or_default(icon); }
 
-HazardIconCategory hazard_icon_category(HazardIcon icon) {
-    return hazard_icon_descriptor(icon).category;
-}
+HazardIconCategory hazard_icon_category(HazardIcon icon) { return hazard_icon_descriptor(icon).category; }
 
-const char* hazard_icon_path(HazardIcon icon) {
-    return hazard_icon_descriptor(icon).path;
-}
+const char* hazard_icon_path(HazardIcon icon) { return hazard_icon_descriptor(icon).path; }
 
-const char* hazard_icon_nerd_suffix(HazardIcon icon) {
-    return hazard_icon_descriptor(icon).nerd_suffix;
-}
+const char* hazard_icon_nerd_suffix(HazardIcon icon) { return hazard_icon_descriptor(icon).nerd_suffix; }
 
 const char* hazard_icon_category_path(HazardIconCategory category) {
     switch (category) {
-    case HazardIconCategory::Hazard:
-        return "hazard";
+    case HazardIconCategory::Hazard: return "hazard";
     }
     return "hazard";
 }
 
 const char* hazard_icon_category_label(HazardIconCategory category) {
     switch (category) {
-    case HazardIconCategory::Hazard:
-        return "Hazard";
+    case HazardIconCategory::Hazard: return "Hazard";
     }
     return "Other";
 }

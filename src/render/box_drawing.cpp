@@ -1,5 +1,4 @@
 #include <tuinator/render/box_drawing.hpp>
-
 #include <tuinator/render/glyphs.hpp>
 
 #include <array>
@@ -101,9 +100,7 @@ std::string resize_handle_glyph(GlyphSet glyphs) {
 
 } // namespace
 
-const BoxDrawingDescriptor& box_drawing_descriptor(BoxDrawing kind) {
-    return descriptor_or_default(kind);
-}
+const BoxDrawingDescriptor& box_drawing_descriptor(BoxDrawing kind) { return descriptor_or_default(kind); }
 
 std::string box_drawing_glyph(BoxDrawing kind, GlyphSet glyphs) {
     const BoxDrawingDescriptor& descriptor = box_drawing_descriptor(kind);
@@ -125,21 +122,13 @@ std::vector<BoxDrawing> all_box_drawings() {
     return kinds;
 }
 
-BorderGlyphs border_glyphs_from_box_drawing(
-    BoxDrawing corner_tl,
-    BoxDrawing corner_tr,
-    BoxDrawing corner_bl,
-    BoxDrawing corner_br,
-    BoxDrawing horizontal,
-    BoxDrawing vertical) {
+BorderGlyphs border_glyphs_from_box_drawing(BoxDrawing corner_tl, BoxDrawing corner_tr, BoxDrawing corner_bl,
+                                            BoxDrawing corner_br, BoxDrawing horizontal, BoxDrawing vertical) {
     const GlyphSet glyphs = GlyphSet::Auto;
     return BorderGlyphs{
-        box_drawing_glyph(corner_tl, glyphs),
-        box_drawing_glyph(corner_tr, glyphs),
-        box_drawing_glyph(corner_bl, glyphs),
-        box_drawing_glyph(corner_br, glyphs),
-        box_drawing_glyph(horizontal, glyphs),
-        box_drawing_glyph(vertical, glyphs),
+        box_drawing_glyph(corner_tl, glyphs),  box_drawing_glyph(corner_tr, glyphs),
+        box_drawing_glyph(corner_bl, glyphs),  box_drawing_glyph(corner_br, glyphs),
+        box_drawing_glyph(horizontal, glyphs), box_drawing_glyph(vertical, glyphs),
         resize_handle_glyph(glyphs),
     };
 }

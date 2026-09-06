@@ -10,7 +10,7 @@ struct BoxOptions {
 };
 
 class VBox : public Widget {
-public:
+  public:
     explicit VBox(BoxOptions options = {});
 
     Size preferred_size() const override;
@@ -18,13 +18,13 @@ public:
     void paint(PaintContext& ctx) const override;
     bool handle_event(const Event& event) override;
 
-private:
+  private:
     int gap_;
     int padding_;
 };
 
 class HBox : public Widget {
-public:
+  public:
     explicit HBox(BoxOptions options = {});
 
     Size preferred_size() const override;
@@ -34,7 +34,7 @@ public:
     Widget* hit_test_focusable(Point point) override;
     bool handle_event(const Event& event) override;
 
-private:
+  private:
     Widget* focusable_child_at(Point point) const;
     int gap_;
     int padding_;

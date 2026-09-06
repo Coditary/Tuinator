@@ -1,9 +1,9 @@
-#include "test_harness.hpp"
-#include "render_helper.hpp"
-
 #include <tuinator/widgets/display/throbber.hpp>
 
 #include <string>
+
+#include "render_helper.hpp"
+#include "test_harness.hpp"
 
 TUINATOR_TEST(throbber_ascii_advances_frames) {
     tuinator::Throbber throbber("ascii");
@@ -26,9 +26,7 @@ TUINATOR_TEST(throbber_unknown_name_falls_back) {
     TUINATOR_CHECK(!throbber.frame().empty());
 }
 
-TUINATOR_TEST(throbber_catalog_is_populated) {
-    TUINATOR_CHECK(tuinator::all_throbber_sets().size() > 20);
-}
+TUINATOR_TEST(throbber_catalog_is_populated) { TUINATOR_CHECK(tuinator::all_throbber_sets().size() > 20); }
 
 TUINATOR_TEST(throbber_short_frame_clears_previous_cells) {
     tuinator::ThrobberSet set;

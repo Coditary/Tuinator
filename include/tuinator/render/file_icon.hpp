@@ -82,15 +82,9 @@ FileIcon file_icon_for_extension(std::string_view extension);
 FileIcon file_icon_for_filename(std::string_view filename);
 
 /// Detect icon from a path. Pass `is_directory` for folders.
-FileIcon file_icon_for_path(
-    std::string_view path,
-    bool is_directory = false,
-    bool folder_open = false);
+FileIcon file_icon_for_path(std::string_view path, bool is_directory = false, bool folder_open = false);
 
-std::string file_icon_glyph_for_path(
-    std::string_view path,
-    GlyphSet glyphs = GlyphSet::Auto,
-    bool is_directory = false,
-    bool folder_open = false);
+std::string file_icon_glyph_for_path(std::string_view path, GlyphSet glyphs = GlyphSet::Auto, bool is_directory = false,
+                                     bool folder_open = false);
 
 } // namespace tuinator

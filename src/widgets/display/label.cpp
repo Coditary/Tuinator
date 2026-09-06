@@ -1,13 +1,11 @@
-#include <tuinator/widgets/display/label.hpp>
-
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/display/label.hpp>
 
 #include <algorithm>
 
 namespace tuinator {
 
-Label::Label(std::string text, Style style)
-    : text_(std::move(text)), style_(style) {}
+Label::Label(std::string text, Style style) : text_(std::move(text)), style_(style) {}
 
 void Label::set_text(std::string text) {
     text_ = std::move(text);
@@ -30,9 +28,7 @@ Size Label::preferred_size() const {
             end = text_.size();
         }
 
-        max_width = std::max(
-            max_width,
-            text_display_width(std::string_view(text_.data() + start, end - start)));
+        max_width = std::max(max_width, text_display_width(std::string_view(text_.data() + start, end - start)));
         ++lines;
 
         if (end >= text_.size()) {
@@ -45,9 +41,7 @@ Size Label::preferred_size() const {
     return {max_width, std::max(1, lines)};
 }
 
-void Label::layout(Rect bounds) {
-    bounds_ = bounds;
-}
+void Label::layout(Rect bounds) { bounds_ = bounds; }
 
 void Label::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;

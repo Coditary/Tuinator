@@ -15,9 +15,7 @@ std::string report_path() {
     return "startup-profile.log";
 }
 
-bool quick_exit() {
-    return std::getenv("TUINATOR_PROFILE_QUICK") != nullptr;
-}
+bool quick_exit() { return std::getenv("TUINATOR_PROFILE_QUICK") != nullptr; }
 
 } // namespace
 
@@ -30,12 +28,10 @@ int main() {
 
     auto root = std::make_unique<tuinator::VBox>(tuinator::BoxOptions{.gap = 1, .padding = 1});
     root->add_child(std::make_unique<tuinator::Label>(
-        "Startup profile",
-        tuinator::Style{.foreground = tuinator::Color::Cyan, .bold = true}));
+        "Startup profile", tuinator::Style{.foreground = tuinator::Color::Cyan, .bold = true}));
     root->add_child(std::make_unique<tuinator::Label>("Measuring startup latency..."));
     root->add_child(std::make_unique<tuinator::Label>(
-        "See startup-profile.log after exit",
-        tuinator::Style{.foreground = tuinator::Color::Yellow, .dim = true}));
+        "See startup-profile.log after exit", tuinator::Style{.foreground = tuinator::Color::Yellow, .dim = true}));
 
     app.set_root(std::move(root));
     tuinator::startup_profile_mark("main.after_set_root");

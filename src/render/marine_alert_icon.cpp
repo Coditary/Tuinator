@@ -1,6 +1,5 @@
-#include <tuinator/render/marine_alert_icon.hpp>
-
 #include <tuinator/render/glyphs.hpp>
+#include <tuinator/render/marine_alert_icon.hpp>
 
 #include <array>
 #include <string>
@@ -29,19 +28,16 @@ std::string utf8_from(char32_t cp) {
     return out;
 }
 
-constexpr MarineAlertIconDescriptor make(
-    MarineAlertIcon kind,
-    MarineAlertIconCategory category,
-    const char* path,
-    const char* nerd_suffix,
-    char32_t codepoint,
-    char ascii) {
+constexpr MarineAlertIconDescriptor make(MarineAlertIcon kind, MarineAlertIconCategory category, const char* path,
+                                         const char* nerd_suffix, char32_t codepoint, char ascii) {
     return MarineAlertIconDescriptor{kind, category, path, nerd_suffix, codepoint, ascii};
 }
 
 constexpr std::array<MarineAlertIconDescriptor, 2> kDescriptors{{
-    make(MarineAlertIcon::GaleWarning, MarineAlertIconCategory::MarineAlert, "marine-gale-warning", "gale_warning", 0xE3C5, '*'),
-    make(MarineAlertIcon::SmallCraftAdvisory, MarineAlertIconCategory::MarineAlert, "marine-small-craft-advisory", "small_craft_advisory", 0xE3C4, '*'),
+    make(MarineAlertIcon::GaleWarning, MarineAlertIconCategory::MarineAlert, "marine-gale-warning", "gale_warning",
+         0xE3C5, '*'),
+    make(MarineAlertIcon::SmallCraftAdvisory, MarineAlertIconCategory::MarineAlert, "marine-small-craft-advisory",
+         "small_craft_advisory", 0xE3C4, '*'),
 }};
 
 static_assert(kDescriptors.size() == 2, "descriptor table out of sync");
@@ -64,9 +60,7 @@ MarineAlertIconCategory marine_alert_icon_category(MarineAlertIcon icon) {
     return marine_alert_icon_descriptor(icon).category;
 }
 
-const char* marine_alert_icon_path(MarineAlertIcon icon) {
-    return marine_alert_icon_descriptor(icon).path;
-}
+const char* marine_alert_icon_path(MarineAlertIcon icon) { return marine_alert_icon_descriptor(icon).path; }
 
 const char* marine_alert_icon_nerd_suffix(MarineAlertIcon icon) {
     return marine_alert_icon_descriptor(icon).nerd_suffix;
@@ -74,16 +68,14 @@ const char* marine_alert_icon_nerd_suffix(MarineAlertIcon icon) {
 
 const char* marine_alert_icon_category_path(MarineAlertIconCategory category) {
     switch (category) {
-    case MarineAlertIconCategory::MarineAlert:
-        return "marine";
+    case MarineAlertIconCategory::MarineAlert: return "marine";
     }
     return "marine";
 }
 
 const char* marine_alert_icon_category_label(MarineAlertIconCategory category) {
     switch (category) {
-    case MarineAlertIconCategory::MarineAlert:
-        return "Marine Alert";
+    case MarineAlertIconCategory::MarineAlert: return "Marine Alert";
     }
     return "Other";
 }

@@ -1,9 +1,8 @@
-#include <tuinator/widgets/chrome/source_control_panel.hpp>
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/file_icon.hpp>
 #include <tuinator/render/git_change_status.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/chrome/source_control_panel.hpp>
 
 #include <algorithm>
 #include <string>
@@ -39,8 +38,7 @@ Style with_optional_fg(const Style& base, const Rgb& fg) {
 
 } // namespace
 
-SourceControlPanel::SourceControlPanel(SourceControlPanelStyle style)
-    : style_(std::move(style)) {}
+SourceControlPanel::SourceControlPanel(SourceControlPanelStyle style) : style_(std::move(style)) {}
 
 void SourceControlPanel::set_header(std::string title, std::string subtitle) {
     header_title_ = std::move(title);
@@ -53,8 +51,7 @@ void SourceControlPanel::set_sections(std::vector<SourceControlSection> sections
     selected_section_ = std::clamp(selected_section_, 0, std::max(0, static_cast<int>(sections_.size()) - 1));
     if (!sections_.empty()) {
         selected_entry_ = std::clamp(
-            selected_entry_,
-            0,
+            selected_entry_, 0,
             std::max(0, static_cast<int>(sections_[static_cast<std::size_t>(selected_section_)].entries.size()) - 1));
     } else {
         selected_entry_ = 0;
@@ -92,9 +89,7 @@ void SourceControlPanel::set_on_select(
     on_select_ = std::move(callback);
 }
 
-Size SourceControlPanel::preferred_size() const {
-    return {style_.preferred_width, std::max(1, content_height())};
-}
+Size SourceControlPanel::preferred_size() const { return {style_.preferred_width, std::max(1, content_height())}; }
 
 void SourceControlPanel::layout(Rect bounds) {
     bounds_ = bounds;
@@ -275,10 +270,8 @@ void SourceControlPanel::paint(PaintContext& ctx) const {
                 status_colors.muted = style_.muted_fg;
                 const Rgb status_color = git_change_status_color(entry.status, status_colors);
                 const std::string status_text(1, git_change_status_char(entry.status));
-                canvas.draw_text(
-                    {1, row},
-                    status_text,
-                    with_optional_fg(with_optional_bg(style_.entry_text, row_bg), status_color));
+                canvas.draw_text({1, row}, status_text,
+                                 with_optional_fg(with_optional_bg(style_.entry_text, row_bg), status_color));
 
                 const FileIcon icon = file_icon_for_path(entry.path);
                 const std::string icon_glyph = file_icon_glyph(icon);
@@ -410,8 +403,7 @@ bool SourceControlPanel::handle_event(const Event& event) {
         }
         return true;
     }
-    default:
-        break;
+    default: break;
     }
 
     return false;

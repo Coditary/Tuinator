@@ -11,9 +11,7 @@ namespace tuinator {
 namespace {
 
 bool locale_ready() {
-    static const bool ready = [] {
-        return std::setlocale(LC_CTYPE, "") != nullptr;
-    }();
+    static const bool ready = [] { return std::setlocale(LC_CTYPE, "") != nullptr; }();
     return ready;
 }
 
@@ -29,8 +27,7 @@ std::vector<wchar_t> utf8_to_wide(std::string_view text) {
 
     while (cursor < end) {
         wchar_t ch = L'\0';
-        const std::size_t consumed =
-            std::mbrtowc(&ch, cursor, static_cast<std::size_t>(end - cursor), &state);
+        const std::size_t consumed = std::mbrtowc(&ch, cursor, static_cast<std::size_t>(end - cursor), &state);
         if (consumed == 0) {
             break;
         }
@@ -45,9 +42,7 @@ std::vector<wchar_t> utf8_to_wide(std::string_view text) {
     return wide;
 }
 
-bool is_emoji_plane(char32_t ch) {
-    return ch >= 0x1F000 && ch <= 0x1FAFF;
-}
+bool is_emoji_plane(char32_t ch) { return ch >= 0x1F000 && ch <= 0x1FAFF; }
 
 int base_cell_width(char32_t ch) {
     if (ch == 0x200D || ch == 0xFE0E || ch == 0xFE0F) {
@@ -65,8 +60,7 @@ int base_cell_width(char32_t ch) {
     return cell;
 }
 
-template <typename Fn>
-void for_each_utf8_scalar(std::string_view text, Fn&& fn) {
+template <typename Fn> void for_each_utf8_scalar(std::string_view text, Fn&& fn) {
     std::size_t index = 0;
     while (index < text.size()) {
         const unsigned char lead = static_cast<unsigned char>(text[index]);

@@ -17,7 +17,7 @@ namespace tuinator {
 /// Spawns dedicated reader/writer threads (tui-term pattern): the reader
 /// continuously drains PTY output; input is queued to the writer thread.
 class PtySession {
-public:
+  public:
     using OutputHandler = std::function<void(std::string_view)>;
     using ExitHandler = std::function<void()>;
 
@@ -38,7 +38,7 @@ public:
 
     void terminate();
 
-private:
+  private:
     void start_io_threads();
     void stop_io_threads();
     void reader_loop();

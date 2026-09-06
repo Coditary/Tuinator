@@ -1,9 +1,9 @@
-#include "render_helper.hpp"
-#include "test_harness.hpp"
-
 #include <tuinator/layout/box.hpp>
 #include <tuinator/render/theme.hpp>
 #include <tuinator/widgets/display/label.hpp>
+
+#include "render_helper.hpp"
+#include "test_harness.hpp"
 
 TUINATOR_TEST(label_centers_in_vbox) {
     tuinator::MemoryTerminalBackend backend({80, 8});
@@ -34,8 +34,7 @@ TUINATOR_TEST(label_regression_no_control_chars) {
 
     for (int y = 1; y <= 3; y += 2) {
         for (int x = 0; x < backend.terminal_size().width; ++x) {
-            const unsigned char ch =
-                static_cast<unsigned char>(tuinator::test::cell_at(backend, x, y));
+            const unsigned char ch = static_cast<unsigned char>(tuinator::test::cell_at(backend, x, y));
             TUINATOR_CHECK(ch == ' ' || (ch >= 32 && ch < 127));
         }
     }

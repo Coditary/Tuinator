@@ -1,9 +1,9 @@
-#include "render_helper.hpp"
-#include "test_harness.hpp"
-
 #include <tuinator/widgets/charts/pie_chart.hpp>
 
 #include <cmath>
+
+#include "render_helper.hpp"
+#include "test_harness.hpp"
 
 TUINATOR_TEST(pie_chart_renders_legend) {
     tuinator::MemoryTerminalBackend backend({40, 16});

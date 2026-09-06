@@ -6,7 +6,7 @@ CMAKE_CACHE := $(BUILD_DIR)/CMakeCache.txt
 DEMOS := hello form colors layout counter buttons windows mouse-test scroll theme dashboard data controls menu image textarea throbber bigtext checkbox piechart charts diffview weather glyphs terminal-frame scene scene-runtime
 RUNNABLE := $(DEMOS) profile
 
-.PHONY: all build configure clean rebuild help demos test test-all unit-test profile profile-quick scene-codegen scene-runtime-codegen scene-validate $(RUNNABLE)
+.PHONY: all build configure clean rebuild help demos test test-all unit-test profile profile-quick scene-codegen scene-runtime-codegen scene-validate format format-check lint quality $(RUNNABLE)
 
 all: $(DEMOS:%=$(BUILD_DIR)/tuinator-%)
 
@@ -53,6 +53,19 @@ test test-all: build
 unit-test: $(BUILD_DIR)/tuinator-tests
 	@./$(BUILD_DIR)/tuinator-tests
 
+format:
+	@./scripts/quality/format.sh
+
+format-check:
+	@./scripts/quality/format-check.sh
+
+lint:
+	@./scripts/quality/clang-tidy.sh
+	@./scripts/quality/cppcheck.sh
+
+quality: format-check lint
+	@echo "All quality checks passed."
+
 rebuild: clean all
 
 clean:
@@ -71,6 +84,12 @@ help:
 	@echo "Test:"
 	@echo "  make unit-test  Run headless unit tests"
 	@echo "  make test       Run all smoke tests"
+	@echo ""
+	@echo "Quality:"
+	@echo "  make format       Apply clang-format to tracked sources"
+	@echo "  make format-check Verify formatting (clang-format)"
+	@echo "  make lint         Run clang-tidy + cppcheck"
+	@echo "  make quality      Run all quality checks"
 	@echo ""
 	@echo "Run demos:"
 	@echo "  make hello      Centered label"

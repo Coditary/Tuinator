@@ -34,11 +34,8 @@ struct MenuItem {
 
     static MenuItem separator();
     static MenuItem checkbox(std::string label, bool checked = false, std::function<void()> action = {});
-    static MenuItem submenu(
-        std::string label,
-        std::vector<MenuItem> items,
-        std::string shortcut = {},
-        std::string icon = {});
+    static MenuItem submenu(std::string label, std::vector<MenuItem> items, std::string shortcut = {},
+                            std::string icon = {});
 };
 
 struct Menu {
@@ -58,7 +55,7 @@ struct MenuBarLook;
 struct MenuPanelLayout;
 
 class MenuBar : public Widget {
-public:
+  public:
     explicit MenuBar(Style style = {}, Style active_style = {});
 
     void set_menus(std::vector<Menu> menus);
@@ -72,7 +69,7 @@ public:
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
 
-private:
+  private:
     struct DropdownLayout {
         int x = 0;
         int y = 1;

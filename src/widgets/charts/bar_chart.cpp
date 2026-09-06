@@ -1,7 +1,6 @@
-#include <tuinator/widgets/charts/bar_chart.hpp>
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/charts/bar_chart.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -31,8 +30,7 @@ std::string format_axis_value(double value) {
 } // namespace
 
 BarChart::BarChart(std::vector<BarChartBar> bars, BarChartOptions options)
-    : bars_(std::move(bars)),
-      options_(std::move(options)) {}
+    : bars_(std::move(bars)), options_(std::move(options)) {}
 
 void BarChart::set_bars(std::vector<BarChartBar> bars) {
     bars_ = std::move(bars);
@@ -77,16 +75,12 @@ double BarChart::value_min() const {
     return 0.0;
 }
 
-double BarChart::value_span() const {
-    return std::max(1e-6, value_max() - value_min());
-}
+double BarChart::value_span() const { return std::max(1e-6, value_max() - value_min()); }
 
 BarChart::PlotArea BarChart::compute_plot() const {
     PlotArea plot{};
     plot.title_rows = options_.title.empty() ? 0 : 1;
-    plot.label_rows = (options_.show_labels && options_.orientation == BarChartOrientation::Vertical)
-        ? 1
-        : 0;
+    plot.label_rows = (options_.show_labels && options_.orientation == BarChartOrientation::Vertical) ? 1 : 0;
 
     plot.left = options_.show_axis ? kAxisWidth : 0;
     plot.top = plot.title_rows;
@@ -115,11 +109,7 @@ Size BarChart::preferred_size() const {
     };
 }
 
-void BarChart::paint_grid_vertical(
-    Canvas& canvas,
-    const PlotArea& plot,
-    double min_v,
-    double max_v) const {
+void BarChart::paint_grid_vertical(Canvas& canvas, const PlotArea& plot, double min_v, double max_v) const {
     if (!options_.show_grid || plot.height <= 1) {
         return;
     }
@@ -137,11 +127,7 @@ void BarChart::paint_grid_vertical(
     }
 }
 
-void BarChart::paint_grid_horizontal(
-    Canvas& canvas,
-    const PlotArea& plot,
-    double min_v,
-    double max_v) const {
+void BarChart::paint_grid_horizontal(Canvas& canvas, const PlotArea& plot, double min_v, double max_v) const {
     if (!options_.show_grid || plot.width <= 1) {
         return;
     }
@@ -162,13 +148,7 @@ void BarChart::paint_grid_horizontal(
     }
 }
 
-void BarChart::fill_vertical_bar(
-    Canvas& canvas,
-    int x,
-    int y,
-    int width,
-    int height,
-    const Style& style) const {
+void BarChart::fill_vertical_bar(Canvas& canvas, int x, int y, int width, int height, const Style& style) const {
     if (width <= 0 || height <= 0) {
         return;
     }
@@ -196,13 +176,7 @@ void BarChart::fill_vertical_bar(
     }
 }
 
-void BarChart::fill_horizontal_bar(
-    Canvas& canvas,
-    int x,
-    int y,
-    int width,
-    int height,
-    const Style& style) const {
+void BarChart::fill_horizontal_bar(Canvas& canvas, int x, int y, int width, int height, const Style& style) const {
     fill_vertical_bar(canvas, x, y, width, height, style);
 }
 
@@ -228,10 +202,7 @@ void BarChart::paint_vertical(Canvas& canvas, const PlotArea& plot) const {
     for (int i = 0; i < count; ++i) {
         const BarChartBar& bar = bars_[static_cast<std::size_t>(i)];
         const int x = plot.left + i * (bar_width + options_.bar_gap);
-        const int filled = std::clamp(
-            static_cast<int>((bar.value - min_v) / span * plot.height),
-            0,
-            plot.height);
+        const int filled = std::clamp(static_cast<int>((bar.value - min_v) / span * plot.height), 0, plot.height);
         const int y = plot.top + plot.height - filled;
 
         fill_vertical_bar(canvas, x, y, bar_width, filled, bar.style);
@@ -240,9 +211,8 @@ void BarChart::paint_vertical(Canvas& canvas, const PlotArea& plot) const {
             std::ostringstream value;
             value << std::fixed << std::setprecision(0) << bar.value;
             const int value_y = std::max(plot.top, y - 1);
-            canvas.draw_text({x, value_y}, value.str(), options_.value_style.foreground == Color::Default
-                ? bar.style
-                : options_.value_style);
+            canvas.draw_text({x, value_y}, value.str(),
+                             options_.value_style.foreground == Color::Default ? bar.style : options_.value_style);
         }
 
         if (options_.show_labels) {
@@ -280,10 +250,7 @@ void BarChart::paint_horizontal(Canvas& canvas, const PlotArea& plot) const {
         const BarChartBar& bar = bars_[static_cast<std::size_t>(i)];
         const int y = plot.top + i * row_height;
         const int bar_area_width = std::max(1, plot.width - label_width - 1);
-        const int filled = std::clamp(
-            static_cast<int>((bar.value - min_v) / span * bar_area_width),
-            0,
-            bar_area_width);
+        const int filled = std::clamp(static_cast<int>((bar.value - min_v) / span * bar_area_width), 0, bar_area_width);
         const int x = plot.left + label_width + 1;
 
         if (options_.show_labels) {
@@ -295,9 +262,8 @@ void BarChart::paint_horizontal(Canvas& canvas, const PlotArea& plot) const {
         if (options_.show_values && filled > 0) {
             std::ostringstream value;
             value << std::fixed << std::setprecision(0) << bar.value;
-            canvas.draw_text({x + filled + 1, y}, value.str(), options_.value_style.foreground == Color::Default
-                ? bar.style
-                : options_.value_style);
+            canvas.draw_text({x + filled + 1, y}, value.str(),
+                             options_.value_style.foreground == Color::Default ? bar.style : options_.value_style);
         }
     }
 }
@@ -347,8 +313,7 @@ void BarChart::set_bar_value(int index, double value) {
     }
 
     const double max_v = value_max();
-    bars_[static_cast<std::size_t>(index)].value =
-        std::clamp(value, value_min(), max_v);
+    bars_[static_cast<std::size_t>(index)].value = std::clamp(value, value_min(), max_v);
     mark_dirty();
 
     if (on_change_) {

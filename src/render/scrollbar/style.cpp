@@ -1,5 +1,4 @@
 #include <tuinator/render/scrollbar/style.hpp>
-
 #include <tuinator/render/theme.hpp>
 
 #include <utility>
@@ -41,8 +40,7 @@ ScrollbarGlyphPatch glyph_patch_for(ScrollbarStyleKind kind) {
         patch.arrow_right = "▸";
         patch.corner = "┴";
         break;
-    default:
-        break;
+    default: break;
     }
     return patch;
 }
@@ -79,8 +77,7 @@ ScrollbarPalettePatch palette_patch_for(ScrollbarStyleKind kind) {
         patch.track = dim_style();
         patch.arrow = dim_style();
         break;
-    default:
-        break;
+    default: break;
     }
     return patch;
 }
@@ -169,45 +166,28 @@ ScrollbarGlyphs ascii_scrollbar_glyphs() {
     return apply_glyph_patch(unicode_scrollbar_glyphs(), glyph_patch_for(ScrollbarStyleKind::Ascii));
 }
 
-ScrollbarGlyphs unicode_scrollbar_glyphs() {
-    return ScrollbarGlyphs{};
-}
+ScrollbarGlyphs unicode_scrollbar_glyphs() { return ScrollbarGlyphs{}; }
 
 ScrollbarStyle::ScrollbarStyle(ScrollbarStyleKind kind, State state) : state_(state), kind_(kind) {}
 
-ScrollbarStyle ScrollbarStyle::classic() {
-    return {ScrollbarStyleKind::Classic, State::Preset};
-}
+ScrollbarStyle ScrollbarStyle::classic() { return {ScrollbarStyleKind::Classic, State::Preset}; }
 
-ScrollbarStyle ScrollbarStyle::ascii() {
-    return {ScrollbarStyleKind::Ascii, State::Preset};
-}
+ScrollbarStyle ScrollbarStyle::ascii() { return {ScrollbarStyleKind::Ascii, State::Preset}; }
 
-ScrollbarStyle ScrollbarStyle::minimal() {
-    return {ScrollbarStyleKind::Minimal, State::Preset};
-}
+ScrollbarStyle ScrollbarStyle::minimal() { return {ScrollbarStyleKind::Minimal, State::Preset}; }
 
-ScrollbarStyle ScrollbarStyle::bold() {
-    return {ScrollbarStyleKind::Bold, State::Preset};
-}
+ScrollbarStyle ScrollbarStyle::bold() { return {ScrollbarStyleKind::Bold, State::Preset}; }
 
-ScrollbarStyle ScrollbarStyle::thin() {
-    return {ScrollbarStyleKind::Thin, State::Preset};
-}
+ScrollbarStyle ScrollbarStyle::thin() { return {ScrollbarStyleKind::Thin, State::Preset}; }
 
 ScrollbarStyle ScrollbarStyle::from_kind(ScrollbarStyleKind kind) {
     switch (kind) {
-    case ScrollbarStyleKind::Ascii:
-        return ascii();
-    case ScrollbarStyleKind::Minimal:
-        return minimal();
-    case ScrollbarStyleKind::Bold:
-        return bold();
-    case ScrollbarStyleKind::Thin:
-        return thin();
+    case ScrollbarStyleKind::Ascii: return ascii();
+    case ScrollbarStyleKind::Minimal: return minimal();
+    case ScrollbarStyleKind::Bold: return bold();
+    case ScrollbarStyleKind::Thin: return thin();
     case ScrollbarStyleKind::Classic:
-    default:
-        return classic();
+    default: return classic();
     }
 }
 
@@ -304,43 +284,25 @@ ScrollbarStyle ScrollbarStyle::themed(const Theme& theme) const {
     return next;
 }
 
-ScrollbarGlyphs ScrollbarStyle::glyphs() const {
-    return resolve_glyphs();
-}
+ScrollbarGlyphs ScrollbarStyle::glyphs() const { return resolve_glyphs(); }
 
-ScrollbarPalette ScrollbarStyle::palette() const {
-    return resolve_palette();
-}
+ScrollbarPalette ScrollbarStyle::palette() const { return resolve_palette(); }
 
 namespace ScrollbarStyles {
 
-ScrollbarStyle classic() {
-    return ScrollbarStyle::classic();
-}
+ScrollbarStyle classic() { return ScrollbarStyle::classic(); }
 
-ScrollbarStyle ascii() {
-    return ScrollbarStyle::ascii();
-}
+ScrollbarStyle ascii() { return ScrollbarStyle::ascii(); }
 
-ScrollbarStyle minimal() {
-    return ScrollbarStyle::minimal();
-}
+ScrollbarStyle minimal() { return ScrollbarStyle::minimal(); }
 
-ScrollbarStyle bold() {
-    return ScrollbarStyle::bold();
-}
+ScrollbarStyle bold() { return ScrollbarStyle::bold(); }
 
-ScrollbarStyle thin() {
-    return ScrollbarStyle::thin();
-}
+ScrollbarStyle thin() { return ScrollbarStyle::thin(); }
 
-ScrollbarStyle from_kind(ScrollbarStyleKind kind) {
-    return ScrollbarStyle::from_kind(kind);
-}
+ScrollbarStyle from_kind(ScrollbarStyleKind kind) { return ScrollbarStyle::from_kind(kind); }
 
-ScrollbarStyle themed(const Theme& theme, ScrollbarStyle style) {
-    return style.themed(theme);
-}
+ScrollbarStyle themed(const Theme& theme, ScrollbarStyle style) { return style.themed(theme); }
 
 } // namespace ScrollbarStyles
 

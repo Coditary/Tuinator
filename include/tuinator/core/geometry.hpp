@@ -27,11 +27,9 @@ struct Rect {
     int height = 0;
 
     constexpr Rect() = default;
-    constexpr Rect(int x, int y, int width, int height)
-        : x(x), y(y), width(width), height(height) {}
+    constexpr Rect(int x, int y, int width, int height) : x(x), y(y), width(width), height(height) {}
 
-    constexpr Rect(Point origin, Size size)
-        : x(origin.x), y(origin.y), width(size.width), height(size.height) {}
+    constexpr Rect(Point origin, Size size) : x(origin.x), y(origin.y), width(size.width), height(size.height) {}
 
     constexpr Point origin() const { return {x, y}; }
     constexpr Size size() const { return {width, height}; }
@@ -39,9 +37,7 @@ struct Rect {
     constexpr int right() const { return x + width; }
     constexpr int bottom() const { return y + height; }
 
-    constexpr bool contains(Point p) const {
-        return p.x >= x && p.x < right() && p.y >= y && p.y < bottom();
-    }
+    constexpr bool contains(Point p) const { return p.x >= x && p.x < right() && p.y >= y && p.y < bottom(); }
 
     Rect centered_in(Rect outer) const {
         return {
@@ -74,13 +70,9 @@ struct Rect {
         return {clamped_x, clamped_y, clamped_width, clamped_height};
     }
 
-    Rect translated(int dx, int dy) const {
-        return {x + dx, y + dy, width, height};
-    }
+    Rect translated(int dx, int dy) const { return {x + dx, y + dy, width, height}; }
 
-    Rect inset(int amount) const {
-        return {x + amount, y + amount, width - amount * 2, height - amount * 2};
-    }
+    Rect inset(int amount) const { return {x + amount, y + amount, width - amount * 2, height - amount * 2}; }
 };
 
 inline Rect intersect(Rect a, Rect b) {

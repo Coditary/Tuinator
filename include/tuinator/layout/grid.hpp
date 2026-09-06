@@ -11,7 +11,7 @@ struct GridOptions {
 };
 
 class Grid : public Widget {
-public:
+  public:
     explicit Grid(GridOptions options = {});
 
     Size preferred_size() const override;
@@ -19,7 +19,7 @@ public:
     void paint(PaintContext& ctx) const override;
     bool handle_event(const Event& event) override;
 
-private:
+  private:
     int columns_;
     int gap_;
     int padding_;

@@ -53,7 +53,7 @@ const std::vector<PieChartStyleInfo>& all_pie_chart_styles();
 std::string pie_chart_glyph_for(PieChartStyle style, const std::string& custom = {});
 
 class PieChart : public Widget {
-public:
+  public:
     PieChart(std::vector<PieChartSlice> slices = {}, PieChartOptions options = {});
 
     const std::vector<PieChartSlice>& slices() const { return slices_; }
@@ -73,7 +73,7 @@ public:
     bool captures_pointer() const override { return options_.interactive; }
     bool pointer_active() const override { return dragging_; }
 
-private:
+  private:
     struct Layout {
         int title_rows = 0;
         int chart_top = 0;

@@ -1,5 +1,4 @@
 #include <tuinator/render/block_element.hpp>
-
 #include <tuinator/render/glyphs.hpp>
 
 #include <array>
@@ -29,10 +28,7 @@ std::string utf8_from(char32_t cp) {
     return out;
 }
 
-constexpr BlockElementDescriptor make(
-    BlockElement kind,
-    char32_t codepoint,
-    char ascii) {
+constexpr BlockElementDescriptor make(BlockElement kind, char32_t codepoint, char ascii) {
     return BlockElementDescriptor{
         kind,
         codepoint,
@@ -79,9 +75,7 @@ GlyphSet resolve_glyph_set(GlyphSet glyphs) {
 
 } // namespace
 
-const BlockElementDescriptor& block_element_descriptor(BlockElement element) {
-    return descriptor_or_default(element);
-}
+const BlockElementDescriptor& block_element_descriptor(BlockElement element) { return descriptor_or_default(element); }
 
 std::vector<BlockElement> all_block_elements() {
     std::vector<BlockElement> elements;

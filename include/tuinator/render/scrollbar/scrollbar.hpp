@@ -23,10 +23,7 @@ struct ScrollbarOptions {
     ScrollbarStyle style = ScrollbarStyle::classic();
 
     static ScrollbarOptions classic();
-    static ScrollbarOptions from_parts(
-        ScrollbarConfig config,
-        ScrollbarBehavior behavior,
-        ScrollbarStyle style);
+    static ScrollbarOptions from_parts(ScrollbarConfig config, ScrollbarBehavior behavior, ScrollbarStyle style);
 
     ScrollbarOptions with_config(ScrollbarConfig config) const;
     ScrollbarOptions with_behavior(ScrollbarBehavior behavior) const;
@@ -41,18 +38,10 @@ struct ScrollbarOptions {
 ScrollbarOptions scrollbar_options(ScrollbarPreset preset);
 ScrollbarOptions scrollbar_options(const Theme& theme, ScrollbarPreset preset);
 
-void paint_scrollbars(
-    Canvas& canvas,
-    const ScrollbarOptions& options,
-    const ScrollbarLayout& layout);
+void paint_scrollbars(Canvas& canvas, const ScrollbarOptions& options, const ScrollbarLayout& layout);
 
-void paint_scrollbars(
-    Canvas& canvas,
-    const ScrollbarOptions& options,
-    int scroll_x,
-    int scroll_y,
-    int content_width,
-    int content_height);
+void paint_scrollbars(Canvas& canvas, const ScrollbarOptions& options, int scroll_x, int scroll_y, int content_width,
+                      int content_height);
 
 // Legacy aliases
 using ScrollbarStylePalette = ScrollbarPalette;
@@ -63,9 +52,7 @@ using ScrollbarStyles::bold;
 using ScrollbarStyles::classic;
 using ScrollbarStyles::from_kind;
 using ScrollbarStyles::minimal;
-inline ScrollbarStyle from_preset(ScrollbarStyleKind kind) {
-    return ScrollbarStyles::from_kind(kind);
-}
+inline ScrollbarStyle from_preset(ScrollbarStyleKind kind) { return ScrollbarStyles::from_kind(kind); }
 using ScrollbarStyles::themed;
 using ScrollbarStyles::thin;
 } // namespace ScrollbarSkins

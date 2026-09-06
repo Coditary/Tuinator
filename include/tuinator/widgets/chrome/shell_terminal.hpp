@@ -19,7 +19,7 @@ struct ShellTerminalStyle {
 
 /// Interactive shell backed by a real PTY (your $SHELL, prompt, aliases, …).
 class ShellTerminal : public Widget {
-public:
+  public:
     explicit ShellTerminal(ShellTerminalStyle style = {});
 
     bool start(const std::string& shell_command = {});
@@ -40,7 +40,7 @@ public:
     bool is_shell_terminal() const override { return true; }
     bool is_focusable() const override { return true; }
 
-private:
+  private:
     void on_pty_output(std::string_view bytes);
     void on_pty_exit();
 

@@ -1,10 +1,10 @@
-#include "render_helper.hpp"
-#include "test_harness.hpp"
-
 #include <tuinator/core/event.hpp>
 #include <tuinator/widgets/controls/text_area.hpp>
 
 #include <string>
+
+#include "render_helper.hpp"
+#include "test_harness.hpp"
 
 namespace {
 

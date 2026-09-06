@@ -27,10 +27,7 @@ Style title_style() {
 } // namespace
 
 Window::Window(std::string title, Rect bounds, std::unique_ptr<Widget> content, WindowOptions options)
-    : title_(std::move(title)),
-      options_(options),
-      content_(std::move(content)),
-      frame_bounds_(bounds) {}
+    : title_(std::move(title)), options_(options), content_(std::move(content)), frame_bounds_(bounds) {}
 
 void Window::set_bounds(Rect bounds) {
     frame_bounds_ = {
@@ -43,9 +40,7 @@ void Window::set_bounds(Rect bounds) {
     mark_dirty();
 }
 
-void Window::set_on_close(std::function<void()> callback) {
-    on_close_ = std::move(callback);
-}
+void Window::set_on_close(std::function<void()> callback) { on_close_ = std::move(callback); }
 
 Size Window::preferred_size() const {
     if (!content_) {
@@ -68,9 +63,7 @@ Rect Window::content_area_in_window() const {
     };
 }
 
-Rect Window::content_bounds_local() const {
-    return {{0, 0}, content_area_in_window().size()};
-}
+Rect Window::content_bounds_local() const { return {{0, 0}, content_area_in_window().size()}; }
 
 void Window::layout(Rect bounds) {
     frame_bounds_ = {
@@ -149,9 +142,7 @@ bool Window::handle_event(const Event& event) {
     return content_->handle_event(event);
 }
 
-bool Window::captures_pointer() const {
-    return content_ && content_->captures_pointer();
-}
+bool Window::captures_pointer() const { return content_ && content_->captures_pointer(); }
 
 Widget* Window::hit_test_focusable(Point point) {
     if (!frame_bounds_.contains(point)) {
@@ -168,14 +159,10 @@ Widget* Window::hit_test_focusable(Point point) {
     return content_ ? content_->hit_test_focusable(content_point) : nullptr;
 }
 
-bool Window::contains_point(Point point) const {
-    return frame_bounds_.contains(point);
-}
+bool Window::contains_point(Point point) const { return frame_bounds_.contains(point); }
 
 bool Window::is_title_bar(Point local_point) const {
-    return local_point.y == 0
-        && local_point.x >= 0
-        && local_point.x < frame_bounds_.width;
+    return local_point.y == 0 && local_point.x >= 0 && local_point.x < frame_bounds_.width;
 }
 
 bool Window::is_resize_handle(Point local_point) const {
@@ -183,8 +170,7 @@ bool Window::is_resize_handle(Point local_point) const {
         return false;
     }
 
-    return local_point.x >= frame_bounds_.width - 3
-        && local_point.y >= frame_bounds_.height - 2;
+    return local_point.x >= frame_bounds_.width - 3 && local_point.y >= frame_bounds_.height - 2;
 }
 
 } // namespace tuinator

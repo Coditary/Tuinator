@@ -145,6 +145,26 @@ target_link_libraries(myapp PRIVATE tuinator::tuinator)
 
 When Tuinator is pulled in as a dependency (`add_subdirectory` / `FetchContent`), examples and tests default to **OFF**.
 
+## Code quality
+
+Local checks:
+
+```bash
+make format        # apply clang-format
+make format-check  # verify formatting
+make lint          # clang-tidy + cppcheck
+make quality       # all checks
+```
+
+CI runs **clang-format**, **clang-tidy**, **cppcheck**, and **CodeQL** security analysis on every push/PR (`.github/workflows/quality.yml`).
+
+Optional pre-commit hooks:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
 ## Test everything
 
 ```bash
