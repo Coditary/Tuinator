@@ -69,6 +69,82 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
+## Use as a library
+
+Tuinator is a CMake package. You can consume it in three ways.
+
+### 1. Installed package (`find_package`)
+
+```bash
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+cmake --install build --prefix ~/.local
+```
+
+In your `CMakeLists.txt`:
+
+```cmake
+find_package(Tuinator CONFIG REQUIRED)
+
+add_executable(myapp main.cpp)
+target_link_libraries(myapp PRIVATE tuinator::tuinator)
+```
+
+```cpp
+#include <tuinator/tuinator.hpp>
+
+int main() {
+    tuinator::Application app;
+    app.set_root(std::make_unique<tuinator::Label>("Hello from Tuinator"));
+    return app.run();
+}
+```
+
+Point CMake at the install prefix:
+
+```bash
+cmake -B build -DCMAKE_PREFIX_PATH=$HOME/.local
+```
+
+### 2. FetchContent (GitHub / local path)
+
+```cmake
+include(FetchContent)
+
+FetchContent_Declare(
+    tuinator
+    GIT_REPOSITORY https://github.com/Coditary/Tuinator.git
+    GIT_TAG v0.1.0
+)
+set(TUINATOR_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(TUINATOR_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(tuinator)
+
+add_executable(myapp main.cpp)
+target_link_libraries(myapp PRIVATE tuinator::tuinator)
+```
+
+### 3. `add_subdirectory`
+
+```cmake
+set(TUINATOR_BUILD_EXAMPLES OFF)
+set(TUINATOR_BUILD_TESTS OFF)
+add_subdirectory(third_party/Tuinator)
+
+target_link_libraries(myapp PRIVATE tuinator::tuinator)
+```
+
+### CMake options
+
+| Option | Default (standalone) | Description |
+|--------|-------------------|-------------|
+| `TUINATOR_BUILD_EXAMPLES` | ON | Build demo programs |
+| `TUINATOR_BUILD_TESTS` | ON | Build unit tests |
+| `TUINATOR_BUILD_SHARED_LIBS` | OFF | Build shared instead of static library |
+| `TUINATOR_INSTALL` | ON | Generate `cmake --install` rules |
+
+When Tuinator is pulled in as a dependency (`add_subdirectory` / `FetchContent`), examples and tests default to **OFF**.
+
 ## Test everything
 
 ```bash

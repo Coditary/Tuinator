@@ -13,7 +13,7 @@ all: $(DEMOS:%=$(BUILD_DIR)/tuinator-%)
 build: all
 
 # Reconfigure only when the build dir or CMake config changed.
-$(CMAKE_CACHE): CMakeLists.txt
+$(CMAKE_CACHE): CMakeLists.txt cmake/*.cmake examples/CMakeLists.txt tests/CMakeLists.txt
 	@mkdir -p $(BUILD_DIR)
 	$(CMAKE) -B $(BUILD_DIR) $(CMAKE_FLAGS)
 

@@ -5,60 +5,106 @@ on:
     branches: [main, master]
   pull_request:
 
+env:
+  CMAKE_BUILD_TYPE: Release
+
 jobs:
-  unix:
+  library:
+    name: Library (${{ matrix.label }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            label: Linux
+            configure-args: -DTUINATOR_BUILD_EXAMPLES=OFF -DTUINATOR_BUILD_TESTS=ON
+            build-config: ""
+            ctest-config: ""
+          - os: macos-latest
+            label: macOS
+            configure-args: -DTUINATOR_BUILD_EXAMPLES=OFF -DTUINATOR_BUILD_TESTS=ON
+            build-config: ""
+            ctest-config: ""
+          - os: windows-latest
+            label: Windows
+            configure-args: >-
+              -DTUINATOR_BUILD_EXAMPLES=OFF
+              -DTUINATOR_BUILD_TESTS=ON
+              -DTUINATOR_PDCURSES_ROOT=${{ github.workspace }}/vcpkg/installed/x64-windows
+            build-config: --config Release
+            ctest-config: -C Release
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Install dependencies (Ubuntu)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libncursesw-dev
+        run: sudo apt-get update && sudo apt-get install -y libncursesw-dev zlib1g-dev
 
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
         run: brew install ncurses
 
-      - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build
-        run: cmake --build build
-
-      - name: Unit tests
-        run: ctest --test-dir build --output-on-failure
-
-      - name: Smoke tests
-        run: ./scripts/test-all.sh
-
-  windows:
-    runs-on: windows-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install PDCurses (vcpkg)
+      - name: Install PDCurses (Windows)
+        if: runner.os == 'Windows'
         shell: pwsh
         run: |
           git clone https://github.com/microsoft/vcpkg $env:GITHUB_WORKSPACE/vcpkg
           & $env:GITHUB_WORKSPACE/vcpkg/bootstrap-vcpkg.bat
           & $env:GITHUB_WORKSPACE/vcpkg/vcpkg install pdcurses:x64-windows
 
-      - name: Configure
-        shell: pwsh
+      - name: Configure library
+        shell: bash
         run: |
-          cmake -B build `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DTUINATOR_PDCURSES_ROOT="$env:GITHUB_WORKSPACE/vcpkg/installed/x64-windows"
+          cmake -B build -DCMAKE_BUILD_TYPE=Release ${{ matrix.configure-args }}
 
-      - name: Build
-        run: cmake --build build --config Release
+      - name: Build library
+        shell: bash
+        run: cmake --build build ${{ matrix.build-config }} --parallel
 
       - name: Unit tests
-        shell: pwsh
-        run: ctest --test-dir build -C Release --output-on-failure
+        shell: bash
+        run: ctest --test-dir build ${{ matrix.ctest-config }} --output-on-failure
+
+      - name: Install package
+        shell: bash
+        run: cmake --install build --prefix "${{ github.workspace }}/install" ${{ matrix.build-config }}
+
+      - name: find_package smoke test
+        shell: bash
+        run: |
+          cmake -S tests/integration/find_package -B build-find-package \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install"
+          cmake --build build-find-package ${{ matrix.build-config }} --parallel
+
+      - name: FetchContent smoke test
+        shell: bash
+        run: |
+          cmake -S tests/integration/fetchcontent -B build-fetchcontent \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-fetchcontent ${{ matrix.build-config }} --parallel
+
+  demos:
+    name: Examples (Linux)
+    runs-on: ubuntu-latest
+    needs: library
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y libncursesw-dev zlib1g-dev
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Unit tests
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Demo smoke tests
+        run: ./scripts/test-all.sh
