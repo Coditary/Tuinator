@@ -3,7 +3,9 @@
 #include <tuinator/core/action_registry.hpp>
 #include <tuinator/version.hpp>
 #include <tuinator/backend/memory_backend.hpp>
+#include <tuinator/backend/inline_backend.hpp>
 #include <tuinator/core/application.hpp>
+#include <tuinator/core/inline_view.hpp>
 #include <tuinator/core/event.hpp>
 #include <tuinator/core/geometry.hpp>
 #include <tuinator/layout/box.hpp>
@@ -101,3 +103,5 @@
 #include <tuinator/window/window.hpp>
 #include <tuinator/window/window_host.hpp>
 #include <tuinator/window/window_manager.hpp>
+
+#include <tuinator/scene/scene.hpp>

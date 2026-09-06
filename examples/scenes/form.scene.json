@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "bindings": [
+    {
+      "from": "username",
+      "to": "preview",
+      "event": "change",
+      "template": "Signed in as: {value}",
+      "fallback": "guest"
+    }
+  ],
+  "root": {
+    "type": "VBox",
+    "gap": 1,
+    "padding": 1,
+    "children": [
+      {
+        "type": "Label",
+        "text": "Login",
+        "style": "heading"
+      },
+      {
+        "type": "Label",
+        "text": "Username",
+        "style": "label"
+      },
+      {
+        "type": "TextInput",
+        "id": "username",
+        "minWidth": 24,
+        "placeholder": "guest"
+      },
+      {
+        "type": "Label",
+        "text": "Password",
+        "style": "label"
+      },
+      {
+        "type": "TextInput",
+        "minWidth": 24,
+        "placeholder": "secret"
+      },
+      {
+        "type": "Separator",
+        "style": "border"
+      },
+      {
+        "type": "Label",
+        "id": "preview",
+        "text": "Signed in as: guest",
+        "style": "muted"
+      },
+      {
+        "type": "HBox",
+        "gap": 2,
+        "children": [
+          {
+            "type": "Button",
+            "label": "OK",
+            "style": "success",
+            "onClick": "quit"
+          },
+          {
+            "type": "Button",
+            "label": "Cancel",
+            "style": "danger",
+            "onClick": "quit"
+          }
+        ]
+      },
+      {
+        "type": "Label",
+        "text": "Tab between fields | type to edit | q to quit",
+        "style": "muted"
+      }
+    ]
+  }
+}

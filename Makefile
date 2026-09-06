@@ -3,10 +3,10 @@ CMAKE := cmake
 CMAKE_FLAGS := -DCMAKE_BUILD_TYPE=Release
 CMAKE_CACHE := $(BUILD_DIR)/CMakeCache.txt
 
-DEMOS := hello form colors layout counter buttons windows mouse-test scroll theme dashboard data controls menu image textarea throbber bigtext checkbox piechart charts diffview weather glyphs terminal-frame
+DEMOS := hello form colors layout counter buttons windows mouse-test scroll theme dashboard data controls menu image textarea throbber bigtext checkbox piechart charts diffview weather glyphs terminal-frame scene scene-runtime
 RUNNABLE := $(DEMOS) profile
 
-.PHONY: all build configure clean rebuild help demos test test-all unit-test profile profile-quick $(RUNNABLE)
+.PHONY: all build configure clean rebuild help demos test test-all unit-test profile profile-quick scene-codegen scene-runtime-codegen scene-validate $(RUNNABLE)
 
 all: $(DEMOS:%=$(BUILD_DIR)/tuinator-%)
 
@@ -18,6 +18,15 @@ $(CMAKE_CACHE): CMakeLists.txt
 	$(CMAKE) -B $(BUILD_DIR) $(CMAKE_FLAGS)
 
 # Build only the requested target (and its dependencies).
+$(BUILD_DIR)/tuinator-scene: examples/scenes/form.scene.json examples/scene_handlers.hpp scripts/generate_scene_cpp.py $(CMAKE_CACHE)
+	@python3 scripts/generate_scene_cpp.py examples/scenes/form.scene.json --handlers examples/scene_handlers.hpp
+	@python3 scripts/generate_scene_cpp.py examples/scenes/hello.scene.json --handlers examples/scene_handlers.hpp
+	@$(CMAKE) --build $(BUILD_DIR) --target tuinator-scene
+
+$(BUILD_DIR)/tuinator-scene-runtime: scripts/generate_scene_runtime_cpp.py scripts/scene_options.py $(CMAKE_CACHE)
+	@python3 scripts/generate_scene_runtime_cpp.py
+	@$(CMAKE) --build $(BUILD_DIR) --target tuinator-scene-runtime
+
 $(BUILD_DIR)/tuinator-%: $(CMAKE_CACHE)
 	@$(CMAKE) --build $(BUILD_DIR) --target tuinator-$*
 
@@ -82,7 +91,13 @@ help:
 	@echo "  make piechart   Interactive pie charts (dots, braille, …)"
 	@echo "  make charts     Bar/line graph gallery (many styles)"
 	@echo "  make theme      Theme presets"
-	@echo "  make mouse-test Test mouse clicks"
+	@echo "  make scene          Login form built from generated C++"
+	@echo "  make scene-runtime  Load form.scene.json at runtime"
+	@echo ""
+	@echo "Scene codegen:"
+	@echo "  make scene-codegen  Regenerate C++ from examples/scenes/*.scene.json"
+	@echo "  make scene-runtime-codegen  Regenerate runtime widget factory"
+	@echo "  make scene-validate Validate example scene JSON files"
 	@echo ""
 	@echo "Profiling:"
 	@echo "  make profile       Startup latency profile"
@@ -93,3 +108,13 @@ help:
 demos:
 	@echo "Available demos:"
 	@for demo in $(DEMOS); do echo "  make $$demo"; done
+
+scene-codegen:
+	@python3 scripts/generate_scene_cpp.py examples/scenes/hello.scene.json --handlers examples/scene_handlers.hpp
+	@python3 scripts/generate_scene_cpp.py examples/scenes/form.scene.json --handlers examples/scene_handlers.hpp
+
+scene-runtime-codegen:
+	@python3 scripts/generate_scene_runtime_cpp.py
+
+scene-validate:
+	@python3 scripts/validate_scene_json.py --basic-only examples/scenes/*.scene.json

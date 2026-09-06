@@ -1,5 +1,6 @@
 #include <tuinator/core/application.hpp>
 
+#include <tuinator/backend/inline_backend.hpp>
 #include <tuinator/debug/startup_profiler.hpp>
 #include <tuinator/render/graphics_protocol.hpp>
 #include <tuinator/render/paint_context.hpp>
@@ -469,6 +470,13 @@ void Application::present() {
     render();
 }
 
+void Application::shutdown_terminal() {
+    if (backend_ && terminal_ready_) {
+        backend_->shutdown();
+        terminal_ready_ = false;
+    }
+}
+
 void Application::focus_widget(Widget* widget) {
     if (!widget) {
         return;
@@ -649,7 +657,8 @@ void Application::render() {
     frame.dirty_region = terminal_bounds;
     Rect paint_clip = terminal_bounds;
 
-    const bool use_partial = !dirty_region_.is_full() && !shell_active;
+    const bool inline_backend = dynamic_cast<const InlineTerminalBackend*>(backend_.get()) != nullptr;
+    const bool use_partial = !dirty_region_.is_full() && !shell_active && !inline_backend;
 
     if (use_partial) {
         paint_clip = intersect(dirty_region_.bounds(), terminal_bounds);

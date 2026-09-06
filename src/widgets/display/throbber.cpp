@@ -278,14 +278,14 @@ void Throbber::paint(PaintContext& ctx) const {
         return;
     }
 
-    const int slot = std::min(bounds_.width, std::max(1, width_));
+    const int slot = std::clamp(std::min(bounds_.width, std::max(1, width_)), 1, 64);
     canvas.fill_rect({0, 0, bounds_.width, 1}, ' ', style_);
 
     const std::string& glyph = frame();
     const std::size_t bytes = text_byte_length_for_width(glyph, slot);
     std::string padded(glyph.substr(0, bytes));
     int used = text_display_width(padded);
-    while (used < slot) {
+    for (int guard = 0; used < slot && guard < slot + 8; ++guard) {
         padded.push_back(' ');
         ++used;
     }

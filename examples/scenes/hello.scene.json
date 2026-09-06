@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "root": {
+    "type": "VBox",
+    "gap": 1,
+    "padding": 2,
+    "children": [
+      {
+        "type": "Label",
+        "text": "Hello Tuinator",
+        "style": {
+          "foreground": "Cyan",
+          "bold": true
+        }
+      },
+      {
+        "type": "Label",
+        "text": "Built from a JSON scene file",
+        "style": "muted"
+      },
+      {
+        "type": "Button",
+        "label": "Quit",
+        "style": "success",
+        "onClick": "quit"
+      }
+    ]
+  }
+}

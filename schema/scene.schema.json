@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tuinator.dev/schema/scene.schema.json",
+  "title": "Tuinator Scene",
+  "description": "Declarative JSON scene for Tuinator C++ code generation.",
+  "type": "object",
+  "required": ["version", "root"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "preset": {
+          "type": "string",
+          "enum": ["dark", "light"]
+        },
+        "glyphs": {
+          "type": "string",
+          "enum": ["Auto", "Ascii", "Unicode", "UnicodeRounded"]
+        },
+        "borderStyle": {
+          "type": "string",
+          "enum": ["Ascii", "Light", "Heavy", "Double", "Rounded"]
+        }
+      }
+    },
+    "actions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["handler"],
+        "properties": {
+          "handler": { "type": "string" },
+          "label": { "type": "string" },
+          "shortcut": { "type": "string" }
+        }
+      }
+    },
+    "timers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/timer" }
+    },
+    "bindings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/binding" }
+    },
+    "root": { "$ref": "#/$defs/widget" }
+  },
+  "$defs": {
+    "style": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Theme preset or named color"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "foreground": { "$ref": "#/$defs/color" },
+            "background": { "$ref": "#/$defs/color" },
+            "bold": { "type": "boolean" },
+            "dim": { "type": "boolean" },
+            "reverse": { "type": "boolean" }
+          }
+        }
+      ]
+    },
+    "color": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "required": ["r", "g", "b"],
+          "properties": {
+            "r": { "type": "integer", "minimum": 0, "maximum": 255 },
+            "g": { "type": "integer", "minimum": 0, "maximum": 255 },
+            "b": { "type": "integer", "minimum": 0, "maximum": 255 }
+          }
+        }
+      ]
+    },
+    "rgb": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^#?[0-9a-fA-F]{6}$"
+        },
+        {
+          "type": "object",
+          "required": ["r", "g", "b"],
+          "properties": {
+            "r": { "type": "integer", "minimum": 0, "maximum": 255 },
+            "g": { "type": "integer", "minimum": 0, "maximum": 255 },
+            "b": { "type": "integer", "minimum": 0, "maximum": 255 }
+          }
+        }
+      ]
+    },
+    "gradientStop": {
+      "type": "object",
+      "required": ["position", "color"],
+      "additionalProperties": false,
+      "properties": {
+        "position": { "type": "number", "minimum": 0, "maximum": 1 },
+        "color": { "$ref": "#/$defs/rgb" }
+      }
+    },
+    "borderGlyphs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "topLeft": { "type": "string" },
+        "topRight": { "type": "string" },
+        "bottomLeft": { "type": "string" },
+        "bottomRight": { "type": "string" },
+        "horizontal": { "type": "string" },
+        "vertical": { "type": "string" },
+        "resizeHandle": { "type": "string" }
+      }
+    },
+    "scrollbarOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "preset": {
+          "type": "string",
+          "enum": ["Classic", "Ascii", "Minimal", "Bold", "Thin"]
+        },
+        "enabled": { "type": "boolean" },
+        "vertical": { "type": "boolean" },
+        "horizontal": { "type": "boolean" },
+        "config": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "vertical": { "type": "boolean" },
+            "horizontal": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "binding": {
+      "type": "object",
+      "required": ["from", "to"],
+      "additionalProperties": false,
+      "properties": {
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "fromProperty": { "type": "string" },
+        "sourceProperty": { "type": "string" },
+        "toProperty": { "type": "string" },
+        "targetProperty": { "type": "string" },
+        "event": { "type": "string" },
+        "template": { "type": "string" },
+        "fallback": { "type": "string" },
+        "converter": {
+          "type": "string",
+          "enum": ["yesNo", "onOff", "percent", "percent01", "ratio"]
+        },
+        "initial": { "type": "boolean" }
+      }
+    },
+    "timer": {
+      "type": "object",
+      "required": ["handler"],
+      "additionalProperties": false,
+      "properties": {
+        "handler": { "type": "string" },
+        "intervalMs": { "type": "integer", "minimum": 1 },
+        "interval_ms": { "type": "integer", "minimum": 1 },
+        "delayMs": { "type": "integer", "minimum": 0 },
+        "delay_ms": { "type": "integer", "minimum": 0 },
+        "repeat": { "type": "boolean" }
+      }
+    },
+    "widget": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string" },
+        "id": { "type": "string" },
+        "options": { "type": "object" },
+        "properties": { "type": "object" },
+        "style": { "$ref": "#/$defs/style" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/widget" }
+        },
+        "content": { "$ref": "#/$defs/widget" },
+        "first": { "$ref": "#/$defs/widget" },
+        "second": { "$ref": "#/$defs/widget" },
+        "scrollbars": { "$ref": "#/$defs/scrollbarOptions" },
+        "borderGlyphs": { "$ref": "#/$defs/borderGlyphs" },
+        "look": { "type": "string" },
+        "lookName": { "type": "string" },
+        "styleName": { "type": "string" },
+        "gradientStops": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/gradientStop" }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "VBox" } } },
+          "then": { "required": ["children"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "HBox" } } },
+          "then": { "required": ["children"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "Grid" } } },
+          "then": { "required": ["children"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "Panel" } } },
+          "then": { "required": ["content"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "ScrollView" } } },
+          "then": { "required": ["content"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "SplitPane" } } },
+          "then": { "required": ["first", "second"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "TerminalFrame" } } },
+          "then": { "required": ["content"] }
+        }
+      ]
+    }
+  }
+}

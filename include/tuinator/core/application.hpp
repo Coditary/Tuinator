@@ -47,6 +47,9 @@ public:
     // Draw one frame immediately (useful for profiling and tests).
     void present();
 
+    /// Release the terminal backend (for inline mode teardown).
+    void shutdown_terminal();
+
 private:
     struct TimerEntry {
         TimerId id = 0;

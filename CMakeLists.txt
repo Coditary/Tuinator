@@ -12,6 +12,7 @@ enable_testing()
 
 set(TUINATOR_BACKEND_SOURCES
     src/backend/curses_backend.cpp
+    src/backend/inline_backend.cpp
     src/backend/memory_backend.cpp
     src/backend/terminal_backend.cpp
 )
@@ -68,6 +69,13 @@ endif()
 
 find_package(ZLIB REQUIRED)
 
+include(FetchContent)
+FetchContent_Declare(
+    nlohmann_json
+    URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+)
+FetchContent_MakeAvailable(nlohmann_json)
+
 # --- Library ------------------------------------------------------------
 
 add_subdirectory(third_party/libvterm EXCLUDE_FROM_ALL)
@@ -76,6 +84,7 @@ add_library(tuinator
     ${TUINATOR_BACKEND_SOURCES}
     src/core/action_registry.cpp
     src/core/application.cpp
+    src/core/inline_view.cpp
     src/debug/startup_profiler.cpp
     src/layout/box.cpp
     src/layout/grid.cpp
@@ -160,6 +169,13 @@ add_library(tuinator
     src/window/window.cpp
     src/window/window_manager.cpp
     src/window/window_host.cpp
+    src/scene/handler_registry.cpp
+    src/scene/scene_context.cpp
+    src/scene/scene_builder.cpp
+    src/scene/detail/json_node.cpp
+    src/scene/detail/style_resolve.cpp
+    src/scene/detail/binding_engine.cpp
+    src/scene/runtime/widget_builder.generated.cpp
 )
 
 add_library(tuinator::tuinator ALIAS tuinator)
@@ -176,7 +192,7 @@ if(TUINATOR_CURSES_TARGET)
 else()
     target_link_libraries(tuinator PUBLIC ${TUINATOR_CURSES_LIBS})
 endif()
-target_link_libraries(tuinator PRIVATE ZLIB::ZLIB tuinator_libvterm)
+target_link_libraries(tuinator PRIVATE ZLIB::ZLIB tuinator_libvterm nlohmann_json::nlohmann_json)
 
 if(NOT WIN32)
     find_library(TUINATOR_UTIL_LIBRARY util)
@@ -204,6 +220,7 @@ if(TUINATOR_BUILD_TESTS)
         tests/core/test_main.cpp
         tests/core/test_text.cpp
         tests/core/test_memory_backend.cpp
+        tests/core/test_inline_backend.cpp
         tests/core/test_dirty_region.cpp
         # Render
         tests/render/test_glyphs.cpp
@@ -253,9 +270,20 @@ endif()
 option(TUINATOR_BUILD_EXAMPLES "Build example programs" ON)
 
 if(TUINATOR_BUILD_EXAMPLES)
-    set(TUINATOR_DEMOS hello form colors layout counter buttons windows mouse-test scroll theme startup-profile dashboard data controls menu image textarea throbber bigtext checkbox piechart charts diffview weather glyphs terminal-frame)
+    set(TUINATOR_DEMOS hello form colors layout counter buttons windows mouse-test scroll theme startup-profile dashboard data controls menu image textarea throbber bigtext checkbox piechart charts diffview weather glyphs terminal-frame scene scene-runtime inline-tasks)
     foreach(demo IN LISTS TUINATOR_DEMOS)
-        add_executable(tuinator-${demo} examples/${demo}.cpp)
+        if(demo STREQUAL "scene")
+            add_executable(tuinator-scene
+                examples/scene.cpp
+                examples/scenes/form_scene.generated.cpp
+            )
+            target_include_directories(tuinator-scene PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/examples)
+        elseif(demo STREQUAL "scene-runtime")
+            add_executable(tuinator-scene-runtime examples/scene_runtime.cpp)
+            target_include_directories(tuinator-scene-runtime PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/examples)
+        else()
+            add_executable(tuinator-${demo} examples/${demo}.cpp)
+        endif()
         target_link_libraries(tuinator-${demo} PRIVATE tuinator::tuinator)
     endforeach()
     target_compile_definitions(tuinator-image PRIVATE

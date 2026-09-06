@@ -143,7 +143,7 @@ void Canvas::draw_vline(int x, int y, int length, Style style) {
 }
 
 void Canvas::fill_rect(Rect rect, char ch, Style style) {
-    if (rect.width <= 0 || rect.height <= 0) {
+    if (rect.width <= 0 || rect.height <= 0 || rect.width > 4096 || rect.height > 4096) {
         return;
     }
 

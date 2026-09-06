@@ -2,8 +2,23 @@ Tuinator startup profile
 label                          total_ms  delta_ms
 ---------------------------------------------------
 main.start                        0.000     0.000
-main.after_application_ctor       0.008     0.008
-application.before_set_root       0.010     0.002
+main.after_application_ctor       0.009     0.009
+application.before_set_root       0.011     0.002
 application.after_set_root        0.011     0.001
-main.after_set_root               0.011     0.000
-main.after_first_present          0.012     0.002
+main.after_set_root               0.012     0.000
+application.before_backend_init   0.023     0.011
+curses.before_initscr             0.023     0.000
+curses.after_initscr              0.321     0.298
+curses.after_initial_refresh      0.371     0.050
+curses.before_colors              0.372     0.001
+curses.after_colors               0.391     0.019
+curses.init_done                  0.401     0.010
+application.after_backend_init    0.401     0.000
+run.start                         0.402     0.000
+render.begin_frame                0.412     0.011
+render.before_refresh             0.429     0.017
+render.after_refresh              0.533     0.103
+run.after_first_render            0.534     0.001
+run.before_first_poll             0.534     0.000
+run.after_first_poll           1577.070  1576.536
+run.exit                       1950.200   373.130
