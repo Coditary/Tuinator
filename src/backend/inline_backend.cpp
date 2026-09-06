@@ -14,6 +14,7 @@
 
 #if TUINATOR_PLATFORM_POSIX
 #include <sys/ioctl.h>
+#include <termios.h>
 #include <unistd.h>
 #endif
 
@@ -67,6 +68,32 @@ Size query_terminal_size() {
 bool uses_relative_draw(const InlineBackendOptions& options) {
     return options.anchor_row <= 0 && !options.pin_to_bottom;
 }
+
+#if TUINATOR_PLATFORM_POSIX
+
+std::optional<KeyPress> decode_key_byte(unsigned char byte) {
+    if (byte == '\r' || byte == '\n') {
+        return KeyPress{Key::Enter, '\0'};
+    }
+    if (byte == 127 || byte == 8) {
+        return KeyPress{Key::Backspace, '\0'};
+    }
+    if (byte == 27) {
+        return KeyPress{Key::Escape, '\0'};
+    }
+    if (byte >= 1 && byte <= 26) {
+        KeyPress press{};
+        press.ctrl = true;
+        press.character = static_cast<char>('a' + byte - 1);
+        return press;
+    }
+    if (byte >= 32 && byte <= 126) {
+        return KeyPress{Key::Unknown, static_cast<char>(byte)};
+    }
+    return std::nullopt;
+}
+
+#endif
 
 } // namespace
 
@@ -193,6 +220,7 @@ void InlineTerminalBackend::init() {
 
     std::fputs("\033[?25l", output_);
     std::fflush(output_);
+    acquire_stdin();
     initialized_ = true;
 }
 
@@ -208,6 +236,9 @@ void InlineTerminalBackend::shutdown() {
     if (relative_draw_) {
         fputc('\n', output_);
     }
+
+    drain_stdin();
+    release_stdin();
 
     std::fputs("\033[?25h", output_);
     std::fflush(output_);
@@ -230,6 +261,98 @@ Size InlineTerminalBackend::terminal_size() const {
     return {region_width_, region_height_};
 }
 
+void InlineTerminalBackend::acquire_stdin() {
+#if TUINATOR_PLATFORM_POSIX
+    if (stdin_captured_ || !isatty(STDIN_FILENO)) {
+        return;
+    }
+
+    if (tcgetattr(STDIN_FILENO, &stdin_original_) != 0) {
+        return;
+    }
+
+    termios raw = stdin_original_;
+    raw.c_lflag &= static_cast<tcflag_t>(~(ICANON | ECHO));
+    raw.c_iflag &= static_cast<tcflag_t>(~(IXON | ICRNL));
+    raw.c_cc[VMIN] = 0;
+    raw.c_cc[VTIME] = 0;
+    if (tcsetattr(STDIN_FILENO, TCSANOW, &raw) != 0) {
+        return;
+    }
+
+    stdin_captured_ = true;
+    drain_stdin();
+#endif
+}
+
+void InlineTerminalBackend::release_stdin() {
+#if TUINATOR_PLATFORM_POSIX
+    if (!stdin_captured_) {
+        return;
+    }
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &stdin_original_);
+    stdin_captured_ = false;
+#endif
+}
+
+void InlineTerminalBackend::drain_stdin() {
+#if TUINATOR_PLATFORM_POSIX
+    if (!isatty(STDIN_FILENO)) {
+        return;
+    }
+
+    char buffer[256];
+    while (read(STDIN_FILENO, buffer, sizeof(buffer)) > 0) {
+    }
+#endif
+}
+
+std::optional<Event> InlineTerminalBackend::read_stdin_event(bool allow_block) {
+#if TUINATOR_PLATFORM_POSIX
+    if (!stdin_captured_ || !isatty(STDIN_FILENO)) {
+        return std::nullopt;
+    }
+
+    unsigned char byte = 0;
+    const ssize_t bytes = read(STDIN_FILENO, &byte, 1);
+    if (bytes < 0) {
+        return std::nullopt;
+    }
+    if (bytes == 0) {
+        if (!allow_block || poll_timeout_ms_ <= 0) {
+            return std::nullopt;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(poll_timeout_ms_));
+        return std::nullopt;
+    }
+
+    if (!options_.keyboard_input) {
+        return std::nullopt;
+    }
+
+    if (const std::optional<KeyPress> key = decode_key_byte(byte)) {
+        return *key;
+    }
+#else
+    (void)allow_block;
+#endif
+    return std::nullopt;
+}
+
+std::optional<Event> InlineTerminalBackend::poll_event_nonblocking() {
+    if (!initialized_) {
+        return std::nullopt;
+    }
+
+    if (!options_.keyboard_input) {
+        drain_stdin();
+        return std::nullopt;
+    }
+
+    return read_stdin_event(false);
+}
+
 std::optional<Event> InlineTerminalBackend::poll_event() {
 #if TUINATOR_PLATFORM_POSIX
     const Size term = query_terminal_size();
@@ -250,8 +373,19 @@ std::optional<Event> InlineTerminalBackend::poll_event() {
     }
 #endif
 
+    if (!options_.keyboard_input) {
+        drain_stdin();
+    } else if (const std::optional<Event> key = read_stdin_event(false)) {
+        return key;
+    }
+
     if (poll_timeout_ms_ > 0) {
         std::this_thread::sleep_for(std::chrono::milliseconds(poll_timeout_ms_));
+        if (!options_.keyboard_input) {
+            drain_stdin();
+        } else if (const std::optional<Event> key_after_wait = read_stdin_event(false)) {
+            return key_after_wait;
+        }
     }
     return std::nullopt;
 }

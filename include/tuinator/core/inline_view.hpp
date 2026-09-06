@@ -41,7 +41,8 @@ public:
     /// Render a single frame into the inline region.
     void present();
 
-    /// Run the event loop (timers, idle callbacks). Does not capture keyboard input.
+    /// Run the event loop (timers, idle callbacks). Stdin is swallowed by default;
+    /// pass {.keyboard_input = true} in InlineBackendOptions to handle key events.
     int run();
 
     /// Tear down the inline region (optionally clears it).

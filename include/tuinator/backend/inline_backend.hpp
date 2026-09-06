@@ -7,6 +7,10 @@
 #include <string>
 #include <vector>
 
+#if TUINATOR_PLATFORM_POSIX
+#include <termios.h>
+#endif
+
 namespace tuinator {
 
 /// Options for rendering a Tuinator UI inline in the terminal scrollback
@@ -23,6 +27,9 @@ struct InlineBackendOptions {
     bool pin_to_bottom = false;
     bool clear_on_shutdown = true;
     bool true_color = true;
+    /// When false (default), stdin is drained so stray key presses do not reach the shell.
+    /// Set to true when the inline UI should receive keyboard events.
+    bool keyboard_input = false;
     FILE* output = nullptr;
 };
 
@@ -38,6 +45,7 @@ public:
 
     Size terminal_size() const override;
     std::optional<Event> poll_event() override;
+    std::optional<Event> poll_event_nonblocking() override;
 
     void begin_frame(BeginFrameOptions options = {}) override;
     void end_frame() override;
@@ -72,6 +80,10 @@ private:
     int last_nonempty_column(int y) const;
     void write_row_content(int y, std::string& out) const;
     void write_row_absolute(int abs_row, int y) const;
+    void acquire_stdin();
+    void release_stdin();
+    void drain_stdin();
+    std::optional<Event> read_stdin_event(bool allow_block);
     void append_style(std::string& out, const Style& style) const;
     bool style_equal(const Style& a, const Style& b) const;
     bool cell_equal(const Cell& a, const Cell& b) const;
@@ -90,6 +102,10 @@ private:
     bool anchor_locked_ = false;
     bool relative_draw_ = false;
     bool true_color_ = true;
+    bool stdin_captured_ = false;
+#if TUINATOR_PLATFORM_POSIX
+    termios stdin_original_{};
+#endif
     std::vector<std::vector<Cell>> cells_;
     std::vector<std::vector<Cell>> previous_cells_;
 };
