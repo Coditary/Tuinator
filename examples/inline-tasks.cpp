@@ -152,7 +152,6 @@ void tick_throbbers(DemoUi& ui, int dt_ms) {
 int main() {
     std::cout << "Tuinator inline demo — simulating ESLint-style task progress\n";
     std::cout << "Normal CLI output stays above the live TUI band.\n\n";
-    std::cout.flush();
 
     const std::vector<std::string> files = {
         "src/core/application.cpp",
@@ -170,7 +169,7 @@ int main() {
 
     tuinator::InlineView view({.height = 10, .clear_on_shutdown = false});
     view.set_root(build_ui(state, ui));
-    view.present();
+    view.start();
 
     std::size_t file_index = 0;
     int progress_ticks = 0;

@@ -7,6 +7,9 @@
 
 namespace tuinator {
 
+/// Flush regular CLI output (cout/cerr/stdout/stderr) before starting an inline band.
+void flush_cli_output();
+
 /// Convenience wrapper for inline CLI rendering below the shell prompt.
 ///
 /// Typical usage (ESLint-style live reporter):
@@ -15,11 +18,10 @@ namespace tuinator {
 ///
 /// InlineView view({.height = 12});
 /// view.set_root(build_widget_tree());
-/// view.present();
+/// view.start();  // flushes CLI output, then draws the first frame
 ///
 /// view.app().set_interval(100, [&]() {
 ///     update_state();
-///     view.present();
 /// });
 /// view.run();
 /// view.finish();
@@ -38,7 +40,10 @@ public:
     void set_root(std::unique_ptr<Widget> root);
     void set_theme(Theme theme) { app_.set_theme(std::move(theme)); }
 
-    /// Render a single frame into the inline region.
+    /// Flush CLI output and render the first inline frame.
+    void start();
+
+    /// Render a frame into the inline region (flushes CLI output on the first call).
     void present();
 
     /// Run the event loop (timers, idle callbacks). Stdin is swallowed by default;
@@ -52,8 +57,11 @@ public:
     int anchor_row() const;
 
 private:
+    void begin_inline_output();
+
     Application app_;
     bool finished_ = false;
+    bool output_committed_ = false;
 };
 
 } // namespace tuinator

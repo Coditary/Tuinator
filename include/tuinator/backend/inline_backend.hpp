@@ -103,8 +103,10 @@ private:
     bool relative_draw_ = false;
     bool true_color_ = true;
     bool stdin_captured_ = false;
+    bool stdin_nonblocking_set_ = false;
 #if TUINATOR_PLATFORM_POSIX
     termios stdin_original_{};
+    int stdin_original_flags_ = 0;
 #endif
     std::vector<std::vector<Cell>> cells_;
     std::vector<std::vector<Cell>> previous_cells_;

@@ -402,6 +402,10 @@ int Application::run_headless() {
 }
 
 bool Application::should_run_headless() const {
+    if (dynamic_cast<const InlineTerminalBackend*>(backend_.get()) != nullptr) {
+        return false;
+    }
+
     if (!isatty(STDIN_FILENO)) {
         return true;
     }

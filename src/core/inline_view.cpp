@@ -1,6 +1,16 @@
 #include <tuinator/core/inline_view.hpp>
 
+#include <cstdio>
+#include <iostream>
+
 namespace tuinator {
+
+void flush_cli_output() {
+    std::cout.flush();
+    std::cerr.flush();
+    std::fflush(stdout);
+    std::fflush(stderr);
+}
 
 namespace {
 
@@ -51,11 +61,27 @@ void InlineView::set_root(std::unique_ptr<Widget> root) {
     app_.set_root(std::make_unique<InlineRegionShell>(std::move(root)));
 }
 
+void InlineView::begin_inline_output() {
+    if (output_committed_) {
+        return;
+    }
+
+    flush_cli_output();
+    output_committed_ = true;
+}
+
+void InlineView::start() {
+    begin_inline_output();
+    app_.present();
+}
+
 void InlineView::present() {
+    begin_inline_output();
     app_.present();
 }
 
 int InlineView::run() {
+    begin_inline_output();
     return app_.run();
 }
 

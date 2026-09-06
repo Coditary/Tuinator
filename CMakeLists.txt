@@ -78,7 +78,7 @@ FetchContent_MakeAvailable(nlohmann_json)
 
 # --- Library ------------------------------------------------------------
 
-add_subdirectory(third_party/libvterm EXCLUDE_FROM_ALL)
+include(cmake/libvterm.cmake)
 
 add_library(tuinator
     ${TUINATOR_BACKEND_SOURCES}
@@ -221,6 +221,7 @@ if(TUINATOR_BUILD_TESTS)
         tests/core/test_text.cpp
         tests/core/test_memory_backend.cpp
         tests/core/test_inline_backend.cpp
+        tests/core/test_inline_view.cpp
         tests/core/test_dirty_region.cpp
         # Render
         tests/render/test_glyphs.cpp

@@ -5,9 +5,11 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cerrno>
 #include <cstdio>
 #include <cstring>
 #include <fcntl.h>
+#include <poll.h>
 #include <string>
 #include <thread>
 #include <vector>
@@ -263,21 +265,31 @@ Size InlineTerminalBackend::terminal_size() const {
 
 void InlineTerminalBackend::acquire_stdin() {
 #if TUINATOR_PLATFORM_POSIX
-    if (stdin_captured_ || !isatty(STDIN_FILENO)) {
+    if (stdin_captured_) {
         return;
     }
 
-    if (tcgetattr(STDIN_FILENO, &stdin_original_) != 0) {
-        return;
-    }
+    if (isatty(STDIN_FILENO)) {
+        if (tcgetattr(STDIN_FILENO, &stdin_original_) != 0) {
+            return;
+        }
 
-    termios raw = stdin_original_;
-    raw.c_lflag &= static_cast<tcflag_t>(~(ICANON | ECHO));
-    raw.c_iflag &= static_cast<tcflag_t>(~(IXON | ICRNL));
-    raw.c_cc[VMIN] = 0;
-    raw.c_cc[VTIME] = 0;
-    if (tcsetattr(STDIN_FILENO, TCSANOW, &raw) != 0) {
+        termios raw = stdin_original_;
+        raw.c_lflag &= static_cast<tcflag_t>(~(ICANON | ECHO));
+        raw.c_iflag &= static_cast<tcflag_t>(~(IXON | ICRNL));
+        raw.c_cc[VMIN] = 0;
+        raw.c_cc[VTIME] = 0;
+        if (tcsetattr(STDIN_FILENO, TCSANOW, &raw) != 0) {
+            return;
+        }
+    } else if (!options_.keyboard_input) {
         return;
+    } else {
+        stdin_original_flags_ = fcntl(STDIN_FILENO, F_GETFL, 0);
+        if (stdin_original_flags_ >= 0) {
+            fcntl(STDIN_FILENO, F_SETFL, stdin_original_flags_ | O_NONBLOCK);
+            stdin_nonblocking_set_ = true;
+        }
     }
 
     stdin_captured_ = true;
@@ -291,32 +303,46 @@ void InlineTerminalBackend::release_stdin() {
         return;
     }
 
-    tcsetattr(STDIN_FILENO, TCSANOW, &stdin_original_);
+    if (isatty(STDIN_FILENO)) {
+        tcsetattr(STDIN_FILENO, TCSANOW, &stdin_original_);
+    }
+    if (stdin_nonblocking_set_) {
+        fcntl(STDIN_FILENO, F_SETFL, stdin_original_flags_);
+        stdin_nonblocking_set_ = false;
+    }
     stdin_captured_ = false;
 #endif
 }
 
 void InlineTerminalBackend::drain_stdin() {
 #if TUINATOR_PLATFORM_POSIX
-    if (!isatty(STDIN_FILENO)) {
-        return;
-    }
-
     char buffer[256];
-    while (read(STDIN_FILENO, buffer, sizeof(buffer)) > 0) {
+    for (;;) {
+        pollfd fds{};
+        fds.fd = STDIN_FILENO;
+        fds.events = POLLIN;
+        if (poll(&fds, 1, 0) <= 0 || !(fds.revents & POLLIN)) {
+            return;
+        }
+        if (read(STDIN_FILENO, buffer, sizeof(buffer)) <= 0) {
+            return;
+        }
     }
 #endif
 }
 
 std::optional<Event> InlineTerminalBackend::read_stdin_event(bool allow_block) {
 #if TUINATOR_PLATFORM_POSIX
-    if (!stdin_captured_ || !isatty(STDIN_FILENO)) {
+    if (!stdin_captured_) {
         return std::nullopt;
     }
 
     unsigned char byte = 0;
     const ssize_t bytes = read(STDIN_FILENO, &byte, 1);
     if (bytes < 0) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            return std::nullopt;
+        }
         return std::nullopt;
     }
     if (bytes == 0) {

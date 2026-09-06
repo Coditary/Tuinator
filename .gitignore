@@ -1,7 +1,12 @@
 build/
+build-cov/
+build-fetch/
 cmake-build-*/
 .cache/
 compile_commands.json
+third_party/
+**/_deps/
+**/CMakeFiles/
 *.o
 *.a
 *.so
