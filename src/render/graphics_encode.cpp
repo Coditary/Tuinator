@@ -133,8 +133,7 @@ std::string kitty_transmit(const TerminalImage& image) {
 
 std::string kitty_place(int cell_cols, int cell_rows) {
     std::ostringstream out;
-    out << "\033_Ga=p,i=1"
-        << ",c=" << cell_cols << ",r=" << cell_rows << ",C=1,q=2;\033\\";
+    out << "\033_Ga=p,i=1,c=" << cell_cols << ",r=" << cell_rows << ",C=1,q=2;\033\\";
     return out.str();
 }
 

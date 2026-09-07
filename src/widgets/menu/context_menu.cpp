@@ -120,7 +120,8 @@ void ContextMenu::paint(PaintContext& ctx) const {
     const std::vector<MenuPanelLayout> panels = open_panels();
     const std::vector<MenuItem>* items = &items_;
     for (std::size_t depth = 0; depth < panels.size(); ++depth) {
-        const int active = depth + 1 < panels.size() ? submenu_path_[depth] : active_item_;
+        const int active =
+            depth + 1 < panels.size() && depth < submenu_path_.size() ? submenu_path_[depth] : active_item_;
         paint_menu_panel(canvas, panels[depth], *items, active, look_);
         if (depth < submenu_path_.size()) {
             const int index = submenu_path_[depth];

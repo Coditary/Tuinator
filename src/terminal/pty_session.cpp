@@ -8,7 +8,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#if defined(__APPLE__)
+#include <util.h>
+#else
 #include <pty.h>
+#endif
 #include <string>
 #include <sys/ioctl.h>
 #include <sys/wait.h>

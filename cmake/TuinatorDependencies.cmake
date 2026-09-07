@@ -4,26 +4,46 @@ if(WIN32)
     set(TUINATOR_PDCURSES_ROOT "" CACHE PATH "Root directory of a PDCurses / PDCursesMod install")
 
     if(TUINATOR_PDCURSES_ROOT)
-        set(PDCURSES_INCLUDE_DIR "${TUINATOR_PDCURSES_ROOT}/include")
-        find_library(PDCURSES_LIBRARY
-            NAMES pdcurses pdcursesmod pdcurses.lib
-            PATHS "${TUINATOR_PDCURSES_ROOT}/lib" "${TUINATOR_PDCURSES_ROOT}"
-            NO_DEFAULT_PATH
-        )
+        list(APPEND CMAKE_PREFIX_PATH "${TUINATOR_PDCURSES_ROOT}")
+        set(_tuinator_pdcurses_config "${TUINATOR_PDCURSES_ROOT}/share/unofficial-pdcurses/unofficial-pdcurses-config.cmake")
+        if(EXISTS "${_tuinator_pdcurses_config}")
+            set(unofficial-pdcurses_DIR "${TUINATOR_PDCURSES_ROOT}/share/unofficial-pdcurses")
+        endif()
+    endif()
+
+    find_package(unofficial-pdcurses CONFIG QUIET)
+
+    if(TARGET unofficial::pdcurses::pdcurses)
+        set(TUINATOR_CURSES_TARGET unofficial::pdcurses::pdcurses)
+        set(TUINATOR_CURSES_INCLUDE "")
+        set(TUINATOR_CURSES_LIBS "")
     else()
-        find_path(PDCURSES_INCLUDE_DIR NAMES curses.h)
-        find_library(PDCURSES_LIBRARY NAMES pdcurses pdcursesmod)
-    endif()
+        if(TUINATOR_PDCURSES_ROOT)
+            set(PDCURSES_INCLUDE_DIR "${TUINATOR_PDCURSES_ROOT}/include")
+            find_library(PDCURSES_LIBRARY
+                NAMES pdcurses pdcursesmod pdcurses.lib
+                PATHS
+                    "${TUINATOR_PDCURSES_ROOT}/lib"
+                    "${TUINATOR_PDCURSES_ROOT}/lib/manual-link"
+                    "${TUINATOR_PDCURSES_ROOT}/debug/lib"
+                    "${TUINATOR_PDCURSES_ROOT}"
+                NO_DEFAULT_PATH
+            )
+        else()
+            find_path(PDCURSES_INCLUDE_DIR NAMES curses.h)
+            find_library(PDCURSES_LIBRARY NAMES pdcurses pdcursesmod pdcurses.lib)
+        endif()
 
-    if(NOT PDCURSES_INCLUDE_DIR OR NOT PDCURSES_LIBRARY)
-        message(FATAL_ERROR
-            "PDCurses not found. Install it (e.g. vcpkg install pdcurses) "
-            "or pass -DTUINATOR_PDCURSES_ROOT=/path/to/pdcurses")
-    endif()
+        if(NOT PDCURSES_INCLUDE_DIR OR NOT PDCURSES_LIBRARY)
+            message(FATAL_ERROR
+                "PDCurses not found. Install it (e.g. vcpkg install pdcurses) "
+                "or pass -DTUINATOR_PDCURSES_ROOT=/path/to/pdcurses")
+        endif()
 
-    set(TUINATOR_CURSES_TARGET "")
-    set(TUINATOR_CURSES_INCLUDE "${PDCURSES_INCLUDE_DIR}")
-    set(TUINATOR_CURSES_LIBS "${PDCURSES_LIBRARY}")
+        set(TUINATOR_CURSES_TARGET "")
+        set(TUINATOR_CURSES_INCLUDE "${PDCURSES_INCLUDE_DIR}")
+        set(TUINATOR_CURSES_LIBS "${PDCURSES_LIBRARY}")
+    endif()
 else()
     set(TUINATOR_BACKEND_DEF TUINATOR_BACKEND_NCURSES)
 

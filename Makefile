@@ -6,7 +6,7 @@ CMAKE_CACHE := $(BUILD_DIR)/CMakeCache.txt
 DEMOS := hello form colors layout counter buttons windows mouse-test scroll theme dashboard data controls menu image textarea throbber bigtext checkbox piechart charts diffview weather glyphs terminal-frame scene scene-runtime
 RUNNABLE := $(DEMOS) profile
 
-.PHONY: all build configure clean rebuild help demos test test-all unit-test profile profile-quick scene-codegen scene-runtime-codegen scene-validate format format-check lint quality $(RUNNABLE)
+.PHONY: all build configure clean rebuild help demos test test-all unit-test perf-test profile profile-quick scene-codegen scene-runtime-codegen scene-validate format format-check lint quality $(RUNNABLE)
 
 all: $(DEMOS:%=$(BUILD_DIR)/tuinator-%)
 
@@ -33,6 +33,9 @@ $(BUILD_DIR)/tuinator-%: $(CMAKE_CACHE)
 $(BUILD_DIR)/tuinator-tests: $(CMAKE_CACHE)
 	@$(CMAKE) --build $(BUILD_DIR) --target tuinator-tests
 
+$(BUILD_DIR)/tuinator-perf-tests: $(CMAKE_CACHE)
+	@$(CMAKE) --build $(BUILD_DIR) --target tuinator-perf-tests
+
 define RUN_DEMO
 $(1): $(BUILD_DIR)/tuinator-$(1)
 	@./$(BUILD_DIR)/tuinator-$(1)
@@ -52,6 +55,9 @@ test test-all: build
 
 unit-test: $(BUILD_DIR)/tuinator-tests
 	@./$(BUILD_DIR)/tuinator-tests
+
+perf-test: $(BUILD_DIR)/tuinator-perf-tests
+	@./$(BUILD_DIR)/tuinator-perf-tests
 
 format:
 	@./scripts/quality/format.sh
@@ -83,6 +89,7 @@ help:
 	@echo ""
 	@echo "Test:"
 	@echo "  make unit-test  Run headless unit tests"
+	@echo "  make perf-test  Run performance regression tests"
 	@echo "  make test       Run all smoke tests"
 	@echo ""
 	@echo "Quality:"

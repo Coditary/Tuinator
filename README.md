@@ -18,7 +18,7 @@ sudo dnf install ncurses-devel
 ### Debian / Ubuntu
 
 ```bash
-sudo apt install libncursesw-dev
+sudo apt install libncurses-dev
 ```
 
 ### macOS

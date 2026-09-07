@@ -46,3 +46,27 @@ target_include_directories(tuinator-tests PRIVATE
 target_compile_definitions(tuinator-tests PRIVATE TUINATOR_DATA_DIR="${TUINATOR_SOURCE_DIR}/data")
 add_test(NAME tuinator-tests COMMAND tuinator-tests)
 set_tests_properties(tuinator-tests PROPERTIES WORKING_DIRECTORY ${TUINATOR_SOURCE_DIR})
+
+set(TUINATOR_PERF_SOURCES
+    perf/perf_main.cpp
+    perf/perf_text.cpp
+    perf/perf_render.cpp
+    perf/perf_ansi_terminal.cpp
+    perf/perf_charts.cpp
+    perf/perf_nerd_glyph.cpp
+    perf/perf_graphics.cpp
+)
+
+add_executable(tuinator-perf-tests ${TUINATOR_PERF_SOURCES})
+set_target_properties(tuinator-perf-tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+target_link_libraries(tuinator-perf-tests PRIVATE tuinator::tuinator)
+target_include_directories(tuinator-perf-tests PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/support
+)
+target_compile_definitions(tuinator-perf-tests PRIVATE TUINATOR_DATA_DIR="${TUINATOR_SOURCE_DIR}/data")
+add_test(NAME tuinator-perf-tests COMMAND tuinator-perf-tests)
+set_tests_properties(tuinator-perf-tests PROPERTIES
+    WORKING_DIRECTORY ${TUINATOR_SOURCE_DIR}
+    LABELS "perf"
+)

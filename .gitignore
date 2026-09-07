@@ -1,8 +1,10 @@
 build/
+build-*/
 build-cov/
 build-fetch/
 build-quality/
 build-codeql/
+install-local/
 cmake-build-*/
 .cache/
 compile_commands.json
