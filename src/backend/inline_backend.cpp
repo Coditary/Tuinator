@@ -220,9 +220,7 @@ void InlineTerminalBackend::init() {
     initialized_ = true;
 }
 
-void InlineTerminalBackend::shutdown() {
-    shutdown_impl();
-}
+void InlineTerminalBackend::shutdown() { shutdown_impl(); }
 
 void InlineTerminalBackend::shutdown_impl() {
     if (!initialized_) {

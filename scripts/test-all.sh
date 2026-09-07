@@ -3,11 +3,15 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD="${ROOT}/build"
+DEMO_DIR="${BUILD}/examples"
 TIMEOUT="${TUINATOR_TEST_TIMEOUT:-3}"
 
 reset_terminal() {
-    if [[ -w /dev/tty ]] 2>/dev/null; then
-        printf '\033[?1000l\033[?1002l\033[?1003l\033[?1006l\033[0m\033[?25h' >/dev/tty 2>/dev/null || true
+    if [[ -n "${CI:-}" || -n "${TUINATOR_HEADLESS:-}" ]]; then
+        return
+    fi
+    if [[ -e /dev/tty && -w /dev/tty ]] 2>/dev/null; then
+        { printf '\033[?1000l\033[?1002l\033[?1003l\033[?1006l\033[0m\033[?25h' >/dev/tty; } 2>/dev/null || true
     fi
 }
 
@@ -48,13 +52,13 @@ fi
 
 reset_terminal
 
-if [[ ! -x "${BUILD}/tuinator-hello" ]]; then
+if [[ ! -x "${DEMO_DIR}/tuinator-hello" ]]; then
     echo "Building demos first..."
     cmake --build "${BUILD}"
 fi
 
 for demo in "${DEMOS[@]}"; do
-    binary="${BUILD}/tuinator-${demo}"
+    binary="${DEMO_DIR}/tuinator-${demo}"
     if [[ ! -x "${binary}" ]]; then
         echo "[FAIL] ${demo} (binary missing)"
         failed=$((failed + 1))
@@ -73,7 +77,7 @@ for demo in "${DEMOS[@]}"; do
 done
 
 printf "[....] %-10s " "profile"
-if TUINATOR_PROFILE_QUICK=1 TUINATOR_HEADLESS=1 timeout "${TIMEOUT}" "${BUILD}/tuinator-startup-profile" >/dev/null 2>&1; then
+if TUINATOR_PROFILE_QUICK=1 TUINATOR_HEADLESS=1 timeout "${TIMEOUT}" "${DEMO_DIR}/tuinator-startup-profile" >/dev/null 2>&1; then
     echo "OK"
     passed=$((passed + 1))
 else
