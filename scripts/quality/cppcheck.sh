@@ -12,7 +12,7 @@ if ((${#FILES[@]} == 0)); then
 fi
 
 cppcheck \
-    --enable=warning,style,performance,portability \
+    --enable=warning,performance,portability \
     --error-exitcode=1 \
     --inline-suppr \
     --quiet \

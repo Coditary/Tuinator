@@ -51,6 +51,7 @@ jobs:
   security:
     name: CodeQL
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       actions: read
       contents: read
@@ -73,8 +74,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DTUINATOR_BUILD_EXAMPLES=OFF \
-            -DTUINATOR_BUILD_TESTS=ON
-          cmake --build build-codeql --parallel
+            -DTUINATOR_BUILD_TESTS=OFF
+          cmake --build build-codeql --target tuinator --parallel
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3

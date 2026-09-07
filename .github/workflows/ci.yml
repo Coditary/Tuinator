@@ -28,10 +28,7 @@ jobs:
             ctest-config: ""
           - os: windows-latest
             label: Windows
-            configure-args: >-
-              -DTUINATOR_BUILD_EXAMPLES=OFF
-              -DTUINATOR_BUILD_TESTS=ON
-              -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
+            configure-args: -DTUINATOR_BUILD_EXAMPLES=OFF -DTUINATOR_BUILD_TESTS=ON
             build-config: --config Release
             ctest-config: -C Release
 
@@ -54,12 +51,21 @@ jobs:
           & $env:GITHUB_WORKSPACE/vcpkg/bootstrap-vcpkg.bat
           & $env:GITHUB_WORKSPACE/vcpkg/vcpkg install pdcurses:x64-windows
 
-      - name: Configure library
+      - name: Configure library (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release `
+            -DTUINATOR_BUILD_EXAMPLES=OFF `
+            -DTUINATOR_BUILD_TESTS=ON `
+            -DCMAKE_TOOLCHAIN_FILE="$env:GITHUB_WORKSPACE/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
+      - name: Configure library (Unix)
+        if: runner.os != 'Windows'
         shell: bash
         env:
           PKG_CONFIG_PATH: /opt/homebrew/opt/ncurses/lib/pkgconfig:/usr/local/opt/ncurses/lib/pkgconfig
-        run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release ${{ matrix.configure-args }}
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release ${{ matrix.configure-args }}
 
       - name: Build library
         shell: bash

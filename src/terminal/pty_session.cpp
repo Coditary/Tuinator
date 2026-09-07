@@ -67,7 +67,7 @@ bool PtySession::start(Size size, const std::string& shell_command) {
     terminate();
 
     const std::string shell = shell_command.empty() ? default_shell() : shell_command;
-    const winsize ws = make_winsize(size);
+    winsize ws = make_winsize(size);
 
     pid_t pid = forkpty(&master_fd_, nullptr, nullptr, &ws);
     if (pid < 0) {
