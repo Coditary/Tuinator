@@ -105,8 +105,7 @@ InlineTerminalBackend::InlineTerminalBackend(InlineBackendOptions options)
 
 InlineTerminalBackend::~InlineTerminalBackend() {
     if (initialized_) {
-        // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
-        shutdown();
+        shutdown_impl();
     }
     if (owned_tty_ != nullptr) {
         std::fclose(owned_tty_);
@@ -222,6 +221,10 @@ void InlineTerminalBackend::init() {
 }
 
 void InlineTerminalBackend::shutdown() {
+    shutdown_impl();
+}
+
+void InlineTerminalBackend::shutdown_impl() {
     if (!initialized_) {
         return;
     }

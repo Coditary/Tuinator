@@ -29,8 +29,9 @@ Size Grid::preferred_size() const {
             std::max(row_heights[static_cast<std::size_t>(row)], child_size.height);
     }
 
-    int width = padding_ * 2;
-    int height = padding_ * 2;
+    const int padding_total = padding_ * 2;
+    int width = padding_total;
+    int height = padding_total;
     for (int column = 0; column < columns_; ++column) {
         width += column_widths[static_cast<std::size_t>(column)];
         if (column + 1 < columns_) {

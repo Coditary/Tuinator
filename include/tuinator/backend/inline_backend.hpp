@@ -85,6 +85,7 @@ class InlineTerminalBackend : public TerminalBackend {
     void drain_stdin();
     std::optional<Event> read_stdin_event(bool allow_block);
     void append_style(std::string& out, const Style& style) const;
+    void shutdown_impl();
     bool style_equal(const Style& a, const Style& b) const;
     bool cell_equal(const Cell& a, const Cell& b) const;
 

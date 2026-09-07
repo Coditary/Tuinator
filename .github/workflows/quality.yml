@@ -69,13 +69,15 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libncurses-dev zlib1g-dev
 
       - name: Build for analysis
+        env:
+          CODEQL_THREADS: "2"
         run: |
           cmake -B build-codeql \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DTUINATOR_BUILD_EXAMPLES=OFF \
             -DTUINATOR_BUILD_TESTS=OFF
-          cmake --build build-codeql --target tuinator --parallel
+          cmake --build build-codeql --target tuinator -j 2
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3

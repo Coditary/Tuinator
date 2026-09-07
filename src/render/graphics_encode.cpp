@@ -113,7 +113,7 @@ std::string kitty_transmit(const TerminalImage& image) {
     bool had_data = false;
     for (std::size_t offset = 0; offset < payload.size(); offset += kChunkSize) {
         const std::size_t length = std::min(kChunkSize, payload.size() - offset);
-        const std::string_view chunk(payload.data() + offset, length);
+        const std::string chunk = payload.substr(offset, length);
         had_data = true;
 
         if (offset == 0) {

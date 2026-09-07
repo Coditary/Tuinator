@@ -60,7 +60,7 @@ void Label::paint(PaintContext& ctx) const {
             end = text_.size();
         }
 
-        const std::string_view line(text_.data() + start, end - start);
+        const std::string line = text_.substr(start, end - start);
         const int line_width = text_display_width(line);
         const int x = std::max(0, (bounds_.width - line_width) / 2);
         const int max_columns = std::max(0, bounds_.width - x);
