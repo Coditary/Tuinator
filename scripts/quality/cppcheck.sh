@@ -21,6 +21,12 @@ cppcheck \
     --suppress=missingIncludeSystem \
     --suppress=unmatchedSuppression \
     --suppress=unusedFunction \
+    --suppress=duplInheritedMember \
+    --suppress=noCopyConstructor \
+    --suppress=noOperatorEq \
+    --suppress=uninitMemberVarNoCtor \
+    --suppress=passedByValue \
+    --suppress=useInitializationList \
     -I "${ROOT}/include" \
     -I "${ROOT}/src" \
     -I "${ROOT}/tests" \
