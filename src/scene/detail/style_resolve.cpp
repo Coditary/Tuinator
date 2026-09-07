@@ -24,7 +24,7 @@ Style style_from_color_name(const std::string& name) {
     return style;
 }
 
-Style style_from_object(const nlohmann::json& object, const Theme& theme) {
+Style style_from_object(const nlohmann::json& object, const Theme& /*theme*/) {
     Style style;
     if (object.contains("foreground")) {
         const auto& fg = object["foreground"];

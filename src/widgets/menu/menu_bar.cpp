@@ -261,7 +261,7 @@ void MenuBar::paint(PaintContext& ctx) const {
     paint_dropdown(canvas, dropdown_layout());
 }
 
-void MenuBar::paint_dropdown(Canvas& canvas, const DropdownLayout& layout) const {
+void MenuBar::paint_dropdown(Canvas& canvas, const DropdownLayout& /*layout*/) const {
     const MenuBarLook look =
         current_look(style_, active_style_, submenu_style_, disabled_style_, shortcut_style_, border_style_, glyphs_);
 

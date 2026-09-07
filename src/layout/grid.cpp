@@ -72,7 +72,6 @@ void Grid::layout(Rect bounds) {
 }
 
 void Grid::paint(PaintContext& ctx) const {
-    Canvas& canvas = ctx.canvas;
     for (const auto& child : children_) {
         const Rect local{
             child->bounds().x - bounds_.x,

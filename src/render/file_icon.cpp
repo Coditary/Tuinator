@@ -119,7 +119,7 @@ std::string basename(std::string_view path) {
 }
 
 std::string extension_of(std::string_view filename) {
-    if (filename.empty() || filename.front() == '.' && filename.find('.', 1) == std::string_view::npos) {
+    if (filename.empty() || (filename.front() == '.' && filename.find('.', 1) == std::string_view::npos)) {
         return {};
     }
 

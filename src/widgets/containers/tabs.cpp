@@ -120,7 +120,10 @@ void Tabs::paint(PaintContext& ctx) const {
     }
 
     if (is_focused()) {
-        canvas.draw_text({x, 0}, "*", Style{.foreground = Color::Yellow, .bold = true});
+        Style focused_marker;
+        focused_marker.foreground = Color::Yellow;
+        focused_marker.bold = true;
+        canvas.draw_text({x, 0}, "*", focused_marker);
     }
 
     if (tabs_.empty()) {

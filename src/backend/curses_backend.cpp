@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cwchar>
+#include <string>
 #include <vector>
 
 #include "backend/curses_backend.hpp"
@@ -759,9 +760,9 @@ void CursesBackend::present_text_cursor(FILE* output) {
         }
 
         if (!hardware_text_cursor_visible_) {
-            char sequence[32];
-            std::snprintf(sequence, sizeof(sequence), "\033[%d;%dH\033[?25h", position.y + 1, position.x + 1);
-            send_tty_sequence_to(output, sequence);
+            const std::string sequence =
+                "\033[" + std::to_string(position.y + 1) + ";" + std::to_string(position.x + 1) + "H\033[?25h";
+            send_tty_sequence_to(output, sequence.c_str());
             hardware_text_cursor_visible_ = true;
             placed_text_cursor_ = position;
             return;
@@ -769,9 +770,9 @@ void CursesBackend::present_text_cursor(FILE* output) {
 
         if (!placed_text_cursor_.has_value() || placed_text_cursor_->x != position.x ||
             placed_text_cursor_->y != position.y) {
-            char sequence[32];
-            std::snprintf(sequence, sizeof(sequence), "\033[%d;%dH", position.y + 1, position.x + 1);
-            send_tty_sequence_to(output, sequence);
+            const std::string sequence =
+                "\033[" + std::to_string(position.y + 1) + ";" + std::to_string(position.x + 1) + "H";
+            send_tty_sequence_to(output, sequence.c_str());
             placed_text_cursor_ = position;
         }
         return;

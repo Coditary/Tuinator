@@ -8,7 +8,7 @@
 namespace tuinator::dialog {
 
 std::unique_ptr<Widget> make_message(const Theme& theme, std::string message, std::function<void()> on_ok) {
-    auto box = std::make_unique<VBox>(BoxOptions{.gap = 1, .padding = 1});
+    auto box = std::make_unique<VBox>(BoxOptions{1, 1});
     box->add_child(std::make_unique<Label>(std::move(message), theme.label));
     box->add_child(std::make_unique<Button>(
         "OK",
@@ -23,12 +23,12 @@ std::unique_ptr<Widget> make_message(const Theme& theme, std::string message, st
 
 std::unique_ptr<Widget> make_confirm(const Theme& theme, std::string message,
                                      std::function<void(bool confirmed)> on_result) {
-    auto box = std::make_unique<VBox>(BoxOptions{.gap = 1, .padding = 1});
+    auto box = std::make_unique<VBox>(BoxOptions{1, 1});
     box->add_child(std::make_unique<Label>(std::move(message), theme.label));
 
     auto callback = std::move(on_result);
 
-    auto actions = std::make_unique<HBox>(BoxOptions{.gap = 2});
+    auto actions = std::make_unique<HBox>(BoxOptions{2, 0});
     actions->add_child(std::make_unique<Button>(
         "OK",
         [callback]() {

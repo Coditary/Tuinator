@@ -64,7 +64,7 @@ void apply_vterm_color(const VTermScreen* screen, VTermColor color, bool bold, b
     }
 
     bool emit_bold = bold;
-    if (bold && VTERM_COLOR_IS_INDEXED(&color) && color.indexed.idx >= 0 && color.indexed.idx < 8) {
+    if (bold && VTERM_COLOR_IS_INDEXED(&color) && color.indexed.idx < 8) {
         vterm_color_indexed(&color, static_cast<uint8_t>(color.indexed.idx + 8));
         emit_bold = false;
     }
