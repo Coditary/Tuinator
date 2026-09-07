@@ -19,6 +19,18 @@ namespace tuinator::scene::detail {
 
 namespace {
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif
+
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4100)
+#pragma warning(disable : 4505)
+#endif
+
 void fill_BarChartOptions(tuinator::BarChartOptions& opts, const nlohmann::json& node, SceneContext& ctx) {
     if (const nlohmann::json* value = json::find(node, "style")) {
                 { const std::string _enum_val = json::as_string(*value);
@@ -1963,6 +1975,14 @@ void create_windows(
         }
     }
 }
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 } // namespace
 
