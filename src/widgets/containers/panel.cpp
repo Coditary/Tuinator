@@ -24,8 +24,8 @@ void Panel::apply_stylesheet(const StyleResolver& styles) {
 void Panel::set_border_edges(BorderEdges edges) {
     if (configured_border_edges_.top == edges.top && configured_border_edges_.right == edges.right &&
         configured_border_edges_.bottom == edges.bottom && configured_border_edges_.left == edges.left &&
-        border_edges_.top == edges.top && border_edges_.right == edges.right &&
-        border_edges_.bottom == edges.bottom && border_edges_.left == edges.left) {
+        border_edges_.top == edges.top && border_edges_.right == edges.right && border_edges_.bottom == edges.bottom &&
+        border_edges_.left == edges.left) {
         return;
     }
 

@@ -206,9 +206,7 @@ void SplitPane::set_options(SplitPaneOptions options) {
     mark_layout_dirty();
 }
 
-void SplitPane::apply_stylesheet(const StyleResolver& styles) {
-    apply_splittable_stylesheet(*this, *this, styles);
-}
+void SplitPane::apply_stylesheet(const StyleResolver& styles) { apply_splittable_stylesheet(*this, *this, styles); }
 
 void SplitPane::set_on_dirty(std::function<void(Rect)> callback) {
     Widget::set_on_dirty(std::move(callback));
@@ -307,9 +305,7 @@ void SplitPane::begin_drag() {
     dragging_ = true;
 }
 
-void SplitPane::end_drag() {
-    dragging_ = false;
-}
+void SplitPane::end_drag() { dragging_ = false; }
 
 void SplitPane::layout(Rect bounds) {
     bounds_ = bounds;

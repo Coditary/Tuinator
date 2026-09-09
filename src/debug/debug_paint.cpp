@@ -32,14 +32,8 @@ void debug_paint_log_frame(bool partial, const Rect& dirty_region) {
         return;
     }
 
-    std::fprintf(stderr,
-                 "tuinator-paint: mode=%s dirty=%d,%d %dx%d fills=%d\n",
-                 partial ? "partial" : "full",
-                 dirty_region.x,
-                 dirty_region.y,
-                 dirty_region.width,
-                 dirty_region.height,
-                 background_fills_);
+    std::fprintf(stderr, "tuinator-paint: mode=%s dirty=%d,%d %dx%d fills=%d\n", partial ? "partial" : "full",
+                 dirty_region.x, dirty_region.y, dirty_region.width, dirty_region.height, background_fills_);
 }
 
 } // namespace tuinator

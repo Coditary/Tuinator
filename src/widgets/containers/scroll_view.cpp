@@ -48,9 +48,7 @@ void ScrollView::set_options(ScrollViewOptions options) {
     mark_layout_dirty();
 }
 
-void ScrollView::apply_stylesheet(const StyleResolver& styles) {
-    apply_scroll_view_stylesheet(*this, styles);
-}
+void ScrollView::apply_stylesheet(const StyleResolver& styles) { apply_scroll_view_stylesheet(*this, styles); }
 
 int ScrollView::max_scroll_x() const {
     const auto metrics = scrollbar_metrics();

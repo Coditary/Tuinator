@@ -104,6 +104,11 @@ std::string TextArea::value() const {
     return out;
 }
 
+std::string_view TextArea::field_value() const {
+    field_value_cache_ = value();
+    return field_value_cache_;
+}
+
 void TextArea::set_value(std::string value) {
     lines_ = split_lines(value);
     cursor_row_ = 0;

@@ -55,8 +55,7 @@ GlyphSet StyleResolver::glyph_set(const Widget& widget) const {
     return GlyphSet::Unicode;
 }
 
-void apply_stylesheet_to_tree(Widget& root, const StyleResolver& styles,
-                              std::vector<std::string>* option_warnings) {
+void apply_stylesheet_to_tree(Widget& root, const StyleResolver& styles, std::vector<std::string>* option_warnings) {
     root.for_each_descendant([&](Widget* widget) {
         widget->apply_stylesheet(styles);
         if (option_warnings != nullptr) {

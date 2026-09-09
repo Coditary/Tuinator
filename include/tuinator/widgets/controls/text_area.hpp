@@ -50,7 +50,7 @@ class TextArea : public Widget, public MultiLineTextInput {
     TextArea(TextAreaOptions options = {}, Style style = {}, Style focused_style = {});
 
     std::string value() const;
-    std::string_view field_value() const override { return value(); }
+    std::string_view field_value() const override;
     std::string_view field_placeholder() const override { return placeholder_; }
     const std::string& title() const { return title_; }
     int cursor_row() const { return cursor_row_; }
@@ -117,6 +117,7 @@ class TextArea : public Widget, public MultiLineTextInput {
     Style focused_style_;
     GutterRenderer gutter_renderer_;
     std::function<void(const std::string&)> on_change_;
+    mutable std::string field_value_cache_;
 };
 
 } // namespace tuinator

@@ -18,8 +18,7 @@ class WidgetOptions {
     int int_or(std::string_view key, int fallback) const;
     std::string string_or(std::string_view key, std::string_view fallback) const;
 
-    template <typename Fn>
-    void for_each(Fn&& visitor) const {
+    template <typename Fn> void for_each(Fn&& visitor) const {
         for (const auto& entry : values_) {
             visitor(entry.first, entry.second);
         }

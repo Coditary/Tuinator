@@ -52,9 +52,7 @@ void ComboBox::set_min_width(int min_width) {
     mark_layout_dirty();
 }
 
-void ComboBox::apply_stylesheet(const StyleResolver& styles) {
-    apply_value_control_stylesheet(*this, *this, styles);
-}
+void ComboBox::apply_stylesheet(const StyleResolver& styles) { apply_value_control_stylesheet(*this, *this, styles); }
 
 void ComboBox::select_index(int index, bool notify) {
     if (items_.empty()) {

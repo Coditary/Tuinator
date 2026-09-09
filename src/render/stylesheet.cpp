@@ -94,9 +94,9 @@ std::string read_file(const std::filesystem::path& path) {
 
 const std::unordered_map<std::string, Color>& color_names() {
     static const std::unordered_map<std::string, Color> names = {
-        {"default", Color::Default}, {"black", Color::Black},     {"red", Color::Red},
-        {"green", Color::Green},     {"yellow", Color::Yellow},   {"blue", Color::Blue},
-        {"magenta", Color::Magenta}, {"cyan", Color::Cyan},       {"white", Color::White},
+        {"default", Color::Default}, {"black", Color::Black},   {"red", Color::Red},
+        {"green", Color::Green},     {"yellow", Color::Yellow}, {"blue", Color::Blue},
+        {"magenta", Color::Magenta}, {"cyan", Color::Cyan},     {"white", Color::White},
     };
     return names;
 }
@@ -356,21 +356,11 @@ int rule_specificity(const Rule& rule) {
 bool matches_token(const Widget& widget, const SelectorToken& token) {
     bool matches = false;
     switch (token.kind) {
-    case SelectorKind::Universal:
-        matches = true;
-        break;
-    case SelectorKind::Type:
-        matches = widget.widget_type_name() == token.value;
-        break;
-    case SelectorKind::Id:
-        matches = widget.widget_id() == token.value;
-        break;
-    case SelectorKind::Class:
-        matches = widget.has_widget_class(token.value);
-        break;
-    default:
-        matches = false;
-        break;
+    case SelectorKind::Universal: matches = true; break;
+    case SelectorKind::Type: matches = widget.widget_type_name() == token.value; break;
+    case SelectorKind::Id: matches = widget.widget_id() == token.value; break;
+    case SelectorKind::Class: matches = widget.has_widget_class(token.value); break;
+    default: matches = false; break;
     }
 
     if (!matches) {
@@ -498,10 +488,12 @@ class StylesheetParser {
 
     SelectorToken parse_selector_token(std::string_view token) {
         SelectorToken parsed;
+        std::string base_storage;
         std::string_view base = token;
         const std::size_t colon = token.find(':');
         if (colon != std::string_view::npos) {
-            base = trim(token.substr(0, colon));
+            base_storage = trim(token.substr(0, colon));
+            base = base_storage;
             if (base.empty()) {
                 throw std::runtime_error("Invalid selector token: " + std::string(token));
             }
@@ -796,8 +788,7 @@ Stylesheet Stylesheet::load_from_file(const std::filesystem::path& path) {
 
 namespace {
 
-stylesheet_detail::ResolvedRule resolve_rules(const std::vector<stylesheet_detail::Rule>& rules,
-                                              const Widget& widget) {
+stylesheet_detail::ResolvedRule resolve_rules(const std::vector<stylesheet_detail::Rule>& rules, const Widget& widget) {
     std::vector<const stylesheet_detail::Rule*> matches;
     for (const stylesheet_detail::Rule& rule : rules) {
         if (stylesheet_detail::matches_selector_chain(widget, rule.selector, rule.selector.size() - 1)) {
@@ -805,11 +796,10 @@ stylesheet_detail::ResolvedRule resolve_rules(const std::vector<stylesheet_detai
         }
     }
 
-    std::stable_sort(matches.begin(), matches.end(),
-                     [](const stylesheet_detail::Rule* left, const stylesheet_detail::Rule* right) {
-                         return stylesheet_detail::rule_specificity(*left) <
-                                stylesheet_detail::rule_specificity(*right);
-                     });
+    std::stable_sort(
+        matches.begin(), matches.end(), [](const stylesheet_detail::Rule* left, const stylesheet_detail::Rule* right) {
+            return stylesheet_detail::rule_specificity(*left) < stylesheet_detail::rule_specificity(*right);
+        });
 
     stylesheet_detail::ResolvedRule resolved;
     for (const stylesheet_detail::Rule* rule : matches) {
@@ -896,8 +886,7 @@ BorderGlyphs Stylesheet::resolve_border_glyphs(const Widget& widget, const Theme
         return border_glyphs_for(*resolved.border_style);
     }
 
-    GlyphSet glyphs =
-        resolved.glyph_set ? *resolved.glyph_set : stylesheet_detail::glyph_set_from_theme(theme);
+    GlyphSet glyphs = resolved.glyph_set ? *resolved.glyph_set : stylesheet_detail::glyph_set_from_theme(theme);
     if (glyphs == GlyphSet::Auto) {
         glyphs = detect_glyph_set();
     }

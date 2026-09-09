@@ -30,9 +30,7 @@ TUINATOR_TEST(custom_paint_composes_children) {
     auto host = std::make_unique<tuinator::CustomPaint>();
     host->set_preferred_size({12, 2});
     host->set_paint_children_first(false);
-    host->set_on_paint([](tuinator::PaintContext& ctx, tuinator::Rect area) {
-        ctx.canvas.fill_rect(area, '.', {});
-    });
+    host->set_on_paint([](tuinator::PaintContext& ctx, tuinator::Rect area) { ctx.canvas.fill_rect(area, '.', {}); });
     host->add_child(std::make_unique<tuinator::Label>("Child", tuinator::dark_theme().label));
 
     tuinator::test::render_root(*host, backend);

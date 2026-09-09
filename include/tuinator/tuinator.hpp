@@ -4,10 +4,10 @@
 #include <tuinator/backend/memory_backend.hpp>
 #include <tuinator/core/action_registry.hpp>
 #include <tuinator/core/application.hpp>
-#include <tuinator/core/screen.hpp>
 #include <tuinator/core/event.hpp>
 #include <tuinator/core/geometry.hpp>
 #include <tuinator/core/inline_view.hpp>
+#include <tuinator/core/screen.hpp>
 #include <tuinator/layout/box.hpp>
 #include <tuinator/layout/grid.hpp>
 #include <tuinator/render/action_icon.hpp>
@@ -34,13 +34,13 @@
 #include <tuinator/render/scrollbar.hpp>
 #include <tuinator/render/style.hpp>
 #include <tuinator/render/style_resolver.hpp>
-#include <tuinator/render/widget_options.hpp>
 #include <tuinator/render/stylesheet.hpp>
 #include <tuinator/render/terminal_image.hpp>
 #include <tuinator/render/text.hpp>
 #include <tuinator/render/theme.hpp>
 #include <tuinator/render/ui_icon.hpp>
 #include <tuinator/render/weather_icon.hpp>
+#include <tuinator/render/widget_options.hpp>
 #include <tuinator/version.hpp>
 
 // Controls

@@ -20,9 +20,7 @@ class ComboBox : public Widget, public ValueControl, public SelectableList {
     bool is_open() const { return open_; }
     bool is_dropdown_open() const override { return open_; }
     int value_minimum() const override { return items_.empty() ? 0 : 0; }
-    int value_maximum() const override {
-        return items_.empty() ? 0 : static_cast<int>(items_.size()) - 1;
-    }
+    int value_maximum() const override { return items_.empty() ? 0 : static_cast<int>(items_.size()) - 1; }
     int value_current() const override { return selected_index_; }
     void set_value_current(int value) override { set_selected_index(value); }
     void set_min_width(int min_width);

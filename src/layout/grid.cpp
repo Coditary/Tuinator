@@ -1,5 +1,4 @@
 #include <tuinator/layout/grid.hpp>
-
 #include <tuinator/widgets/capabilities/widget_roles.hpp>
 
 #include <algorithm>
@@ -25,9 +24,7 @@ void Grid::set_layout_padding(int padding) {
     mark_layout_dirty();
 }
 
-void Grid::apply_stylesheet(const StyleResolver& styles) {
-    apply_layout_box_stylesheet(*this, *this, styles);
-}
+void Grid::apply_stylesheet(const StyleResolver& styles) { apply_layout_box_stylesheet(*this, *this, styles); }
 
 Size Grid::preferred_size() const {
     if (children_.empty()) {

@@ -58,13 +58,12 @@ int main(int argc, char** argv) {
         std::move(editor_row), std::move(terminal),
         tuinator::SplitPaneOptions{.orientation = tuinator::SplitOrientation::Vertical, .first_size = 12});
 
-    auto workspace = std::make_unique<tuinator::SplitPane>(
-        std::move(explorer), std::move(editor_column),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Horizontal,
-            .first_size = 22,
-            .outer_border = true,
-        });
+    auto workspace = std::make_unique<tuinator::SplitPane>(std::move(explorer), std::move(editor_column),
+                                                           tuinator::SplitPaneOptions{
+                                                               .orientation = tuinator::SplitOrientation::Horizontal,
+                                                               .first_size = 22,
+                                                               .outer_border = true,
+                                                           });
     workspace->set_widget_id("workspace");
     root->add_child(std::move(workspace));
 

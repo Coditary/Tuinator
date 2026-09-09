@@ -136,13 +136,12 @@ LineChart {
 }
 )");
 
-    tuinator::LineChart chart({{"sin", sine_points(10), tuinator::Style{}}},
-                              tuinator::LineChartOptions{
-                                  .mode = tuinator::LineChartMode::Line,
-                                  .title = "Series",
-                                  .min_width = 20,
-                                  .min_height = 8,
-                              });
+    tuinator::LineChart chart({{"sin", sine_points(10), tuinator::Style{}}}, tuinator::LineChartOptions{
+                                                                                 .mode = tuinator::LineChartMode::Line,
+                                                                                 .title = "Series",
+                                                                                 .min_width = 20,
+                                                                                 .min_height = 8,
+                                                                             });
 
     tuinator::MemoryTerminalBackend backend({20, 8});
     backend.init();
@@ -150,8 +149,7 @@ LineChart {
     tuinator::Canvas canvas(backend);
     const tuinator::PaintContext ctx{canvas, theme, &sheet};
 
-    const tuinator::ChartStyleBundle styles =
-        tuinator::resolve_chart_styles(ctx, chart, {}, {}, {}, tuinator::Style{});
+    const tuinator::ChartStyleBundle styles = tuinator::resolve_chart_styles(ctx, chart, {}, {}, {}, tuinator::Style{});
 
     TUINATOR_CHECK_EQ(styles.title.foreground, tuinator::Color::Cyan);
     TUINATOR_CHECK_EQ(styles.axis.foreground, tuinator::Color::Cyan);

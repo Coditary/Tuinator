@@ -130,9 +130,7 @@ void VBox::set_padding(int padding) {
     mark_layout_dirty();
 }
 
-void VBox::apply_stylesheet(const StyleResolver& styles) {
-    apply_layout_box_stylesheet(*this, *this, styles);
-}
+void VBox::apply_stylesheet(const StyleResolver& styles) { apply_layout_box_stylesheet(*this, *this, styles); }
 
 Size VBox::preferred_size() const {
     int width = 0;
@@ -215,9 +213,7 @@ void HBox::set_padding(int padding) {
     mark_layout_dirty();
 }
 
-void HBox::apply_stylesheet(const StyleResolver& styles) {
-    apply_layout_box_stylesheet(*this, *this, styles);
-}
+void HBox::apply_stylesheet(const StyleResolver& styles) { apply_layout_box_stylesheet(*this, *this, styles); }
 
 Size HBox::preferred_size() const {
     int width = padding_ * 2;

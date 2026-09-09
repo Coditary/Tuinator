@@ -1,6 +1,6 @@
 #include <tuinator/render/text.hpp>
-#include <tuinator/widgets/charts/chart_widget.hpp>
 #include <tuinator/widgets/charts/candlestick_chart.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -21,9 +21,9 @@ void CandlestickChart::set_options(CandlestickChartOptions options) {
 }
 
 void CandlestickChart::apply_stylesheet(const StyleResolver& styles) {
-    apply_chart_stylesheet(*this, styles,
-                           {&options_.min_width, &options_.min_height, &options_.show_axis, &options_.show_grid,
-                            nullptr, nullptr});
+    apply_chart_stylesheet(
+        *this, styles,
+        {&options_.min_width, &options_.min_height, &options_.show_axis, &options_.show_grid, nullptr, nullptr});
     mark_layout_dirty();
 }
 

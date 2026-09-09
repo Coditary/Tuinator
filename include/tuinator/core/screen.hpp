@@ -16,9 +16,7 @@ class Screen : public VBox {
 };
 
 /// Create a full-screen vertical layout root.
-inline std::unique_ptr<Screen> make_screen(BoxOptions options = {}) {
-    return std::make_unique<Screen>(options);
-}
+inline std::unique_ptr<Screen> make_screen(BoxOptions options = {}) { return std::make_unique<Screen>(options); }
 
 /// Attach a screen root and run the application event loop.
 int run_screen(Application& app, std::unique_ptr<Screen> root);

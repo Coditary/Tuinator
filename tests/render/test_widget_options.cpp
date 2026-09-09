@@ -1,11 +1,11 @@
+#include <tuinator/layout/box.hpp>
 #include <tuinator/render/style_resolver.hpp>
 #include <tuinator/render/stylesheet.hpp>
 #include <tuinator/render/widget_options.hpp>
 #include <tuinator/widgets/containers/panel.hpp>
-#include <tuinator/widgets/display/label.hpp>
 #include <tuinator/widgets/containers/split_pane.hpp>
 #include <tuinator/widgets/controls/text_input.hpp>
-#include <tuinator/layout/box.hpp>
+#include <tuinator/widgets/display/label.hpp>
 
 #include "support/test_harness.hpp"
 

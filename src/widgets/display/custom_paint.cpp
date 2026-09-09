@@ -36,9 +36,7 @@ void CustomPaint::set_paint_children_first(bool children_first) {
     mark_dirty();
 }
 
-void CustomPaint::set_needs_periodic_idle(bool enabled) {
-    needs_periodic_idle_ = enabled;
-}
+void CustomPaint::set_needs_periodic_idle(bool enabled) { needs_periodic_idle_ = enabled; }
 
 void CustomPaint::apply_stylesheet(const StyleResolver& styles) {
     Widget::apply_stylesheet(styles);

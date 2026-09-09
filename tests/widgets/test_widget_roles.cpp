@@ -1,3 +1,5 @@
+#include <tuinator/layout/box.hpp>
+#include <tuinator/layout/grid.hpp>
 #include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/containers/panel.hpp>
 #include <tuinator/widgets/containers/scroll_view.hpp>
@@ -8,8 +10,6 @@
 #include <tuinator/widgets/controls/slider.hpp>
 #include <tuinator/widgets/controls/text_area.hpp>
 #include <tuinator/widgets/display/label.hpp>
-#include <tuinator/layout/box.hpp>
-#include <tuinator/layout/grid.hpp>
 
 #include "support/test_harness.hpp"
 

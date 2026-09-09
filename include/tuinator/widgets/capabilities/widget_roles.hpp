@@ -56,7 +56,7 @@ class LayoutBox {
     virtual int layout_column_count() const { return 0; }
     virtual void set_layout_gap(int gap) = 0;
     virtual void set_layout_padding(int padding) = 0;
-    virtual void set_layout_column_count(int columns) {}
+    virtual void set_layout_column_count(int /*columns*/) {}
 };
 
 /// Draggable split divider between two children.
@@ -190,8 +190,7 @@ void apply_layout_box_stylesheet(LayoutBox& box, Widget& widget, const StyleReso
 void apply_bordered_pane_stylesheet(BorderedPane& pane, Widget& widget, const StyleResolver& styles);
 void apply_splittable_stylesheet(Splittable& split, Widget& widget, const StyleResolver& styles);
 void apply_text_input_stylesheet(TextInputField& field, Widget& widget, const StyleResolver& styles);
-void apply_multiline_text_input_stylesheet(MultiLineTextInput& field, Widget& widget,
-                                           const StyleResolver& styles);
+void apply_multiline_text_input_stylesheet(MultiLineTextInput& field, Widget& widget, const StyleResolver& styles);
 void apply_scroll_view_stylesheet(Widget& widget, const StyleResolver& styles);
 void apply_value_control_stylesheet(ValueControl& control, Widget& widget, const StyleResolver& styles);
 void apply_progress_bar_stylesheet(Widget& widget, const StyleResolver& styles);

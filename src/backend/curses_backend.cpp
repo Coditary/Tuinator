@@ -756,8 +756,7 @@ Rect CursesBackend::kitty_placement_rect() const {
         return {};
     }
 
-    return {last_kitty_placement_.x, last_kitty_placement_.y, last_kitty_placement_.cols,
-            last_kitty_placement_.rows};
+    return {last_kitty_placement_.x, last_kitty_placement_.y, last_kitty_placement_.cols, last_kitty_placement_.rows};
 }
 
 bool CursesBackend::ansi_draw_visible(const AnsiDraw& draw) const {

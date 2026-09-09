@@ -54,9 +54,7 @@ void TextInput::set_options(TextInputOptions options) {
     mark_dirty();
 }
 
-void TextInput::apply_stylesheet(const StyleResolver& styles) {
-    apply_text_input_stylesheet(*this, *this, styles);
-}
+void TextInput::apply_stylesheet(const StyleResolver& styles) { apply_text_input_stylesheet(*this, *this, styles); }
 
 void TextInput::set_value(std::string value) {
     value_ = std::move(value);

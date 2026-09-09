@@ -37,9 +37,7 @@ void WidgetOptions::set(std::string_view key, std::string_view value) {
     values_[normalize_key(key)] = std::string(value);
 }
 
-bool WidgetOptions::has(std::string_view key) const {
-    return values_.find(normalize_key(key)) != values_.end();
-}
+bool WidgetOptions::has(std::string_view key) const { return values_.find(normalize_key(key)) != values_.end(); }
 
 bool WidgetOptions::bool_or(std::string_view key, bool fallback) const {
     const auto it = values_.find(normalize_key(key));

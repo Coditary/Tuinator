@@ -24,20 +24,18 @@ tuinator::Point vertical_divider_point(const tuinator::SplitPane& pane, int firs
 } // namespace
 
 TUINATOR_TEST(split_pane_nested_dividers_are_hit_testable) {
-    auto inner = std::make_unique<tuinator::SplitPane>(
-        make_label("left"), make_label("right"),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Horizontal,
-            .first_size = 10,
-        });
+    auto inner = std::make_unique<tuinator::SplitPane>(make_label("left"), make_label("right"),
+                                                       tuinator::SplitPaneOptions{
+                                                           .orientation = tuinator::SplitOrientation::Horizontal,
+                                                           .first_size = 10,
+                                                       });
     auto* inner_ptr = inner.get();
 
-    auto outer = std::make_unique<tuinator::SplitPane>(
-        std::move(inner), make_label("bottom"),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Vertical,
-            .first_size = 6,
-        });
+    auto outer = std::make_unique<tuinator::SplitPane>(std::move(inner), make_label("bottom"),
+                                                       tuinator::SplitPaneOptions{
+                                                           .orientation = tuinator::SplitOrientation::Vertical,
+                                                           .first_size = 6,
+                                                       });
     auto* outer_ptr = outer.get();
 
     outer->layout({0, 0, 40, 20});
@@ -52,19 +50,17 @@ TUINATOR_TEST(split_pane_nested_dividers_are_hit_testable) {
 TUINATOR_TEST(split_pane_propagates_layout_callback_to_nested_children) {
     int layout_passes = 0;
 
-    auto inner = std::make_unique<tuinator::SplitPane>(
-        make_label("left"), make_label("right"),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Horizontal,
-            .first_size = 10,
-        });
+    auto inner = std::make_unique<tuinator::SplitPane>(make_label("left"), make_label("right"),
+                                                       tuinator::SplitPaneOptions{
+                                                           .orientation = tuinator::SplitOrientation::Horizontal,
+                                                           .first_size = 10,
+                                                       });
 
-    auto outer = std::make_unique<tuinator::SplitPane>(
-        std::move(inner), make_label("bottom"),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Vertical,
-            .first_size = 6,
-        });
+    auto outer = std::make_unique<tuinator::SplitPane>(std::move(inner), make_label("bottom"),
+                                                       tuinator::SplitPaneOptions{
+                                                           .orientation = tuinator::SplitOrientation::Vertical,
+                                                           .first_size = 6,
+                                                       });
     outer->set_on_layout([&layout_passes]() { ++layout_passes; });
     outer->layout({0, 0, 40, 20});
 
@@ -76,13 +72,12 @@ TUINATOR_TEST(split_pane_propagates_layout_callback_to_nested_children) {
 }
 
 TUINATOR_TEST(split_pane_outer_border_option) {
-    auto split = std::make_unique<tuinator::SplitPane>(
-        make_label("left"), make_label("right"),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Horizontal,
-            .first_size = 10,
-            .outer_border = true,
-        });
+    auto split = std::make_unique<tuinator::SplitPane>(make_label("left"), make_label("right"),
+                                                       tuinator::SplitPaneOptions{
+                                                           .orientation = tuinator::SplitOrientation::Horizontal,
+                                                           .first_size = 10,
+                                                           .outer_border = true,
+                                                       });
 
     TUINATOR_CHECK(split->wants_outer_border());
 }
@@ -100,19 +95,17 @@ TUINATOR_TEST(split_divider_lines_join_at_adjacent_rows) {
 }
 
 TUINATOR_TEST(split_pane_collects_nested_divider_lines) {
-    auto inner = std::make_unique<tuinator::SplitPane>(
-        make_label("left"), make_label("right"),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Horizontal,
-            .first_size = 10,
-        });
+    auto inner = std::make_unique<tuinator::SplitPane>(make_label("left"), make_label("right"),
+                                                       tuinator::SplitPaneOptions{
+                                                           .orientation = tuinator::SplitOrientation::Horizontal,
+                                                           .first_size = 10,
+                                                       });
 
-    auto outer = std::make_unique<tuinator::SplitPane>(
-        std::move(inner), make_label("bottom"),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Vertical,
-            .first_size = 6,
-        });
+    auto outer = std::make_unique<tuinator::SplitPane>(std::move(inner), make_label("bottom"),
+                                                       tuinator::SplitPaneOptions{
+                                                           .orientation = tuinator::SplitOrientation::Vertical,
+                                                           .first_size = 6,
+                                                       });
     outer->layout({0, 0, 40, 20});
 
     std::vector<tuinator::SplitDividerLine> lines;
@@ -155,12 +148,11 @@ TUINATOR_TEST(split_pane_trims_touching_panel_borders) {
     auto* left_ptr = left.get();
     auto* right_ptr = right.get();
 
-    auto split = std::make_unique<tuinator::SplitPane>(
-        std::move(left), std::move(right),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Horizontal,
-            .first_size = 12,
-        });
+    auto split = std::make_unique<tuinator::SplitPane>(std::move(left), std::move(right),
+                                                       tuinator::SplitPaneOptions{
+                                                           .orientation = tuinator::SplitOrientation::Horizontal,
+                                                           .first_size = 12,
+                                                       });
     split->layout({0, 0, 40, 10});
 
     TUINATOR_CHECK(!left_ptr->border_edges().right);
@@ -174,12 +166,11 @@ TUINATOR_TEST(split_pane_restores_panel_borders_on_relayout) {
     auto right = std::make_unique<tuinator::Panel>("Right");
     auto* left_ptr = left.get();
 
-    auto split = std::make_unique<tuinator::SplitPane>(
-        std::move(left), std::move(right),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Horizontal,
-            .first_size = 12,
-        });
+    auto split = std::make_unique<tuinator::SplitPane>(std::move(left), std::move(right),
+                                                       tuinator::SplitPaneOptions{
+                                                           .orientation = tuinator::SplitOrientation::Horizontal,
+                                                           .first_size = 12,
+                                                       });
 
     split->layout({0, 0, 40, 10});
     TUINATOR_CHECK(!left_ptr->border_edges().right);
@@ -191,20 +182,18 @@ TUINATOR_TEST(split_pane_restores_panel_borders_on_relayout) {
 }
 
 TUINATOR_TEST(split_pane_nested_drag_resizes_each_splitter) {
-    auto inner = std::make_unique<tuinator::SplitPane>(
-        make_label("left"), make_label("right"),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Horizontal,
-            .first_size = 10,
-        });
+    auto inner = std::make_unique<tuinator::SplitPane>(make_label("left"), make_label("right"),
+                                                       tuinator::SplitPaneOptions{
+                                                           .orientation = tuinator::SplitOrientation::Horizontal,
+                                                           .first_size = 10,
+                                                       });
     auto* inner_ptr = inner.get();
 
-    auto outer = std::make_unique<tuinator::SplitPane>(
-        std::move(inner), make_label("bottom"),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Vertical,
-            .first_size = 6,
-        });
+    auto outer = std::make_unique<tuinator::SplitPane>(std::move(inner), make_label("bottom"),
+                                                       tuinator::SplitPaneOptions{
+                                                           .orientation = tuinator::SplitOrientation::Vertical,
+                                                           .first_size = 6,
+                                                       });
     auto* outer_ptr = outer.get();
 
     outer->layout({0, 0, 40, 20});
@@ -212,16 +201,16 @@ TUINATOR_TEST(split_pane_nested_drag_resizes_each_splitter) {
     const tuinator::Point inner_divider = horizontal_divider_point(*inner_ptr, inner_ptr->first_size());
     const tuinator::Point outer_divider = vertical_divider_point(*outer_ptr, outer_ptr->first_size());
 
-    TUINATOR_CHECK(inner_ptr->handle_event(tuinator::MouseEvent{
-        inner_divider, tuinator::MouseButton::Left, tuinator::MouseAction::Press, true}));
+    TUINATOR_CHECK(inner_ptr->handle_event(
+        tuinator::MouseEvent{inner_divider, tuinator::MouseButton::Left, tuinator::MouseAction::Press, true}));
     TUINATOR_CHECK(inner_ptr->handle_event(tuinator::MouseEvent{
         {inner_divider.x + 5, inner_divider.y}, tuinator::MouseButton::Left, tuinator::MouseAction::Move, true}));
     TUINATOR_CHECK_EQ(inner_ptr->first_size(), 15);
     TUINATOR_CHECK(inner_ptr->handle_event(tuinator::MouseEvent{
         {inner_divider.x + 5, inner_divider.y}, tuinator::MouseButton::Left, tuinator::MouseAction::Release, false}));
 
-    TUINATOR_CHECK(outer_ptr->handle_event(tuinator::MouseEvent{
-        outer_divider, tuinator::MouseButton::Left, tuinator::MouseAction::Press, true}));
+    TUINATOR_CHECK(outer_ptr->handle_event(
+        tuinator::MouseEvent{outer_divider, tuinator::MouseButton::Left, tuinator::MouseAction::Press, true}));
     TUINATOR_CHECK(outer_ptr->handle_event(tuinator::MouseEvent{
         {outer_divider.x, outer_divider.y + 4}, tuinator::MouseButton::Left, tuinator::MouseAction::Move, true}));
     TUINATOR_CHECK_EQ(outer_ptr->first_size(), 10);

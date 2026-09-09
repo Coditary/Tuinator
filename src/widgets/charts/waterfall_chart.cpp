@@ -104,8 +104,7 @@ void WaterfallChart::paint(PaintContext& ctx) const {
     const double max_v = range_max(segments);
     const double span = std::max(1e-6, max_v - min_v);
 
-    chart_paint_horizontal_grid(canvas, plot, min_v, max_v, paint_.styles.axis, paint_.styles.grid,
-                                options_.show_axis);
+    chart_paint_horizontal_grid(canvas, plot, min_v, max_v, paint_.styles.axis, paint_.styles.grid, options_.show_axis);
 
     const int count = static_cast<int>(segments.size());
     const int body_w = std::max(1, options_.bar_width);

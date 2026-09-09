@@ -46,9 +46,7 @@ void TreeView::set_selected_index(int index) {
     mark_dirty();
 }
 
-void TreeView::apply_stylesheet(const StyleResolver& styles) {
-    Widget::apply_stylesheet(styles);
-}
+void TreeView::apply_stylesheet(const StyleResolver& styles) { Widget::apply_stylesheet(styles); }
 
 void TreeView::append_visible(TreeNode& node, const std::string& path, int depth) {
     visible_.push_back({&node, path, depth});

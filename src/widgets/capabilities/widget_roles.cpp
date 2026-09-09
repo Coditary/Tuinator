@@ -1,7 +1,12 @@
-#include <tuinator/widgets/capabilities/widget_roles.hpp>
-
+#include <tuinator/layout/box.hpp>
+#include <tuinator/layout/grid.hpp>
 #include <tuinator/render/style_resolver.hpp>
 #include <tuinator/widgets/capabilities.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
+#include <tuinator/widgets/containers/panel.hpp>
+#include <tuinator/widgets/containers/scroll_view.hpp>
+#include <tuinator/widgets/containers/split_pane.hpp>
+#include <tuinator/widgets/containers/tabs.hpp>
 #include <tuinator/widgets/controls/button.hpp>
 #include <tuinator/widgets/controls/checkbox.hpp>
 #include <tuinator/widgets/controls/combo_box.hpp>
@@ -9,17 +14,11 @@
 #include <tuinator/widgets/controls/text_area.hpp>
 #include <tuinator/widgets/controls/text_input.hpp>
 #include <tuinator/widgets/controls/toggle.hpp>
-#include <tuinator/widgets/containers/panel.hpp>
-#include <tuinator/widgets/containers/scroll_view.hpp>
-#include <tuinator/widgets/containers/split_pane.hpp>
-#include <tuinator/widgets/containers/tabs.hpp>
 #include <tuinator/widgets/display/label.hpp>
 #include <tuinator/widgets/display/progress_bar.hpp>
 #include <tuinator/widgets/views/list_view.hpp>
 #include <tuinator/widgets/views/table.hpp>
 #include <tuinator/widgets/views/tree_view.hpp>
-#include <tuinator/layout/box.hpp>
-#include <tuinator/layout/grid.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <algorithm>
@@ -28,43 +27,33 @@ namespace tuinator {
 
 namespace {
 
-template <typename Interface, typename WidgetType>
-Interface* try_as(Widget* widget) {
+template <typename Interface, typename WidgetType> Interface* try_as(Widget* widget) {
     return dynamic_cast<WidgetType*>(widget);
 }
 
-template <typename Interface, typename WidgetType>
-const Interface* try_as(const Widget* widget) {
+template <typename Interface, typename WidgetType> const Interface* try_as(const Widget* widget) {
     return dynamic_cast<const WidgetType*>(widget);
 }
 
 } // namespace
 
 SingleChildContainer* as_single_child_container(Widget* widget) {
-    return try_as<SingleChildContainer, Panel>(widget) != nullptr
-               ? try_as<SingleChildContainer, Panel>(widget)
-               : try_as<SingleChildContainer, ScrollView>(widget);
+    return try_as<SingleChildContainer, Panel>(widget) != nullptr ? try_as<SingleChildContainer, Panel>(widget)
+                                                                  : try_as<SingleChildContainer, ScrollView>(widget);
 }
 
 const SingleChildContainer* as_single_child_container(const Widget* widget) {
-    return try_as<SingleChildContainer, Panel>(widget) != nullptr
-               ? try_as<SingleChildContainer, Panel>(widget)
-               : try_as<SingleChildContainer, ScrollView>(widget);
+    return try_as<SingleChildContainer, Panel>(widget) != nullptr ? try_as<SingleChildContainer, Panel>(widget)
+                                                                  : try_as<SingleChildContainer, ScrollView>(widget);
 }
 
-BinaryContainer* as_binary_container(Widget* widget) {
-    return try_as<BinaryContainer, SplitPane>(widget);
-}
+BinaryContainer* as_binary_container(Widget* widget) { return try_as<BinaryContainer, SplitPane>(widget); }
 
-const BinaryContainer* as_binary_container(const Widget* widget) {
-    return try_as<BinaryContainer, SplitPane>(widget);
-}
+const BinaryContainer* as_binary_container(const Widget* widget) { return try_as<BinaryContainer, SplitPane>(widget); }
 
 BorderedPane* as_bordered_pane(Widget* widget) { return try_as<BorderedPane, Panel>(widget); }
 
-const BorderedPane* as_bordered_pane(const Widget* widget) {
-    return try_as<BorderedPane, Panel>(widget);
-}
+const BorderedPane* as_bordered_pane(const Widget* widget) { return try_as<BorderedPane, Panel>(widget); }
 
 Pane* as_pane(Widget* widget) { return try_as<Pane, Panel>(widget); }
 
@@ -100,9 +89,7 @@ const TextDisplay* as_text_display(const Widget* widget) { return try_as<TextDis
 
 TextInputField* as_text_input_field(Widget* widget) { return try_as<TextInputField, TextInput>(widget); }
 
-const TextInputField* as_text_input_field(const Widget* widget) {
-    return try_as<TextInputField, TextInput>(widget);
-}
+const TextInputField* as_text_input_field(const Widget* widget) { return try_as<TextInputField, TextInput>(widget); }
 
 Activatable* as_activatable(Widget* widget) { return try_as<Activatable, Button>(widget); }
 
@@ -148,9 +135,7 @@ const SelectableList* as_selectable_list(const Widget* widget) {
     return try_as<SelectableList, TreeView>(widget);
 }
 
-MultiLineTextInput* as_multiline_text_input(Widget* widget) {
-    return try_as<MultiLineTextInput, TextArea>(widget);
-}
+MultiLineTextInput* as_multiline_text_input(Widget* widget) { return try_as<MultiLineTextInput, TextArea>(widget); }
 
 const MultiLineTextInput* as_multiline_text_input(const Widget* widget) {
     return try_as<MultiLineTextInput, TextArea>(widget);
@@ -172,8 +157,7 @@ const ValueControl* as_value_control(const Widget* widget) {
 
 bool widget_matches_pseudo(const Widget& widget, WidgetPseudoState pseudo) {
     switch (pseudo) {
-    case WidgetPseudoState::Focused:
-        return widget.is_focused();
+    case WidgetPseudoState::Focused: return widget.is_focused();
     case WidgetPseudoState::Selected:
         if (const auto* list = as_selectable_list(const_cast<Widget*>(&widget))) {
             return list->selected_index() >= 0;
@@ -184,19 +168,16 @@ bool widget_matches_pseudo(const Widget& widget, WidgetPseudoState pseudo) {
             return toggle->is_checked();
         }
         return false;
-    case WidgetPseudoState::Disabled:
-        return !widget.is_enabled();
-    case WidgetPseudoState::Open:
-        return widget.is_dropdown_open();
-    case WidgetPseudoState::Hover:
-        return widget.is_hovered();
+    case WidgetPseudoState::Disabled: return !widget.is_enabled();
+    case WidgetPseudoState::Open: return widget.is_dropdown_open();
+    case WidgetPseudoState::Hover: return widget.is_hovered();
     }
     return false;
 }
 
 bool widget_has_capability(const Widget& widget, WidgetCapability capability) {
-    return std::find(widget_capabilities(widget).begin(), widget_capabilities(widget).end(), capability) !=
-           widget_capabilities(widget).end();
+    const std::vector<WidgetCapability> capabilities = widget_capabilities(widget);
+    return std::find(capabilities.begin(), capabilities.end(), capability) != capabilities.end();
 }
 
 std::vector<WidgetCapability> widget_capabilities(const Widget& widget) {
@@ -306,8 +287,7 @@ void apply_splittable_stylesheet(Splittable& split, Widget& widget, const StyleR
     }
     if (opts.has("orientation")) {
         const std::string orientation = opts.string_or("orientation", "horizontal");
-        options.orientation =
-            orientation == "vertical" ? SplitOrientation::Vertical : SplitOrientation::Horizontal;
+        options.orientation = orientation == "vertical" ? SplitOrientation::Vertical : SplitOrientation::Horizontal;
     }
     split.set_split_options(options);
 }
@@ -328,8 +308,7 @@ void apply_text_input_stylesheet(TextInputField& field, Widget& widget, const St
     }
 }
 
-void apply_multiline_text_input_stylesheet(MultiLineTextInput& field, Widget& widget,
-                                           const StyleResolver& styles) {
+void apply_multiline_text_input_stylesheet(MultiLineTextInput& field, Widget& widget, const StyleResolver& styles) {
     widget.Widget::apply_stylesheet(styles);
     if (auto* area = dynamic_cast<TextArea*>(&widget)) {
         const WidgetOptions opts = styles.options(widget);
@@ -369,8 +348,7 @@ void apply_scroll_view_stylesheet(Widget& widget, const StyleResolver& styles) {
             options.scrollbars = options.scrollbars.with_vertical(opts.bool_or("scrollbar-vertical", true));
         }
         if (opts.has("scrollbar-horizontal")) {
-            options.scrollbars =
-                options.scrollbars.with_horizontal(opts.bool_or("scrollbar-horizontal", false));
+            options.scrollbars = options.scrollbars.with_horizontal(opts.bool_or("scrollbar-horizontal", false));
         }
         view->set_options(options);
     }

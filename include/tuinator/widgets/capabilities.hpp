@@ -1,11 +1,10 @@
 #pragma once
 
 #include <tuinator/core/event.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 
 #include <functional>
 #include <vector>
-
-#include <tuinator/widgets/capabilities/widget_roles.hpp>
 
 namespace tuinator {
 

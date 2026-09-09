@@ -446,9 +446,7 @@ void ProgressBar::set_completed(bool completed) {
     mark_dirty();
 }
 
-void ProgressBar::apply_stylesheet(const StyleResolver& styles) {
-    apply_progress_bar_stylesheet(*this, styles);
-}
+void ProgressBar::apply_stylesheet(const StyleResolver& styles) { apply_progress_bar_stylesheet(*this, styles); }
 
 void ProgressBar::prepare_paint_options(const PaintContext& ctx) const {
     paint_options_ = options_;
@@ -611,8 +609,8 @@ void ProgressBar::paint_filled_label(Canvas& canvas) const {
 
     const int label_width = text_display_width(paint_options_.inside_label);
     const int x = std::max(0, (width - label_width) / 2);
-    draw_label_on_fill(canvas, x, 0, paint_options_.inside_label, fill_start, fill_end, paint_options_.inside_label_style,
-                       paint_options_.fill_style, paint_options_.track_style);
+    draw_label_on_fill(canvas, x, 0, paint_options_.inside_label, fill_start, fill_end,
+                       paint_options_.inside_label_style, paint_options_.fill_style, paint_options_.track_style);
 }
 
 void ProgressBar::paint_shimmer_bar(Canvas& canvas, int x, int y, int bar_width, const Style* fill_override) const {
@@ -697,7 +695,8 @@ void ProgressBar::paint_bounce(Canvas& canvas) const {
     for (int column = 0; column < inner_width; ++column) {
         const bool filled = column >= pos && column < pos + block_width;
         const char ch = filled ? '=' : ' ';
-        canvas.draw_text({1 + column, 0}, std::string(1, ch), filled ? paint_options_.fill_style : paint_options_.track_style);
+        canvas.draw_text({1 + column, 0}, std::string(1, ch),
+                         filled ? paint_options_.fill_style : paint_options_.track_style);
     }
     canvas.draw_text({1 + inner_width, 0}, "]", paint_options_.track_style);
 }
@@ -807,8 +806,8 @@ void ProgressBar::paint_tqdm(Canvas& canvas) const {
     const int eta_ms = stats.rate > 0.0 ? static_cast<int>(remaining / stats.rate * 1000.0) : 0;
 
     std::ostringstream out;
-    out << paint_options_.label << ": " << std::setw(3) << std::setfill(' ') << std::lround(value_ * 100.0) << "%|" << bar
-        << "| " << current << '/' << stats.total << " [" << format_clock(stats.elapsed_ms) << '<'
+    out << paint_options_.label << ": " << std::setw(3) << std::setfill(' ') << std::lround(value_ * 100.0) << "%|"
+        << bar << "| " << current << '/' << stats.total << " [" << format_clock(stats.elapsed_ms) << '<'
         << format_clock(eta_ms) << ", " << std::fixed << std::setprecision(1) << stats.rate << stats.unit << "/s]";
 
     canvas.draw_text({0, 0}, out.str(), paint_options_.label_style);

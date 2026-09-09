@@ -1,10 +1,10 @@
 #include <tuinator/core/application.hpp>
+#include <tuinator/layout/box.hpp>
 #include <tuinator/render/stylesheet.hpp>
 #include <tuinator/widgets/controls/button.hpp>
 #include <tuinator/widgets/controls/toggle.hpp>
 #include <tuinator/widgets/display/progress_bar.hpp>
 #include <tuinator/widgets/views/tree_view.hpp>
-#include <tuinator/layout/box.hpp>
 
 #include "support/test_harness.hpp"
 

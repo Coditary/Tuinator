@@ -65,7 +65,6 @@ void BarChart::apply_stylesheet(const StyleResolver& styles) {
     mark_layout_dirty();
 }
 
-
 double BarChart::value_max() const {
     if (options_.max_value > options_.min_value) {
         return options_.max_value;

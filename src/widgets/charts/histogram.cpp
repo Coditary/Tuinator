@@ -64,8 +64,7 @@ void Histogram::paint(PaintContext& ctx) const {
     const double min_v = options_.min_value;
     const double span = std::max(1e-6, max_v - min_v);
 
-    chart_paint_horizontal_grid(canvas, plot, min_v, max_v, paint_.styles.axis, paint_.styles.grid,
-                                options_.show_axis);
+    chart_paint_horizontal_grid(canvas, plot, min_v, max_v, paint_.styles.axis, paint_.styles.grid, options_.show_axis);
 
     const int count = static_cast<int>(bins_.size());
     const int bar_width = std::max(1, plot.width / std::max(1, count));

@@ -49,8 +49,7 @@ int main() {
     menu->add_child(std::make_unique<tuinator::Label>("File", theme.accent));
     menu->add_child(std::make_unique<tuinator::Label>("Edit", theme.accent));
     menu->add_child(std::make_unique<tuinator::Label>("View", theme.accent));
-    menu->add_child(std::make_unique<tuinator::Label>(
-        "Drag dividers | nested H+V splits | q quit", theme.muted));
+    menu->add_child(std::make_unique<tuinator::Label>("Drag dividers | nested H+V splits | q quit", theme.muted));
     root->add_child(std::move(menu));
 
     auto explorer = std::make_unique<tuinator::Panel>("Explorer", theme.border, theme.heading);
@@ -61,36 +60,32 @@ int main() {
         "Editor", theme, theme.success,
         "int main() {\n    // Drag the vertical divider between editor and preview.\n    return 0;\n}");
 
-    auto preview = make_region_panel(
-        "Preview", theme, theme.danger,
-        "Rendered output\n\nResize horizontally against the editor pane.");
+    auto preview = make_region_panel("Preview", theme, theme.danger,
+                                     "Rendered output\n\nResize horizontally against the editor pane.");
 
-    auto editor_row = std::make_unique<tuinator::SplitPane>(
-        std::move(editor), std::move(preview),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Horizontal,
-            .first_size = 36,
-        });
+    auto editor_row = std::make_unique<tuinator::SplitPane>(std::move(editor), std::move(preview),
+                                                            tuinator::SplitPaneOptions{
+                                                                .orientation = tuinator::SplitOrientation::Horizontal,
+                                                                .first_size = 36,
+                                                            });
 
     auto terminal = make_region_panel(
         "Terminal", theme, theme.accent,
         "$ make split-panes\n$ ./build/tuinator-split-panes\n\nDrag the horizontal divider above this panel.");
 
-    auto editor_column = std::make_unique<tuinator::SplitPane>(
-        std::move(editor_row), std::move(terminal),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Vertical,
-            .first_size = 18,
-        });
+    auto editor_column = std::make_unique<tuinator::SplitPane>(std::move(editor_row), std::move(terminal),
+                                                               tuinator::SplitPaneOptions{
+                                                                   .orientation = tuinator::SplitOrientation::Vertical,
+                                                                   .first_size = 18,
+                                                               });
     editor_column->set_flex(1);
 
-    auto workspace = std::make_unique<tuinator::SplitPane>(
-        std::move(explorer), std::move(editor_column),
-        tuinator::SplitPaneOptions{
-            .orientation = tuinator::SplitOrientation::Horizontal,
-            .first_size = 24,
-            .outer_border = true,
-        });
+    auto workspace = std::make_unique<tuinator::SplitPane>(std::move(explorer), std::move(editor_column),
+                                                           tuinator::SplitPaneOptions{
+                                                               .orientation = tuinator::SplitOrientation::Horizontal,
+                                                               .first_size = 24,
+                                                               .outer_border = true,
+                                                           });
     workspace->set_flex(1);
     root->add_child(std::move(workspace));
 

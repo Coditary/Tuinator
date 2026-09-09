@@ -1,10 +1,10 @@
 #include <tuinator/backend/inline_backend.hpp>
 #include <tuinator/core/application.hpp>
-#include <tuinator/render/style_resolver.hpp>
 #include <tuinator/debug/debug_paint.hpp>
 #include <tuinator/debug/startup_profiler.hpp>
 #include <tuinator/render/graphics_protocol.hpp>
 #include <tuinator/render/paint_context.hpp>
+#include <tuinator/render/style_resolver.hpp>
 #include <tuinator/render/theme.hpp>
 #include <tuinator/widgets/capabilities.hpp>
 #include <tuinator/widgets/containers/split_pane.hpp>
@@ -118,9 +118,7 @@ void Application::load_stylesheet(const std::filesystem::path& path) {
     set_stylesheet(Stylesheet::load_from_file(path));
 }
 
-const Stylesheet* Application::stylesheet() const {
-    return stylesheet_.has_value() ? &*stylesheet_ : nullptr;
-}
+const Stylesheet* Application::stylesheet() const { return stylesheet_.has_value() ? &*stylesheet_ : nullptr; }
 
 void Application::sync_stylesheet() {
     if (!root_ || !stylesheet_.has_value()) {

@@ -28,9 +28,7 @@ void Toggle::set_label(std::string label) {
     mark_dirty();
 }
 
-void Toggle::apply_stylesheet(const StyleResolver& styles) {
-    Widget::apply_stylesheet(styles);
-}
+void Toggle::apply_stylesheet(const StyleResolver& styles) { Widget::apply_stylesheet(styles); }
 
 void Toggle::set_checked(bool checked) {
     if (checked_ == checked) {

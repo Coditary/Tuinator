@@ -1,10 +1,10 @@
+#include <tuinator/layout/grid.hpp>
 #include <tuinator/render/style_resolver.hpp>
 #include <tuinator/render/stylesheet.hpp>
 #include <tuinator/render/widget_option_schema.hpp>
 #include <tuinator/widgets/controls/button.hpp>
 #include <tuinator/widgets/controls/checkbox.hpp>
 #include <tuinator/widgets/controls/combo_box.hpp>
-#include <tuinator/layout/grid.hpp>
 
 #include "support/test_harness.hpp"
 

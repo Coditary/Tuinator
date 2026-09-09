@@ -1,8 +1,7 @@
-#include <tuinator/widgets/charts/chart_widget.hpp>
-
 #include <tuinator/render/widget_options.hpp>
 #include <tuinator/widgets/charts/bar_chart.hpp>
 #include <tuinator/widgets/charts/candlestick_chart.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
 #include <tuinator/widgets/charts/gauge_chart.hpp>
 #include <tuinator/widgets/charts/heatmap.hpp>
 #include <tuinator/widgets/charts/histogram.hpp>
@@ -24,13 +23,11 @@ std::string lowercase(std::string value) {
     return value;
 }
 
-template <typename Interface, typename WidgetType>
-Interface* try_as(Widget* widget) {
+template <typename Interface, typename WidgetType> Interface* try_as(Widget* widget) {
     return dynamic_cast<WidgetType*>(widget);
 }
 
-template <typename Interface, typename WidgetType>
-const Interface* try_as(const Widget* widget) {
+template <typename Interface, typename WidgetType> const Interface* try_as(const Widget* widget) {
     return dynamic_cast<const WidgetType*>(widget);
 }
 
@@ -153,8 +150,6 @@ ChartWidget* as_chart_widget(Widget* widget) {
     return nullptr;
 }
 
-const ChartWidget* as_chart_widget(const Widget* widget) {
-    return as_chart_widget(const_cast<Widget*>(widget));
-}
+const ChartWidget* as_chart_widget(const Widget* widget) { return as_chart_widget(const_cast<Widget*>(widget)); }
 
 } // namespace tuinator

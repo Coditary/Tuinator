@@ -23,9 +23,7 @@ void Slider::set_min_width(int min_width) {
     mark_layout_dirty();
 }
 
-void Slider::apply_stylesheet(const StyleResolver& styles) {
-    apply_value_control_stylesheet(*this, *this, styles);
-}
+void Slider::apply_stylesheet(const StyleResolver& styles) { apply_value_control_stylesheet(*this, *this, styles); }
 
 void Slider::set_value_internal(int value, bool notify) {
     const int clamped = std::clamp(value, min_value_, max_value_);
