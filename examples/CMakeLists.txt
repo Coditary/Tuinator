@@ -18,7 +18,6 @@ foreach(demo IN LISTS TUINATOR_DEMOS)
         add_executable(tuinator-${demo} ${demo}.cpp)
     endif()
     target_link_libraries(tuinator-${demo} PRIVATE tuinator::tuinator)
-    set_target_properties(tuinator-${demo} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 endforeach()
 
 target_compile_definitions(tuinator-image PRIVATE
