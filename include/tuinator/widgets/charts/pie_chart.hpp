@@ -1,6 +1,9 @@
 #pragma once
 
 #include <tuinator/render/style.hpp>
+#include <tuinator/render/style_resolver.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
+#include <tuinator/widgets/charts/chart_widget_paint.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <functional>
@@ -52,7 +55,7 @@ const PieChartStyleInfo* pie_chart_style_named(const char* id);
 const std::vector<PieChartStyleInfo>& all_pie_chart_styles();
 std::string pie_chart_glyph_for(PieChartStyle style, const std::string& custom = {});
 
-class PieChart : public Widget {
+class PieChart : public Widget, public ChartWidget {
   public:
     PieChart(std::vector<PieChartSlice> slices = {}, PieChartOptions options = {});
 
@@ -65,6 +68,9 @@ class PieChart : public Widget {
     void set_rotation(double radians);
     void set_interactive(bool interactive);
     void set_on_change(std::function<void(const std::vector<PieChartSlice>&)> callback);
+
+    std::string_view widget_type_name() const override { return "PieChart"; }
+    void apply_stylesheet(const StyleResolver& styles) override;
 
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
@@ -98,6 +104,7 @@ class PieChart : public Widget {
 
     std::vector<PieChartSlice> slices_;
     PieChartOptions options_;
+    mutable ChartPaintSupport paint_{};
     std::function<void(const std::vector<PieChartSlice>&)> on_change_;
 
     bool dragging_ = false;

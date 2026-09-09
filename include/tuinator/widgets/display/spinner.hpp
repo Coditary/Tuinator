@@ -15,6 +15,8 @@ class Spinner : public Widget {
     int value() const { return value_; }
     void set_value(int value);
 
+    std::string_view widget_type_name() const override { return "Spinner"; }
+
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
     bool handle_event(const Event& event) override;

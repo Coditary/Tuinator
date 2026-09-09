@@ -45,7 +45,12 @@ void Label::layout(Rect bounds) { bounds_ = bounds; }
 
 void Label::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;
-    if (text_.empty() || bounds_.width <= 0 || bounds_.height <= 0) {
+    if (bounds_.width <= 0 || bounds_.height <= 0) {
+        return;
+    }
+
+    paint_bounds_background(ctx, style_);
+    if (text_.empty()) {
         return;
     }
 
@@ -71,7 +76,8 @@ void Label::paint(PaintContext& ctx) const {
         if (byte_length == 0) {
             break;
         }
-        canvas.draw_text({x, y}, line.substr(0, byte_length), style_);
+        const Style style = ctx.styles().text(*this, style_);
+        canvas.draw_text({x, y}, line.substr(0, byte_length), style);
 
         if (end >= text_.size()) {
             break;

@@ -15,6 +15,8 @@ class ImageView : public Widget {
     void set_image(TerminalImage image);
     void set_display_cells(Size cells);
 
+    std::string_view widget_type_name() const override { return "ImageView"; }
+
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 

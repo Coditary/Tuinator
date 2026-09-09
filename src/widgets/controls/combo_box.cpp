@@ -1,5 +1,6 @@
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/controls/combo_box.hpp>
 
 #include <algorithm>
@@ -46,6 +47,13 @@ void ComboBox::set_on_select(std::function<void(int, const std::string&)> callba
     on_select_ = std::move(callback);
 }
 
+void ComboBox::set_min_width(int min_width) {
+    min_width_ = std::max(1, min_width);
+    mark_layout_dirty();
+}
+
+void ComboBox::apply_stylesheet(const StyleResolver& styles) { apply_value_control_stylesheet(*this, *this, styles); }
+
 void ComboBox::select_index(int index, bool notify) {
     if (items_.empty()) {
         selected_index_ = 0;
@@ -62,7 +70,7 @@ void ComboBox::select_index(int index, bool notify) {
 }
 
 Size ComboBox::preferred_size() const {
-    int width = 12;
+    int width = min_width_;
     for (const std::string& item : items_) {
         width = std::max(width, text_display_width(item) + 6);
     }
@@ -88,9 +96,15 @@ void ComboBox::paint(PaintContext& ctx) const {
         return;
     }
 
+    const StyleResolver& styles = ctx.styles();
+    const Style item_style = styles.text(*this, item_style_);
+    const Style focused_style = styles.focused(*this, focused_style_);
+    const Style selected_style = styles.selected(*this, selected_style_);
+    paint_bounds_background(ctx, item_style);
+
     const std::string& current = items_[static_cast<std::size_t>(selected_index_)];
     const std::string header = "[ " + current + (open_ ? " v]" : " >]");
-    const Style header_style = is_focused() ? focused_style_ : item_style_;
+    const Style& header_style = is_focused() ? focused_style : item_style;
     canvas.draw_text({0, 0}, header, header_style);
 
     if (!open_ || bounds_.height <= 1) {
@@ -105,7 +119,7 @@ void ComboBox::paint(PaintContext& ctx) const {
         }
 
         const bool selected = index == selected_index_;
-        const Style& style = selected ? selected_style_ : item_style_;
+        const Style& style = selected ? selected_style : item_style;
         const std::string prefix = selected ? "> " : "  ";
         const std::string& item = items_[static_cast<std::size_t>(index)];
         const int max_columns = std::max(0, bounds_.width - static_cast<int>(prefix.size()));

@@ -1,0 +1,49 @@
+---
+description: Tuinator TUI rendering rules — avoid screen artifacts and ghost characters
+globs: src/widgets/**/*,include/tuinator/widgets/**/*,examples/**/*,src/core/application.cpp,src/render/**/*
+alwaysApply: false
+---
+
+# Tuinator rendering
+
+Read `docs/rendering-pitfalls.md` for full detail. Apply these rules when creating or editing widgets, examples, or paint code.
+
+## Must do
+
+1. **Root UI** — Use `make_screen()` / `VBox` / `Panel` as app root, not a lone `Label`/`Button`.
+2. **Paint** — Start every custom `paint()` with `paint_bounds_background(ctx, style_)`.
+3. **Dirty** — Call `mark_dirty(bounds_)` when visual state changes; do not rely on `request_redraw()` alone for local updates.
+4. **UTF-8** — Clip with `text_byte_length_for_width(text, columns)`, never `substr(0, columns)`.
+5. **Charts/lists** — Place inside a layout container with explicit bounds.
+
+## Must not
+
+- Draw text only without clearing bounds first (causes ghost chars on partial redraw).
+- Use byte index as terminal column index for UTF-8 strings.
+- Remove `ImageView` content without clearing (use `set_image({})` — it invalidates graphics).
+- Assume `HBox`/`VBox` parent exists unless you control the app root.
+
+## Minimal widget paint pattern
+
+```cpp
+void MyWidget::paint(PaintContext& ctx) const {
+    if (bounds_.width <= 0 || bounds_.height <= 0) return;
+    paint_bounds_background(ctx, style_);
+    // draw content...
+}
+
+void MyWidget::set_value(...) {
+    value_ = ...;
+    mark_dirty(bounds_);
+}
+```
+
+## Minimal app pattern
+
+```cpp
+auto root = tuinator::make_screen({.gap = 1, .padding = 1});
+root->add_child(std::make_unique<tuinator::Label>("...", theme.label));
+return tuinator::run_screen(app, std::move(root));
+```
+
+Reference demos: `docs/golden-examples.md`. Debug renders: `TUINATOR_DEBUG_PAINT=1`.

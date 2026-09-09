@@ -35,6 +35,8 @@ class Throbber : public Widget {
     void set_frame(int index);
     void tick(int dt_ms = 0);
 
+    std::string_view widget_type_name() const override { return "Throbber"; }
+
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 

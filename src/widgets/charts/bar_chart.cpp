@@ -1,6 +1,8 @@
 #include <tuinator/core/event.hpp>
+#include <tuinator/render/paint_context.hpp>
 #include <tuinator/render/text.hpp>
 #include <tuinator/widgets/charts/bar_chart.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -54,6 +56,13 @@ void BarChart::set_interactive(bool interactive) {
 
 void BarChart::set_on_change(std::function<void(const std::vector<BarChartBar>&)> callback) {
     on_change_ = std::move(callback);
+}
+
+void BarChart::apply_stylesheet(const StyleResolver& styles) {
+    apply_chart_stylesheet(*this, styles,
+                           {&options_.min_width, &options_.min_height, &options_.show_axis, &options_.show_grid,
+                            &options_.style, &options_.custom_glyph});
+    mark_layout_dirty();
 }
 
 double BarChart::value_max() const {
@@ -117,12 +126,12 @@ void BarChart::paint_grid_vertical(Canvas& canvas, const PlotArea& plot, double 
     const int lines = 4;
     for (int i = 0; i <= lines; ++i) {
         const int y = plot.top + plot.height - 1 - (i * (plot.height - 1) / lines);
-        canvas.draw_hline(plot.left, y, plot.width, options_.grid_style);
+        canvas.draw_hline(plot.left, y, plot.width, paint_.styles.grid);
 
         if (options_.show_axis) {
             const double value = min_v + (max_v - min_v) * static_cast<double>(i) / lines;
             const std::string label = format_axis_value(value);
-            canvas.draw_text({0, y}, label, options_.axis_style);
+            canvas.draw_text({0, y}, label, paint_.styles.axis);
         }
     }
 }
@@ -135,15 +144,15 @@ void BarChart::paint_grid_horizontal(Canvas& canvas, const PlotArea& plot, doubl
     const int lines = 4;
     for (int i = 0; i <= lines; ++i) {
         const int x = plot.left + (i * (plot.width - 1) / lines);
-        canvas.draw_vline(x, plot.top, plot.height, options_.grid_style);
+        canvas.draw_vline(x, plot.top, plot.height, paint_.styles.grid);
 
         if (options_.show_axis && i == lines) {
             const std::string label = format_axis_value(max_v);
             const int label_x = std::max(0, x - static_cast<int>(label.size()) + 1);
-            canvas.draw_text({label_x, plot.top + plot.height}, label, options_.axis_style);
+            canvas.draw_text({label_x, plot.top + plot.height}, label, paint_.styles.axis);
         }
         if (options_.show_axis && i == 0) {
-            canvas.draw_text({plot.left, plot.top + plot.height}, format_axis_value(min_v), options_.axis_style);
+            canvas.draw_text({plot.left, plot.top + plot.height}, format_axis_value(min_v), paint_.styles.axis);
         }
     }
 }
@@ -190,7 +199,7 @@ void BarChart::paint_vertical(Canvas& canvas, const PlotArea& plot) const {
     const double span = value_span();
 
     if (!options_.title.empty()) {
-        canvas.draw_text({0, 0}, options_.title, options_.title_style);
+        canvas.draw_text({0, 0}, options_.title, paint_.styles.title);
     }
 
     paint_grid_vertical(canvas, plot, min_v, max_v);
@@ -212,12 +221,12 @@ void BarChart::paint_vertical(Canvas& canvas, const PlotArea& plot) const {
             value << std::fixed << std::setprecision(0) << bar.value;
             const int value_y = std::max(plot.top, y - 1);
             canvas.draw_text({x, value_y}, value.str(),
-                             options_.value_style.foreground == Color::Default ? bar.style : options_.value_style);
+                             paint_.styles.value.foreground == Color::Default ? bar.style : paint_.styles.value);
         }
 
         if (options_.show_labels) {
-            const std::string label = bar.label.substr(0, static_cast<std::size_t>(bar_width + 1));
-            canvas.draw_text({x, plot.top + plot.height}, label, options_.axis_style);
+            const std::size_t bytes = text_byte_length_for_width(bar.label, bar_width + 1);
+            canvas.draw_text({x, plot.top + plot.height}, bar.label.substr(0, bytes), paint_.styles.axis);
         }
     }
 }
@@ -232,7 +241,7 @@ void BarChart::paint_horizontal(Canvas& canvas, const PlotArea& plot) const {
     const double span = value_span();
 
     if (!options_.title.empty()) {
-        canvas.draw_text({0, 0}, options_.title, options_.title_style);
+        canvas.draw_text({0, 0}, options_.title, paint_.styles.title);
     }
 
     paint_grid_horizontal(canvas, plot, min_v, max_v);
@@ -254,7 +263,7 @@ void BarChart::paint_horizontal(Canvas& canvas, const PlotArea& plot) const {
         const int x = plot.left + label_width + 1;
 
         if (options_.show_labels) {
-            canvas.draw_text({plot.left, y}, bar.label, options_.axis_style);
+            canvas.draw_text({plot.left, y}, bar.label, paint_.styles.axis);
         }
 
         fill_horizontal_bar(canvas, x, y, filled, std::max(1, row_height - 1), bar.style);
@@ -263,7 +272,7 @@ void BarChart::paint_horizontal(Canvas& canvas, const PlotArea& plot) const {
             std::ostringstream value;
             value << std::fixed << std::setprecision(0) << bar.value;
             canvas.draw_text({x + filled + 1, y}, value.str(),
-                             options_.value_style.foreground == Color::Default ? bar.style : options_.value_style);
+                             paint_.styles.value.foreground == Color::Default ? bar.style : paint_.styles.value);
         }
     }
 }
@@ -274,6 +283,8 @@ void BarChart::paint(PaintContext& ctx) const {
         return;
     }
 
+    paint_.prepare(ctx, *this, options_.title_style, options_.axis_style, options_.grid_style, options_.value_style);
+    chart_paint_background(ctx, *this, bounds_.size());
     const PlotArea plot = compute_plot();
     if (options_.orientation == BarChartOrientation::Horizontal) {
         paint_horizontal(canvas, plot);

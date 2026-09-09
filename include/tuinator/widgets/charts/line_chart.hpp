@@ -1,6 +1,9 @@
 #pragma once
 
+#include <tuinator/render/style_resolver.hpp>
 #include <tuinator/widgets/charts/chart_common.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
+#include <tuinator/widgets/charts/chart_widget_paint.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <string>
@@ -41,7 +44,7 @@ struct LineChartOptions {
     Style legend_style{};
 };
 
-class LineChart : public Widget {
+class LineChart : public Widget, public ChartWidget {
   public:
     LineChart(std::vector<LineChartSeries> series = {}, LineChartOptions options = {});
 
@@ -53,6 +56,9 @@ class LineChart : public Widget {
     void set_style(ChartGlyphStyle style);
     void set_mode(LineChartMode mode);
     void push_value(std::size_t series_index, double value, std::size_t max_points = 0);
+
+    std::string_view widget_type_name() const override { return "LineChart"; }
+    void apply_stylesheet(const StyleResolver& styles) override;
 
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
@@ -81,6 +87,7 @@ class LineChart : public Widget {
 
     std::vector<LineChartSeries> series_;
     LineChartOptions options_;
+    mutable ChartPaintSupport paint_{};
 };
 
 } // namespace tuinator

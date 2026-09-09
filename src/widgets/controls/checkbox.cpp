@@ -281,12 +281,15 @@ void Checkbox::paint(PaintContext& ctx) const {
 
     const std::string& marker = checked_ ? options_.glyphs.checked : options_.glyphs.unchecked;
 
+    const StyleResolver& styles = ctx.styles();
     Style marker_style = checked_ ? options_.marker_checked_style : options_.marker_style;
+    marker_style = styles.text(*this, marker_style);
     Style label_style =
         checked_ && !style_is_empty(options_.label_checked_style) ? options_.label_checked_style : options_.label_style;
+    label_style = styles.text(*this, label_style);
 
     if (is_focused() && options_.highlight_row_on_focus) {
-        const Style row = options_.focused_style;
+        const Style row = styles.focused(*this, options_.focused_style);
         const int text_width =
             text_display_width(marker) + text_display_width(options_.glyphs.gap) + text_display_width(label_);
         const int highlight_width = std::min(bounds_.width, text_width);

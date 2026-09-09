@@ -1,6 +1,9 @@
 #pragma once
 
+#include <tuinator/render/style_resolver.hpp>
 #include <tuinator/widgets/charts/chart_common.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
+#include <tuinator/widgets/charts/chart_widget_paint.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <string>
@@ -30,7 +33,7 @@ struct GaugeChartOptions {
     Style tick_style{};
 };
 
-class GaugeChart : public Widget {
+class GaugeChart : public Widget, public ChartWidget {
   public:
     GaugeChart(double value = 0.0, GaugeChartOptions options = {});
 
@@ -40,15 +43,21 @@ class GaugeChart : public Widget {
     void set_value(double value);
     void set_options(GaugeChartOptions options);
 
+    std::string_view widget_type_name() const override { return "GaugeChart"; }
+    void apply_stylesheet(const StyleResolver& styles) override;
+
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
   private:
-    void paint_arc(Canvas& canvas, int cx, int cy, int radius) const;
-    void paint_horizontal(Canvas& canvas, int x, int y, int width) const;
+    void paint_arc(Canvas& canvas, int cx, int cy, int radius, const Style& fill_style, const Style& track_style,
+                   const Style& tick_style) const;
+    void paint_horizontal(Canvas& canvas, int x, int y, int width, const Style& fill_style,
+                          const Style& track_style) const;
 
     double value_ = 0.0;
     GaugeChartOptions options_;
+    mutable ChartPaintSupport paint_{};
 };
 
 } // namespace tuinator

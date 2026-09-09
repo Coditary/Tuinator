@@ -1,6 +1,8 @@
 #pragma once
 
 #include <tuinator/render/style.hpp>
+#include <tuinator/render/style_resolver.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <functional>
@@ -8,16 +10,21 @@
 
 namespace tuinator {
 
-class Toggle : public Widget {
+class Toggle : public Widget, public ToggleControl {
   public:
     Toggle(std::string label, bool checked = false, std::function<void(bool)> on_change = {}, Style style = {},
            Style checked_style = {});
 
     const std::string& label() const { return label_; }
     bool checked() const { return checked_; }
+    bool is_checked() const override { return checked_; }
 
     void set_label(std::string label);
-    void set_checked(bool checked);
+    void set_checked(bool checked) override;
+
+    std::string_view widget_type_name() const override { return "Toggle"; }
+    bool wants_hover() const override { return true; }
+    void apply_stylesheet(const StyleResolver& styles) override;
 
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;

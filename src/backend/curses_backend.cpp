@@ -5,6 +5,7 @@
 #include <tuinator/render/graphics_protocol.hpp>
 #include <tuinator/render/terminal_image.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/render/tty_overlay.hpp>
 
 #include <array>
 #include <clocale>
@@ -409,6 +410,11 @@ void CursesBackend::init() {
     scrollok(stdscr, FALSE);
     timeout(poll_timeout_ms_);
 
+    if (alternate_screen()) {
+        write_tty_sequence("\033[?1049h");
+        alternate_screen_active_ = true;
+    }
+
     erase();
     refresh();
     startup_profile_mark("curses.after_initial_refresh");
@@ -573,6 +579,14 @@ void CursesBackend::shutdown() {
 
     disable_mouse();
     cleanup_kitty_graphics();
+    if (FILE* output = output_stream()) {
+        if (alternate_screen_active_) {
+            send_tty_sequence_to(output, "\033[?1049l");
+            alternate_screen_active_ = false;
+        } else if (clear_on_shutdown()) {
+            send_tty_sequence_to(output, "\033[2J");
+        }
+    }
     reset_tty_attributes();
     endwin();
 #if defined(TUINATOR_BACKEND_NCURSES)
@@ -705,6 +719,7 @@ void CursesBackend::begin_frame(BeginFrameOptions options) {
     if (options.full_redraw) {
         frame_clip_ = terminal;
         if (options.clear_buffer) {
+            cleanup_kitty_graphics();
             if (FILE* output = output_stream()) {
                 send_tty_sequence_to(output, "\033[2J");
             }
@@ -715,6 +730,33 @@ void CursesBackend::begin_frame(BeginFrameOptions options) {
 
     frame_clip_ = intersect(options.dirty_region, terminal);
     clear_region(options.dirty_region);
+    clear_partial_overlays(frame_clip_);
+}
+
+void CursesBackend::clear_partial_overlays(Rect region) {
+    if (region.width <= 0 || region.height <= 0) {
+        return;
+    }
+
+    if (FILE* output = output_stream()) {
+        clear_tty_overlay_region(output, region, terminal_size());
+    }
+
+    const Rect kitty = kitty_placement_rect();
+    if (kitty.width > 0 && kitty.height > 0) {
+        const Rect overlap = intersect(region, kitty);
+        if (overlap.width > 0 && overlap.height > 0) {
+            cleanup_kitty_graphics();
+        }
+    }
+}
+
+Rect CursesBackend::kitty_placement_rect() const {
+    if (!kitty_image_ready_ || last_kitty_placement_.cols <= 0 || last_kitty_placement_.rows <= 0) {
+        return {};
+    }
+
+    return {last_kitty_placement_.x, last_kitty_placement_.y, last_kitty_placement_.cols, last_kitty_placement_.rows};
 }
 
 bool CursesBackend::ansi_draw_visible(const AnsiDraw& draw) const {

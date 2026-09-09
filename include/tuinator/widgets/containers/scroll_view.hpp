@@ -2,7 +2,9 @@
 
 #include <tuinator/render/scrollbar.hpp>
 #include <tuinator/render/style.hpp>
+#include <tuinator/render/style_resolver.hpp>
 #include <tuinator/widgets/capabilities.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <memory>
@@ -16,11 +18,12 @@ struct ScrollViewOptions {
     Style background{};
 };
 
-class ScrollView : public Widget, public Scrollable {
+class ScrollView : public Widget, public Scrollable, public SingleChildContainer {
   public:
     explicit ScrollView(std::unique_ptr<Widget> content, ScrollViewOptions options = {});
 
-    Widget* content() const { return content_.get(); }
+    Widget* content() const override { return content_.get(); }
+    void set_content(std::unique_ptr<Widget> content) override;
     int scroll_x() const override { return scroll_x_; }
     int scroll_y() const override { return scroll_y_; }
     int max_scroll_x() const;
@@ -48,6 +51,12 @@ class ScrollView : public Widget, public Scrollable {
     Widget* hit_test(Point point) override;
     Widget* hit_test_focusable(Point point) override;
     void for_each_child(const std::function<void(Widget*)>& visitor) override;
+
+    const ScrollViewOptions& options() const { return options_; }
+    void set_options(ScrollViewOptions options);
+
+    std::string_view widget_type_name() const override { return "ScrollView"; }
+    void apply_stylesheet(const StyleResolver& styles) override;
 
   private:
     void clamp_scroll();

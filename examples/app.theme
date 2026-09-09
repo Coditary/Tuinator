@@ -1,0 +1,78 @@
+# Tuinator stylesheet demo
+
+@theme {
+  glyph-set: unicode;
+  border-style: light;
+  accent: #58a6ff;
+  muted: #a8b2c0;
+}
+
+* {
+  color: white;
+}
+
+Label {
+  color: $muted;
+}
+
+Button {
+  color: white;
+}
+
+Button:focused {
+  color: black bold;
+  background: cyan;
+}
+
+Checkbox:checked {
+  color: green;
+}
+
+TextInput {
+  color: white;
+  focused-color: bold cyan;
+}
+
+ListView {
+  selected-color: yellow bold;
+}
+
+Table {
+  title-color: bold cyan;
+  selected-color: magenta;
+}
+
+Tabs {
+  selected-color: black bold;
+  selected-background: cyan;
+}
+
+.accent {
+  color: cyan;
+  bold: true;
+}
+
+.muted {
+  color: #6b7280;
+}
+
+Panel {
+  border-color: dim cyan;
+  title-color: bold cyan;
+}
+
+SplitPane {
+  divider-color: dim white;
+}
+
+#workspace {
+  divider-color: magenta;
+  outer-border: true;
+  first-size: 22;
+  min-pane-size: 6;
+}
+
+.sidebar {
+  border-left: true;
+  border-right: false;
+}

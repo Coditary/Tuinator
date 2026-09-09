@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tuinator/render/style.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <functional>
@@ -14,19 +15,23 @@ struct TableColumn {
     int width = 10;
 };
 
-class Table : public Widget {
+class Table : public Widget, public SelectableList {
   public:
     Table(Style header_style = {}, Style cell_style = {}, Style selected_style = {});
 
     const std::vector<TableColumn>& columns() const { return columns_; }
     const std::vector<std::vector<std::string>>& rows() const { return rows_; }
     int selected_row() const { return selected_row_; }
+    int selected_index() const override { return selected_row_; }
 
     void set_columns(std::vector<TableColumn> columns);
     void set_rows(std::vector<std::vector<std::string>> rows);
     void add_row(std::vector<std::string> cells);
     void set_selected_row(int row);
+    void set_selected_index(int index) override { set_selected_row(index); }
     void set_on_activate(std::function<void(int row, const std::vector<std::string>& cells)> callback);
+
+    std::string_view widget_type_name() const override { return "Table"; }
 
     Size preferred_size() const override;
     void layout(Rect bounds) override;

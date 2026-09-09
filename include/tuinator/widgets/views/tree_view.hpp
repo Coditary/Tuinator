@@ -1,6 +1,8 @@
 #pragma once
 
 #include <tuinator/render/style.hpp>
+#include <tuinator/render/style_resolver.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <functional>
@@ -15,15 +17,20 @@ struct TreeNode {
     bool expanded = true;
 };
 
-class TreeView : public Widget {
+class TreeView : public Widget, public SelectableList {
   public:
     TreeView(Style item_style = {}, Style selected_style = {});
 
     void set_root(TreeNode root);
     const TreeNode& root() const { return root_; }
 
-    int selected_index() const { return selected_index_; }
+    int selected_index() const override { return selected_index_; }
+    void set_selected_index(int index) override;
     void set_on_select(std::function<void(const std::string& path)> callback);
+
+    std::string_view widget_type_name() const override { return "TreeView"; }
+    bool wants_hover() const override { return true; }
+    void apply_stylesheet(const StyleResolver& styles) override;
 
     Size preferred_size() const override;
     void layout(Rect bounds) override;

@@ -160,6 +160,8 @@ void Canvas::draw_image(Point position, Size cell_size, const TerminalImage& ima
     backend_.draw_image(visible.x, visible.y, visible.size(), image);
 }
 
+void Canvas::invalidate_graphics() { backend_.invalidate_graphics(); }
+
 void Canvas::with_clip(Rect rect, const std::function<void(Canvas&)>& draw) const {
     const Point child_origin{origin_.x + rect.x, origin_.y + rect.y};
     const Rect child_clip = intersect(clip_, {child_origin.x, child_origin.y, rect.width, rect.height});

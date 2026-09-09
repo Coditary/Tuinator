@@ -36,6 +36,18 @@ void TreeView::set_root(TreeNode root) {
 
 void TreeView::set_on_select(std::function<void(const std::string&)> callback) { on_select_ = std::move(callback); }
 
+void TreeView::set_selected_index(int index) {
+    if (visible_.empty()) {
+        selected_index_ = 0;
+        return;
+    }
+
+    selected_index_ = std::clamp(index, 0, static_cast<int>(visible_.size()) - 1);
+    mark_dirty();
+}
+
+void TreeView::apply_stylesheet(const StyleResolver& styles) { Widget::apply_stylesheet(styles); }
+
 void TreeView::append_visible(TreeNode& node, const std::string& path, int depth) {
     visible_.push_back({&node, path, depth});
 
@@ -86,6 +98,11 @@ void TreeView::paint(PaintContext& ctx) const {
         return;
     }
 
+    const StyleResolver& styles = ctx.styles();
+    const Style item_style = styles.text(*this, item_style_);
+    const Style selected_style = styles.selected(*this, selected_style_);
+    paint_bounds_background(ctx, item_style);
+
     for (int row = 0; row < bounds_.height; ++row) {
         const int index = scroll_y_ + row;
         if (index < 0 || index >= static_cast<int>(visible_.size())) {
@@ -99,7 +116,7 @@ void TreeView::paint(PaintContext& ctx) const {
         const std::string indent(static_cast<std::size_t>(entry.depth * 2), ' ');
         const std::string line = indent + marker + entry.node->label;
 
-        const Style& style = selected ? selected_style_ : item_style_;
+        const Style& style = selected ? selected_style : item_style;
         const int max_columns = std::max(0, bounds_.width);
         const std::size_t bytes = text_byte_length_for_width(line, max_columns);
         canvas.draw_text({0, row}, std::string_view(line.data(), bytes), style);

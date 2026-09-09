@@ -28,6 +28,8 @@ void Toggle::set_label(std::string label) {
     mark_dirty();
 }
 
+void Toggle::apply_stylesheet(const StyleResolver& styles) { Widget::apply_stylesheet(styles); }
+
 void Toggle::set_checked(bool checked) {
     if (checked_ == checked) {
         return;
@@ -51,15 +53,18 @@ void Toggle::paint(PaintContext& ctx) const {
         return;
     }
 
+    paint_bounds_background(ctx, style_);
+
     const std::string marker = checked_ ? "[X]" : "[ ]";
     const std::string text = marker + " " + label_;
 
-    Style active = style_;
+    const StyleResolver& styles = ctx.styles();
+    Style active = styles.text(*this, style_);
     if (checked_) {
-        active = checked_style_;
+        active = styles.selected(*this, checked_style_);
     }
     if (is_focused()) {
-        active = focused_style_;
+        active = styles.focused(*this, focused_style_);
     }
 
     canvas.draw_text({0, 0}, text, active);

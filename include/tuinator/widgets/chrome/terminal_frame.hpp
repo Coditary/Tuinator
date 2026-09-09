@@ -55,6 +55,8 @@ class TerminalFrame : public Widget {
 
     void set_on_dirty(std::function<void(Rect)> callback) override;
 
+    std::string_view widget_type_name() const override { return "TerminalFrame"; }
+
     Size preferred_size() const override;
     void layout(Rect bounds) override;
     void paint(PaintContext& ctx) const override;

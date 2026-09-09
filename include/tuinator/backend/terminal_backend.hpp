@@ -16,6 +16,7 @@ class TerminalImage;
 struct BeginFrameOptions {
     bool full_redraw = true;
     /// When false on a full redraw, the previous frame stays visible until paint overwrites it.
+    /// Application always sets this to true on full redraws to avoid stale screen artifacts.
     bool clear_buffer = true;
     Rect dirty_region{};
 };
@@ -58,11 +59,23 @@ class TerminalBackend {
     /// Set getch timeout in ms (-1 = blocking, 0 = non-blocking).
     virtual void set_poll_timeout_ms(int timeout_ms) { (void)timeout_ms; }
 
+    /// Use the terminal alternate screen buffer (xterm 1049).
+    virtual void set_alternate_screen(bool enabled) { alternate_screen_ = enabled; }
+    bool alternate_screen() const { return alternate_screen_; }
+
+    /// Erase the last frame on shutdown (ignored when alternate screen is active).
+    virtual void set_clear_on_shutdown(bool enabled) { clear_on_shutdown_ = enabled; }
+    bool clear_on_shutdown() const { return clear_on_shutdown_; }
+
     /// Platform default: ncursesw on POSIX, PDCurses on Windows.
     static std::unique_ptr<TerminalBackend> create();
 
     /// Alias for create(). Kept for older call sites.
     static std::unique_ptr<TerminalBackend> create_ncurses();
+
+  protected:
+    bool alternate_screen_ = true;
+    bool clear_on_shutdown_ = true;
 };
 
 } // namespace tuinator

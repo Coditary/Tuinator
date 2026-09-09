@@ -1,5 +1,6 @@
 #include <tuinator/render/text.hpp>
 #include <tuinator/widgets/charts/candlestick_chart.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -17,6 +18,13 @@ void CandlestickChart::set_bars(std::vector<OhlcBar> bars) {
 void CandlestickChart::set_options(CandlestickChartOptions options) {
     options_ = std::move(options);
     mark_dirty();
+}
+
+void CandlestickChart::apply_stylesheet(const StyleResolver& styles) {
+    apply_chart_stylesheet(
+        *this, styles,
+        {&options_.min_width, &options_.min_height, &options_.show_axis, &options_.show_grid, nullptr, nullptr});
+    mark_layout_dirty();
 }
 
 CandlestickChart::PlotArea CandlestickChart::compute_plot() const {
@@ -74,13 +82,23 @@ Size CandlestickChart::preferred_size() const {
 
 void CandlestickChart::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;
-    if (bounds_.width <= 0 || bounds_.height <= 0 || bars_.empty()) {
+    if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }
 
+    paint_.prepare(ctx, *this, options_.title_style, options_.axis_style, options_.grid_style, options_.axis_style);
+    chart_paint_background(ctx, *this, bounds_.size());
+    if (bars_.empty()) {
+        return;
+    }
+
+    const Style up_style = resolve_chart_accent_style(ctx, *this, options_.up_style);
+    const Style down_style = resolve_chart_accent_style(ctx, *this, options_.down_style);
+    const Style default_wick_style = resolve_chart_text_style(ctx, *this, options_.wick_style);
+
     const PlotArea plot = compute_plot();
     if (!options_.title.empty()) {
-        canvas.draw_text({0, 0}, options_.title, options_.title_style);
+        canvas.draw_text({0, 0}, options_.title, paint_.styles.title);
     }
 
     const double min_v = price_min();
@@ -89,7 +107,7 @@ void CandlestickChart::paint(PaintContext& ctx) const {
 
     const int price_height = options_.show_volume ? std::max(4, plot.height * 2 / 3) : plot.height;
     ChartPlotArea price_plot{plot.left, plot.top, plot.width, price_height, plot.title_rows, 0};
-    chart_paint_horizontal_grid(canvas, price_plot, min_v, max_v, options_.axis_style, options_.grid_style,
+    chart_paint_horizontal_grid(canvas, price_plot, min_v, max_v, paint_.styles.axis, paint_.styles.grid,
                                 options_.show_axis);
 
     const int count = static_cast<int>(bars_.size());
@@ -111,7 +129,7 @@ void CandlestickChart::paint(PaintContext& ctx) const {
         const bool up = bar.close >= bar.open;
         Style body = up ? bar.up_style : bar.down_style;
         if (body.foreground == Color::Default) {
-            body = up ? options_.up_style : options_.down_style;
+            body = up ? up_style : down_style;
         }
         if (body.foreground == Color::Default) {
             body.foreground = up ? Color::Green : Color::Red;
@@ -122,7 +140,7 @@ void CandlestickChart::paint(PaintContext& ctx) const {
         const int y_open = price_to_y(bar.open);
         const int y_close = price_to_y(bar.close);
 
-        Style wick = options_.wick_style;
+        Style wick = default_wick_style;
         if (wick.foreground == Color::Default) {
             wick = body;
         }
@@ -143,8 +161,9 @@ void CandlestickChart::paint(PaintContext& ctx) const {
 
         if (options_.show_labels) {
             const int label_slot = options_.compact_layout ? slot : stretch_slot;
-            canvas.draw_text({slot_x, plot.top + plot.height - plot.volume_rows},
-                             bar.label.substr(0, static_cast<std::size_t>(label_slot)), options_.axis_style);
+            const std::size_t bytes = text_byte_length_for_width(bar.label, label_slot);
+            canvas.draw_text({slot_x, plot.top + plot.height - plot.volume_rows}, bar.label.substr(0, bytes),
+                             paint_.styles.axis);
         }
 
         if (options_.show_volume && bar.volume > 0.0) {

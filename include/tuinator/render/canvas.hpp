@@ -31,6 +31,7 @@ class Canvas {
     void draw_vline(int x, int y, int length, Style style = {});
     void fill_rect(Rect rect, char ch, Style style = {});
     void draw_image(Point position, Size cell_size, const TerminalImage& image);
+    void invalidate_graphics();
 
     void set_text_cursor(std::optional<Point> local_position);
 

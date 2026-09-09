@@ -1,3 +1,6 @@
+#include <tuinator/backend/memory_backend.hpp>
+#include <tuinator/render/stylesheet.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
 #include <tuinator/widgets/charts/line_chart.hpp>
 
 #include <cmath>
@@ -91,6 +94,29 @@ TUINATOR_TEST(line_chart_mirror_mode_renders) {
     TUINATOR_CHECK(backend.terminal_size().width > 0);
 }
 
+TUINATOR_TEST(line_chart_clears_bounds_when_empty) {
+    tuinator::MemoryTerminalBackend backend({20, 8});
+    backend.init();
+
+    tuinator::LineChart chart({{"sin", sine_points(20), tuinator::Style{.foreground = tuinator::Color::Red}}},
+                              tuinator::LineChartOptions{
+                                  .style = tuinator::ChartGlyphStyle::Dots,
+                                  .mode = tuinator::LineChartMode::Line,
+                                  .min_width = 16,
+                                  .min_height = 6,
+                              });
+    chart.layout({0, 0, 20, 8});
+
+    tuinator::Canvas canvas(backend);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    chart.paint(ctx);
+    TUINATOR_CHECK(tuinator::test::cell_at(backend, 10, 4) != ' ');
+
+    chart.set_series({});
+    chart.paint(ctx);
+    TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 10, 4), ' ');
+}
+
 TUINATOR_TEST(line_chart_scatter_mode) {
     tuinator::LineChart chart({{"pts", std::vector<double>{1.0, 4.0, 2.0, 5.0, 3.0}, {}}},
                               tuinator::LineChartOptions{
@@ -101,4 +127,31 @@ TUINATOR_TEST(line_chart_scatter_mode) {
                               });
 
     TUINATOR_CHECK_EQ(chart.series()[0].values.size(), 5U);
+}
+
+TUINATOR_TEST(line_chart_stylesheet_resolves_paint_styles) {
+    const tuinator::Stylesheet sheet = tuinator::Stylesheet::load_from_string(R"(
+LineChart {
+  color: cyan;
+}
+)");
+
+    tuinator::LineChart chart({{"sin", sine_points(10), tuinator::Style{}}}, tuinator::LineChartOptions{
+                                                                                 .mode = tuinator::LineChartMode::Line,
+                                                                                 .title = "Series",
+                                                                                 .min_width = 20,
+                                                                                 .min_height = 8,
+                                                                             });
+
+    tuinator::MemoryTerminalBackend backend({20, 8});
+    backend.init();
+    const tuinator::Theme theme = tuinator::dark_theme();
+    tuinator::Canvas canvas(backend);
+    const tuinator::PaintContext ctx{canvas, theme, &sheet};
+
+    const tuinator::ChartStyleBundle styles = tuinator::resolve_chart_styles(ctx, chart, {}, {}, {}, tuinator::Style{});
+
+    TUINATOR_CHECK_EQ(styles.title.foreground, tuinator::Color::Cyan);
+    TUINATOR_CHECK_EQ(styles.axis.foreground, tuinator::Color::Cyan);
+    TUINATOR_CHECK_EQ(styles.value.foreground, tuinator::Color::Cyan);
 }

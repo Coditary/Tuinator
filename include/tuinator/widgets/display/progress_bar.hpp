@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tuinator/render/style.hpp>
+#include <tuinator/render/style_resolver.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <initializer_list>
@@ -115,10 +116,14 @@ class ProgressBar : public Widget {
     void set_indeterminate(bool indeterminate);
     void set_completed(bool completed);
 
+    std::string_view widget_type_name() const override { return "ProgressBar"; }
+    void apply_stylesheet(const StyleResolver& styles) override;
+
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
   private:
+    void prepare_paint_options(const PaintContext& ctx) const;
     int bar_column_count() const;
     int rendered_bar_width(int bar_width) const;
     void paint_glyph_bar(Canvas& canvas) const;
@@ -140,6 +145,7 @@ class ProgressBar : public Widget {
 
     double value_;
     ProgressBarOptions options_;
+    mutable ProgressBarOptions paint_options_;
 };
 
 } // namespace tuinator

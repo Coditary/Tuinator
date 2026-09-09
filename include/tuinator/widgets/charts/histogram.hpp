@@ -1,6 +1,9 @@
 #pragma once
 
+#include <tuinator/render/style_resolver.hpp>
 #include <tuinator/widgets/charts/chart_common.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
+#include <tuinator/widgets/charts/chart_widget_paint.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <string>
@@ -32,7 +35,7 @@ struct HistogramOptions {
     Style count_style{};
 };
 
-class Histogram : public Widget {
+class Histogram : public Widget, public ChartWidget {
   public:
     Histogram(std::vector<HistogramBin> bins = {}, HistogramOptions options = {});
 
@@ -42,12 +45,16 @@ class Histogram : public Widget {
     void set_bins(std::vector<HistogramBin> bins);
     void set_options(HistogramOptions options);
 
+    std::string_view widget_type_name() const override { return "Histogram"; }
+    void apply_stylesheet(const StyleResolver& styles) override;
+
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 
   private:
     std::vector<HistogramBin> bins_;
     HistogramOptions options_;
+    mutable ChartPaintSupport paint_{};
 };
 
 } // namespace tuinator

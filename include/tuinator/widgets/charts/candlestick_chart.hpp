@@ -1,6 +1,9 @@
 #pragma once
 
+#include <tuinator/render/style_resolver.hpp>
 #include <tuinator/widgets/charts/chart_common.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
+#include <tuinator/widgets/charts/chart_widget_paint.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <string>
@@ -40,7 +43,7 @@ struct CandlestickChartOptions {
     Style wick_style{};
 };
 
-class CandlestickChart : public Widget {
+class CandlestickChart : public Widget, public ChartWidget {
   public:
     CandlestickChart(std::vector<OhlcBar> bars = {}, CandlestickChartOptions options = {});
 
@@ -49,6 +52,9 @@ class CandlestickChart : public Widget {
 
     void set_bars(std::vector<OhlcBar> bars);
     void set_options(CandlestickChartOptions options);
+
+    std::string_view widget_type_name() const override { return "CandlestickChart"; }
+    void apply_stylesheet(const StyleResolver& styles) override;
 
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
@@ -71,6 +77,7 @@ class CandlestickChart : public Widget {
 
     std::vector<OhlcBar> bars_;
     CandlestickChartOptions options_;
+    mutable ChartPaintSupport paint_{};
 };
 
 } // namespace tuinator

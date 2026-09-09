@@ -1,4 +1,5 @@
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
 #include <tuinator/widgets/charts/stacked_area_chart.hpp>
 
 #include <algorithm>
@@ -17,6 +18,13 @@ void StackedAreaChart::set_series(std::vector<StackedAreaSeries> series) {
 void StackedAreaChart::set_options(StackedAreaChartOptions options) {
     options_ = std::move(options);
     mark_dirty();
+}
+
+void StackedAreaChart::apply_stylesheet(const StyleResolver& styles) {
+    apply_chart_stylesheet(*this, styles,
+                           {&options_.min_width, &options_.min_height, &options_.show_axes, &options_.show_grid,
+                            &options_.style, nullptr});
+    mark_layout_dirty();
 }
 
 StackedAreaChart::PlotArea StackedAreaChart::compute_plot() const {
@@ -60,13 +68,19 @@ Size StackedAreaChart::preferred_size() const {
 
 void StackedAreaChart::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;
-    if (bounds_.width <= 0 || bounds_.height <= 0 || series_.empty()) {
+    if (bounds_.width <= 0 || bounds_.height <= 0) {
+        return;
+    }
+
+    paint_.prepare(ctx, *this, options_.title_style, options_.axis_style, options_.grid_style, options_.legend_style);
+    chart_paint_background(ctx, *this, bounds_.size());
+    if (series_.empty()) {
         return;
     }
 
     const PlotArea plot = compute_plot();
     if (!options_.title.empty()) {
-        canvas.draw_text({0, 0}, options_.title, options_.title_style);
+        canvas.draw_text({0, 0}, options_.title, paint_.styles.title);
     }
 
     const double min_v = options_.min_value;
@@ -76,7 +90,7 @@ void StackedAreaChart::paint(PaintContext& ctx) const {
     ChartPlotArea common{
         plot.left, plot.top, plot.width, plot.height, plot.title_rows, plot.legend_rows,
     };
-    chart_paint_horizontal_grid(canvas, common, min_v, max_v, options_.axis_style, options_.grid_style,
+    chart_paint_horizontal_grid(canvas, common, min_v, max_v, paint_.styles.axis, paint_.styles.grid,
                                 options_.show_axes);
 
     std::size_t points = 0;
@@ -117,7 +131,8 @@ void StackedAreaChart::paint(PaintContext& ctx) const {
             if (item.label.empty()) {
                 continue;
             }
-            canvas.draw_text({x, y}, item.label + " ", item.style);
+            canvas.draw_text({x, y}, item.label + " ",
+                             item.style.foreground == Color::Default ? paint_.styles.value : item.style);
             x += text_display_width(item.label) + 1;
         }
     }

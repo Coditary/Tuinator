@@ -37,7 +37,7 @@ constexpr BoxDrawingDescriptor make(BoxDrawing kind, char32_t codepoint, char as
 }
 
 // data/box_drawing.tsv
-constexpr std::array<BoxDrawingDescriptor, 33> kDescriptors{{
+constexpr std::array<BoxDrawingDescriptor, 35> kDescriptors{{
     make(BoxDrawing::Horizontal, 0x2500, '-'),
     make(BoxDrawing::Vertical, 0x2502, '|'),
     make(BoxDrawing::HorizontalHeavy, 0x2501, '-'),
@@ -66,6 +66,8 @@ constexpr std::array<BoxDrawingDescriptor, 33> kDescriptors{{
     make(BoxDrawing::RoundedUpLeft, 0x2570, '+'),
     make(BoxDrawing::VerticalLightAndHeavyRight, 0x251D, '+'),
     make(BoxDrawing::VerticalLightAndHeavyLeft, 0x2525, '+'),
+    make(BoxDrawing::VerticalAndRight, 0x251C, '+'),
+    make(BoxDrawing::VerticalAndLeft, 0x2524, '+'),
     make(BoxDrawing::HorizontalLightAndHeavyDown, 0x252F, '+'),
     make(BoxDrawing::HorizontalLightAndHeavyUp, 0x2537, '+'),
     make(BoxDrawing::DownAndHorizontal, 0x252C, '+'),
@@ -73,7 +75,7 @@ constexpr std::array<BoxDrawingDescriptor, 33> kDescriptors{{
     make(BoxDrawing::Cross, 0x253C, '+'),
 }};
 
-static_assert(kDescriptors.size() == 33, "descriptor table out of sync with BoxDrawing enum");
+static_assert(kDescriptors.size() == 35, "descriptor table out of sync with BoxDrawing enum");
 
 const BoxDrawingDescriptor& descriptor_or_default(BoxDrawing kind) {
     const auto index = static_cast<std::size_t>(kind);

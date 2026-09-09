@@ -37,6 +37,8 @@ enum class BoxDrawing {
     RoundedUpLeft,
     VerticalLightAndHeavyRight,
     VerticalLightAndHeavyLeft,
+    VerticalAndRight,
+    VerticalAndLeft,
     HorizontalLightAndHeavyDown,
     HorizontalLightAndHeavyUp,
     DownAndHorizontal,
