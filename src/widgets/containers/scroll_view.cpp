@@ -283,6 +283,7 @@ bool ScrollView::handle_event(const Event& event) {
     if (const auto* mouse = std::get_if<MouseEvent>(&event)) {
         if (scrollbar_state_.pointer_active() && mouse->action == MouseAction::Release) {
             scrollbar_state_.reset_drag();
+            mark_dirty();
             return true;
         }
 

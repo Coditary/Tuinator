@@ -302,10 +302,6 @@ void Application::process_timers() {
 
     timers_.erase(std::remove_if(timers_.begin(), timers_.end(), [](const TimerEntry& timer) { return !timer.active; }),
                   timers_.end());
-
-    if (fired && !dirty_region_.needs_render()) {
-        request_redraw();
-    }
 }
 
 void Application::refresh_focus() {
@@ -372,7 +368,11 @@ void Application::rebuild_focus_list() {
     }
 }
 
-void Application::sync_mouse_cursor_policy() { backend_->set_mouse_cursor_suppressed(shell_terminal_active()); }
+void Application::sync_mouse_cursor_policy() {
+    // While a mouse button is held (scrollbar/split drag), suppress the fallback
+    // text cursor at the pointer position — it would overwrite glyphs under the cursor.
+    backend_->set_mouse_cursor_suppressed(shell_terminal_active() || backend_->pointer_active());
+}
 
 bool Application::shell_terminal_active() const {
     if (widget_is_shell_terminal(root_.get())) {
@@ -488,6 +488,7 @@ int Application::run() {
         }
 
         poll_idle();
+        sync_mouse_cursor_policy();
 
         render();
     }
@@ -578,7 +579,7 @@ void Application::handle_event(const Event& event) {
             mouse->action == MouseAction::Move && widget_wants_hover_redraw(root_.get(), mouse->position);
         const bool needs_redraw =
             mouse->action != MouseAction::Move || motion_while_dragging || handled || hover_needs_redraw;
-        if (needs_redraw) {
+        if (needs_redraw && !dirty_region_.needs_render()) {
             request_redraw();
         } else if (mouse->action == MouseAction::Move) {
             backend_->refresh_mouse_cursor();
@@ -710,7 +711,10 @@ void Application::render() {
     Rect paint_clip = terminal_bounds;
 
     const bool inline_backend = dynamic_cast<const InlineTerminalBackend*>(backend_.get()) != nullptr;
-    const bool use_partial = !dirty_region_.is_full() && !shell_active && !inline_backend;
+    // True-color curses mixes ncurses palette cells with direct RGB ANSI. Partial
+    // bands produce wrong colors, missing scrollbars, and nested layout artifacts.
+    const bool use_partial =
+        !dirty_region_.is_full() && !shell_active && !inline_backend && !backend_->true_color();
 
     if (use_partial) {
         paint_clip = intersect(dirty_region_.bounds(), terminal_bounds);

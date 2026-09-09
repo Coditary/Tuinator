@@ -8,6 +8,9 @@ namespace tuinator {
 Label::Label(std::string text, Style style) : text_(std::move(text)), style_(style) {}
 
 void Label::set_text(std::string text) {
+    if (text_ == text) {
+        return;
+    }
     text_ = std::move(text);
     mark_dirty();
 }

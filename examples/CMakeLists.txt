@@ -1,7 +1,7 @@
 set(TUINATOR_DEMOS
     golden-app hello form colors layout counter buttons windows mouse-test scroll theme startup-profile
     dashboard data controls menu image textarea throbber bigtext checkbox piechart charts
-    diffview weather glyphs terminal-frame scene scene-runtime inline-tasks split-panes stylesheet
+    diffview weather glyphs terminal-frame scene scene-runtime inline-tasks split-panes stylesheet scroll-hover
 )
 
 foreach(demo IN LISTS TUINATOR_DEMOS)

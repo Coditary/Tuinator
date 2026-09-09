@@ -93,6 +93,8 @@ class CursesBackend final : public TerminalBackend {
     bool ansi_draw_visible(const AnsiDraw& draw) const;
 
     Rect frame_clip_{{0, 0}, {0, 0}};
+    Rect ansi_clip_{{0, 0}, {0, 0}};
+    bool full_frame_redraw_ = true;
 
     bool alternate_screen_active_ = false;
     bool initialized_ = false;

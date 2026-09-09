@@ -716,8 +716,10 @@ void CursesBackend::begin_frame(BeginFrameOptions options) {
     pending_image_draws_.clear();
 
     const Rect terminal{{0, 0}, terminal_size()};
+    full_frame_redraw_ = options.full_redraw;
     if (options.full_redraw) {
         frame_clip_ = terminal;
+        ansi_clip_ = terminal;
         if (options.clear_buffer) {
             cleanup_kitty_graphics();
             if (FILE* output = output_stream()) {
@@ -729,6 +731,7 @@ void CursesBackend::begin_frame(BeginFrameOptions options) {
     }
 
     frame_clip_ = intersect(options.dirty_region, terminal);
+    ansi_clip_ = frame_clip_;
     clear_region(options.dirty_region);
     clear_partial_overlays(frame_clip_);
 }
@@ -766,7 +769,7 @@ bool CursesBackend::ansi_draw_visible(const AnsiDraw& draw) const {
 
     const int width = text_display_width(draw.text);
     const Rect draw_rect{draw.x, draw.y, width, 1};
-    const Rect visible = intersect(draw_rect, frame_clip_);
+    const Rect visible = intersect(draw_rect, ansi_clip_);
     return visible.width > 0 && visible.height > 0;
 }
 
@@ -843,7 +846,15 @@ void CursesBackend::present_frame() {
     }
 
     prepare_refresh(output);
-    refresh();
+    if (full_frame_redraw_) {
+        refresh();
+    } else {
+        for (int y = frame_clip_.y; y < frame_clip_.bottom(); ++y) {
+            touchline(stdscr, y, 1);
+        }
+        wnoutrefresh(stdscr);
+        doupdate();
+    }
     flush_ansi_draws(output);
     flush_image_draws(output);
     present_text_cursor(output);

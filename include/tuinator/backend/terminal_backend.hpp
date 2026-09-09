@@ -19,6 +19,8 @@ struct BeginFrameOptions {
     /// Application always sets this to true on full redraws to avoid stale screen artifacts.
     bool clear_buffer = true;
     Rect dirty_region{};
+    /// Region eligible for direct ANSI flush on partial frames. Empty means dirty_region.
+    Rect ansi_visible_region{};
 };
 
 class TerminalBackend {
