@@ -3,6 +3,7 @@
 #include <tuinator/backend/terminal_backend.hpp>
 
 #include <cstdio>
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -31,6 +32,8 @@ struct InlineBackendOptions {
     /// Set to true when the inline UI should receive keyboard events.
     bool keyboard_input = false;
     FILE* output = nullptr;
+    /// When set, used instead of querying the terminal (primarily for tests).
+    std::function<Size()> terminal_size_query;
 };
 
 /// Renders into a fixed band of terminal rows without taking over the alternate screen.
@@ -70,7 +73,8 @@ class InlineTerminalBackend : public TerminalBackend {
     int compute_region_height(int term_height, int available_rows) const;
     void place_anchor(int term_height);
     void sync_geometry(const Size& term, bool allow_reanchor);
-    void sync_geometry_relative(const Size& term, bool initial);
+    void sync_geometry_relative(const Size& term);
+    Size query_terminal_size() const;
     void resize_buffer(int width, int height);
     void emit_frame_to_terminal();
     void emit_frame_relative();
@@ -95,6 +99,7 @@ class InlineTerminalBackend : public TerminalBackend {
     int anchor_row_ = 1;
     int cursor_anchor_row_ = 0;
     int band_height_ = 0;
+    int last_emitted_band_height_ = 0;
     int region_width_ = 80;
     int region_height_ = 10;
     int poll_timeout_ms_ = -1;

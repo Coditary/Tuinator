@@ -922,6 +922,11 @@ Size BigText::preferred_size() const {
 
 void BigText::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;
+    if (bounds_.width <= 0 || bounds_.height <= 0) {
+        return;
+    }
+
+    paint_bounds_background(ctx, style_);
     rebuild();
     if (cache_width_ <= 0 || cache_height_ <= 0) {
         return;

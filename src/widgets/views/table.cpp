@@ -104,6 +104,12 @@ void Table::paint(PaintContext& ctx) const {
         return;
     }
 
+    const StyleResolver& styles = ctx.styles();
+    const Style header_style = styles.title(*this, header_style_);
+    const Style cell_style = styles.text(*this, cell_style_);
+    const Style selected_style = styles.selected(*this, selected_style_);
+    paint_bounds_background(ctx, cell_style);
+
     int x = 0;
     for (const TableColumn& column : columns_) {
         const int width = std::min(column.width, bounds_.width - x);
@@ -111,7 +117,7 @@ void Table::paint(PaintContext& ctx) const {
             break;
         }
 
-        canvas.draw_text({x, 0}, clip_cell(column.title, width), header_style_);
+        canvas.draw_text({x, 0}, clip_cell(column.title, width), header_style);
         x += column.width;
     }
 
@@ -123,7 +129,7 @@ void Table::paint(PaintContext& ctx) const {
         }
 
         const bool selected = index == selected_row_;
-        const Style& style = selected ? selected_style_ : cell_style_;
+        const Style& style = selected ? selected_style : cell_style;
         const std::vector<std::string>& cells = rows_[static_cast<std::size_t>(index)];
 
         int cell_x = 0;

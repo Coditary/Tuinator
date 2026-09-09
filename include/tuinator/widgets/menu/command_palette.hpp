@@ -28,6 +28,7 @@ class CommandPalette : public Widget {
     void close();
 
     bool wants_full_screen() const override { return true; }
+    std::string_view widget_type_name() const override { return "CommandPalette"; }
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
     bool handle_event(const Event& event) override;

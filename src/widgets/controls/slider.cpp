@@ -1,4 +1,5 @@
 #include <tuinator/core/event.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/controls/slider.hpp>
 
 #include <algorithm>
@@ -16,6 +17,15 @@ Slider::Slider(int min_value, int max_value, int value, std::function<void(int)>
 }
 
 void Slider::set_value(int value) { set_value_internal(value, true); }
+
+void Slider::set_min_width(int min_width) {
+    min_width_ = std::max(1, min_width);
+    mark_layout_dirty();
+}
+
+void Slider::apply_stylesheet(const StyleResolver& styles) {
+    apply_value_control_stylesheet(*this, *this, styles);
+}
 
 void Slider::set_value_internal(int value, bool notify) {
     const int clamped = std::clamp(value, min_value_, max_value_);
@@ -39,6 +49,8 @@ void Slider::paint(PaintContext& ctx) const {
         return;
     }
 
+    paint_bounds_background(ctx, style_);
+
     const int width = std::max(3, bounds_.width);
     const int range = std::max(1, max_value_ - min_value_);
     const int thumb = std::clamp((value_ - min_value_) * (width - 1) / range, 0, width - 1);
@@ -46,7 +58,10 @@ void Slider::paint(PaintContext& ctx) const {
     std::string track(static_cast<std::size_t>(width), '-');
     track[static_cast<std::size_t>(thumb)] = 'O';
 
-    const Style& active = is_focused() ? focused_style_ : style_;
+    const StyleResolver& styles = ctx.styles();
+    const Style style = styles.text(*this, style_);
+    const Style focused = styles.focused(*this, focused_style_);
+    const Style& active = is_focused() ? focused : style;
     canvas.draw_text({0, 0}, track, active);
 }
 

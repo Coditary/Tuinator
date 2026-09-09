@@ -64,10 +64,14 @@ class MenuBar : public Widget {
     void set_border_glyphs(BorderGlyphs glyphs);
     void apply_look(const MenuBarLook& look);
 
+    std::string_view widget_type_name() const override { return "MenuBar"; }
+
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
+    bool is_dropdown_open() const override { return open_; }
+    bool captures_keyboard() const override { return open_; }
 
   private:
     struct DropdownLayout {

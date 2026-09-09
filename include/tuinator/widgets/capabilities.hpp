@@ -5,6 +5,8 @@
 #include <functional>
 #include <vector>
 
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
+
 namespace tuinator {
 
 class Widget;
@@ -46,8 +48,10 @@ Scrollable* find_first_scrollable(Widget* root);
 bool collect_scrollables_for_widget(Widget* root, const Widget* target, std::vector<Scrollable*>& out);
 
 Widget* find_pointer_active_widget(Widget* root);
+Widget* find_keyboard_capture_widget(Widget* root);
 MouseEvent adjust_mouse_for_widget(Widget* root, Widget* target, const MouseEvent& mouse);
 
+bool dispatch_keyboard_capture(Widget* root, const Event& event);
 bool dispatch_scroll_keys(Widget* root, Widget* focused, const Event& event);
 bool dispatch_tab_number(Widget* root, int index);
 

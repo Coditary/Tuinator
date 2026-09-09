@@ -1,5 +1,7 @@
 #include <tuinator/layout/grid.hpp>
 
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
+
 #include <algorithm>
 #include <variant>
 
@@ -7,6 +9,25 @@ namespace tuinator {
 
 Grid::Grid(GridOptions options)
     : columns_(std::max(1, options.columns)), gap_(options.gap), padding_(options.padding) {}
+
+void Grid::set_columns(int columns) {
+    columns_ = std::max(1, columns);
+    mark_layout_dirty();
+}
+
+void Grid::set_layout_gap(int gap) {
+    gap_ = gap;
+    mark_layout_dirty();
+}
+
+void Grid::set_layout_padding(int padding) {
+    padding_ = std::max(0, padding);
+    mark_layout_dirty();
+}
+
+void Grid::apply_stylesheet(const StyleResolver& styles) {
+    apply_layout_box_stylesheet(*this, *this, styles);
+}
 
 Size Grid::preferred_size() const {
     if (children_.empty()) {
@@ -73,6 +94,8 @@ void Grid::layout(Rect bounds) {
 }
 
 void Grid::paint(PaintContext& ctx) const {
+    paint_bounds_background(ctx);
+
     for (const auto& child : children_) {
         const Rect local{
             child->bounds().x - bounds_.x,

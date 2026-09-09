@@ -15,6 +15,13 @@ Button::Button(std::string label, std::function<void()> on_click, Style style)
     focused_style_.reverse = false;
 }
 
+void Button::activate() {
+    if (on_click_) {
+        on_click_();
+    }
+    mark_dirty();
+}
+
 void Button::set_label(std::string label) {
     label_ = std::move(label);
     mark_dirty();
@@ -33,8 +40,13 @@ void Button::paint(PaintContext& ctx) const {
         return;
     }
 
+    paint_bounds_background(ctx, style_);
+
     const std::string text = "[" + label_ + "]";
-    const Style& active_style = is_focused() ? focused_style_ : style_;
+    const StyleResolver& styles = ctx.styles();
+    const Style style = styles.text(*this, style_);
+    const Style focused = styles.focused(*this, focused_style_);
+    const Style& active_style = is_focused() ? focused : style;
     canvas.draw_text({0, 0}, text, active_style);
 }
 

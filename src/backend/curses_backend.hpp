@@ -88,10 +88,13 @@ class CursesBackend final : public TerminalBackend {
     int mouse_tracking_mode() const;
     void cleanup_kitty_graphics();
     void clear_region(Rect region);
+    void clear_partial_overlays(Rect region);
+    Rect kitty_placement_rect() const;
     bool ansi_draw_visible(const AnsiDraw& draw) const;
 
     Rect frame_clip_{{0, 0}, {0, 0}};
 
+    bool alternate_screen_active_ = false;
     bool initialized_ = false;
     bool colors_enabled_ = false;
     bool true_color_enabled_ = false;

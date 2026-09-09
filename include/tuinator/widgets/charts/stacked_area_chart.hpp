@@ -1,6 +1,9 @@
 #pragma once
 
+#include <tuinator/render/style_resolver.hpp>
 #include <tuinator/widgets/charts/chart_common.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
+#include <tuinator/widgets/charts/chart_widget_paint.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <string>
@@ -30,7 +33,7 @@ struct StackedAreaChartOptions {
     Style legend_style{};
 };
 
-class StackedAreaChart : public Widget {
+class StackedAreaChart : public Widget, public ChartWidget {
   public:
     StackedAreaChart(std::vector<StackedAreaSeries> series = {}, StackedAreaChartOptions options = {});
 
@@ -39,6 +42,9 @@ class StackedAreaChart : public Widget {
 
     void set_series(std::vector<StackedAreaSeries> series);
     void set_options(StackedAreaChartOptions options);
+
+    std::string_view widget_type_name() const override { return "StackedAreaChart"; }
+    void apply_stylesheet(const StyleResolver& styles) override;
 
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
@@ -58,6 +64,7 @@ class StackedAreaChart : public Widget {
 
     std::vector<StackedAreaSeries> series_;
     StackedAreaChartOptions options_;
+    mutable ChartPaintSupport paint_{};
 };
 
 } // namespace tuinator

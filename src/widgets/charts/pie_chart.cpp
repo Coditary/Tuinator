@@ -1,6 +1,7 @@
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/glyphs.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
 #include <tuinator/widgets/charts/pie_chart.hpp>
 
 #include <algorithm>
@@ -127,6 +128,13 @@ void PieChart::set_slices(std::vector<PieChartSlice> slices) {
 void PieChart::set_options(PieChartOptions options) {
     options_ = std::move(options);
     mark_dirty();
+}
+
+void PieChart::apply_stylesheet(const StyleResolver& styles) {
+    auto glyph = static_cast<ChartGlyphStyle>(static_cast<int>(options_.style));
+    apply_chart_stylesheet(*this, styles, {nullptr, nullptr, nullptr, nullptr, &glyph, &options_.custom_glyph});
+    options_.style = static_cast<PieChartStyle>(static_cast<int>(glyph));
+    mark_layout_dirty();
 }
 
 void PieChart::set_style(PieChartStyle style) {
@@ -368,7 +376,7 @@ void PieChart::paint_legend(Canvas& canvas, const Layout& layout) const {
             line << ' ' << std::fixed << std::setprecision(1) << (std::max(0.0, slice.value) / total * 100.0) << '%';
         }
 
-        Style style = options_.legend_style;
+        Style style = paint_.styles.value;
         if (style.foreground == Color::Default && !style.foreground_rgb) {
             style = slice.style;
         }
@@ -384,10 +392,13 @@ void PieChart::paint(PaintContext& ctx) const {
         return;
     }
 
+    paint_.prepare(ctx, *this, options_.title_style, options_.legend_style, {}, options_.legend_style);
+    chart_paint_background(ctx, *this, bounds_.size());
+
     const Layout layout = compute_layout();
 
     if (!options_.title.empty()) {
-        canvas.draw_text({0, 0}, options_.title, options_.title_style);
+        canvas.draw_text({0, 0}, options_.title, paint_.styles.title);
     }
 
     paint_chart(canvas, layout);

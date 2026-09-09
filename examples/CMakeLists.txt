@@ -1,7 +1,7 @@
 set(TUINATOR_DEMOS
-    hello form colors layout counter buttons windows mouse-test scroll theme startup-profile
+    golden-app hello form colors layout counter buttons windows mouse-test scroll theme startup-profile
     dashboard data controls menu image textarea throbber bigtext checkbox piechart charts
-    diffview weather glyphs terminal-frame scene scene-runtime inline-tasks
+    diffview weather glyphs terminal-frame scene scene-runtime inline-tasks split-panes stylesheet
 )
 
 foreach(demo IN LISTS TUINATOR_DEMOS)
@@ -18,7 +18,11 @@ foreach(demo IN LISTS TUINATOR_DEMOS)
         add_executable(tuinator-${demo} ${demo}.cpp)
     endif()
     target_link_libraries(tuinator-${demo} PRIVATE tuinator::tuinator)
+    set_target_properties(tuinator-${demo} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 endforeach()
 
 target_compile_definitions(tuinator-image PRIVATE
     TUINATOR_LENNA_PATH="${TUINATOR_SOURCE_DIR}/examples/assets/lenna.png")
+
+target_compile_definitions(tuinator-stylesheet PRIVATE
+    TUINATOR_SOURCE_DIR="${TUINATOR_SOURCE_DIR}")

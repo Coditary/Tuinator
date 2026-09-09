@@ -1,5 +1,8 @@
 #include <tuinator/core/action_registry.hpp>
+#include <tuinator/layout/box.hpp>
 #include <tuinator/render/theme.hpp>
+#include <tuinator/widgets/capabilities.hpp>
+#include <tuinator/widgets/controls/text_input.hpp>
 #include <tuinator/widgets/menu/command_palette.hpp>
 #include <tuinator/widgets/menu/context_menu.hpp>
 #include <tuinator/widgets/menu/menu_bar.hpp>
@@ -138,4 +141,26 @@ TUINATOR_TEST(context_menu_renders_at_anchor) {
 
     tuinator::test::render_root(menu, backend);
     TUINATOR_CHECK(tuinator::test::row_contains(backend, 3, "Copy"));
+}
+
+TUINATOR_TEST(menu_bar_escape_closes_open_menu_while_other_widget_focused) {
+    tuinator::VBox root;
+    auto menu = std::make_unique<tuinator::MenuBar>(tuinator::Theme{}.label, tuinator::Theme{}.button_focused);
+    menu->set_menus({{"&File", {{"&Open", []() {}}}}});
+    auto input = std::make_unique<tuinator::TextInput>();
+    input->set_focused(true);
+    root.add_child(std::move(menu));
+    root.add_child(std::move(input));
+    root.layout({0, 0, 40, 8});
+
+    tuinator::MouseEvent click{};
+    click.action = tuinator::MouseAction::Click;
+    click.position = {3, 0};
+    TUINATOR_CHECK(root.handle_event(click));
+    TUINATOR_CHECK(tuinator::find_keyboard_capture_widget(&root) != nullptr);
+
+    tuinator::KeyPress escape{};
+    escape.key = tuinator::Key::Escape;
+    TUINATOR_CHECK(tuinator::dispatch_keyboard_capture(&root, escape));
+    TUINATOR_CHECK(tuinator::find_keyboard_capture_widget(&root) == nullptr);
 }

@@ -1,4 +1,5 @@
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
 #include <tuinator/widgets/charts/gauge_chart.hpp>
 
 #include <algorithm>
@@ -27,6 +28,11 @@ void GaugeChart::set_options(GaugeChartOptions options) {
     set_value(value_);
 }
 
+void GaugeChart::apply_stylesheet(const StyleResolver& styles) {
+    apply_chart_stylesheet(*this, styles, {nullptr, nullptr, nullptr, nullptr, &options_.glyph, nullptr});
+    mark_layout_dirty();
+}
+
 Size GaugeChart::preferred_size() const {
     if (options_.style == GaugeStyle::Horizontal) {
         return {std::max(20, options_.diameter * 2), 4 + (options_.title.empty() ? 0 : 1)};
@@ -36,7 +42,8 @@ Size GaugeChart::preferred_size() const {
     return {diameter + 2, diameter / 2 + 3 + (options_.title.empty() ? 0 : 1)};
 }
 
-void GaugeChart::paint_arc(Canvas& canvas, int cx, int cy, int radius) const {
+void GaugeChart::paint_arc(Canvas& canvas, int cx, int cy, int radius, const Style& fill_style,
+                           const Style& track_style, const Style& tick_style) const {
     const double span = std::max(1e-6, options_.max_value - options_.min_value);
     const double ratio = (value_ - options_.min_value) / span;
     const double start_angle = kPi;
@@ -58,8 +65,7 @@ void GaugeChart::paint_arc(Canvas& canvas, int cx, int cy, int radius) const {
             }
 
             const bool filled = angle >= value_angle;
-            chart_paint_glyph_cell(canvas, x, y, options_.glyph, {},
-                                   filled ? options_.fill_style : options_.track_style);
+            chart_paint_glyph_cell(canvas, x, y, options_.glyph, {}, filled ? fill_style : track_style);
         }
     }
 
@@ -69,18 +75,18 @@ void GaugeChart::paint_arc(Canvas& canvas, int cx, int cy, int radius) const {
             const double angle = start_angle + (end_angle - start_angle) * t;
             const int tx = cx + static_cast<int>(std::cos(angle) * (radius + 1));
             const int ty = cy + static_cast<int>(std::sin(angle) * (radius + 1) / kTerminalAspect);
-            canvas.draw_text({tx, ty}, "|", options_.tick_style);
+            canvas.draw_text({tx, ty}, "|", tick_style);
         }
     }
 }
 
-void GaugeChart::paint_horizontal(Canvas& canvas, int x, int y, int width) const {
+void GaugeChart::paint_horizontal(Canvas& canvas, int x, int y, int width, const Style& fill_style,
+                                  const Style& track_style) const {
     const double span = std::max(1e-6, options_.max_value - options_.min_value);
     const int filled = std::clamp(static_cast<int>((value_ - options_.min_value) / span * width), 0, width);
 
     for (int col = 0; col < width; ++col) {
-        chart_paint_glyph_cell(canvas, x + col, y, options_.glyph, {},
-                               col < filled ? options_.fill_style : options_.track_style);
+        chart_paint_glyph_cell(canvas, x + col, y, options_.glyph, {}, col < filled ? fill_style : track_style);
     }
 }
 
@@ -90,15 +96,22 @@ void GaugeChart::paint(PaintContext& ctx) const {
         return;
     }
 
+    paint_.prepare(ctx, *this, options_.title_style, options_.tick_style, {}, options_.value_style);
+    chart_paint_background(ctx, *this, bounds_.size());
+
+    const Style fill_style = resolve_chart_accent_style(ctx, *this, options_.fill_style);
+    const Style track_style = resolve_chart_accent_style(ctx, *this, options_.track_style);
+    const Style tick_style = resolve_chart_text_style(ctx, *this, options_.tick_style);
+
     int top = 0;
     if (!options_.title.empty()) {
-        canvas.draw_text({0, top}, options_.title, options_.title_style);
+        canvas.draw_text({0, top}, options_.title, paint_.styles.title);
         ++top;
     }
 
     if (options_.style == GaugeStyle::Horizontal) {
         const int width = std::max(8, bounds_.width - 2);
-        paint_horizontal(canvas, 1, top + 1, width);
+        paint_horizontal(canvas, 1, top + 1, width, fill_style, track_style);
 
         if (options_.show_value) {
             std::ostringstream out;
@@ -106,7 +119,7 @@ void GaugeChart::paint(PaintContext& ctx) const {
             if (!options_.unit.empty()) {
                 out << options_.unit;
             }
-            canvas.draw_text({0, top}, out.str(), options_.value_style);
+            canvas.draw_text({0, top}, out.str(), paint_.styles.value);
         }
         return;
     }
@@ -114,7 +127,7 @@ void GaugeChart::paint(PaintContext& ctx) const {
     const int radius = std::max(3, std::min(options_.diameter / 2, (bounds_.width - 2) / 2));
     const int cx = bounds_.width / 2;
     const int cy = top + radius;
-    paint_arc(canvas, cx, cy, radius);
+    paint_arc(canvas, cx, cy, radius, fill_style, track_style, tick_style);
 
     if (options_.show_value) {
         std::ostringstream out;
@@ -124,7 +137,7 @@ void GaugeChart::paint(PaintContext& ctx) const {
         }
         const std::string text = out.str();
         const int x = std::max(0, cx - text_display_width(text) / 2);
-        canvas.draw_text({x, cy - 1}, text, options_.value_style);
+        canvas.draw_text({x, cy - 1}, text, paint_.styles.value);
     }
 }
 

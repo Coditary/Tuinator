@@ -1,15 +1,19 @@
 #include <tuinator/backend/inline_backend.hpp>
 #include <tuinator/core/application.hpp>
+#include <tuinator/render/style_resolver.hpp>
+#include <tuinator/debug/debug_paint.hpp>
 #include <tuinator/debug/startup_profiler.hpp>
 #include <tuinator/render/graphics_protocol.hpp>
 #include <tuinator/render/paint_context.hpp>
 #include <tuinator/render/theme.hpp>
 #include <tuinator/widgets/capabilities.hpp>
+#include <tuinator/widgets/containers/split_pane.hpp>
 
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <unistd.h>
 #include <variant>
 
@@ -100,6 +104,64 @@ void Application::set_theme(Theme theme) {
     request_redraw();
 }
 
+void Application::set_stylesheet(Stylesheet stylesheet) {
+    stylesheet_ = std::move(stylesheet);
+    ThemeOptions options = stylesheet_->theme_options();
+    if (options.border_style || options.glyphs != GlyphSet::Auto) {
+        set_theme(dark_theme(options));
+    }
+    sync_stylesheet();
+    request_redraw();
+}
+
+void Application::load_stylesheet(const std::filesystem::path& path) {
+    set_stylesheet(Stylesheet::load_from_file(path));
+}
+
+const Stylesheet* Application::stylesheet() const {
+    return stylesheet_.has_value() ? &*stylesheet_ : nullptr;
+}
+
+void Application::sync_stylesheet() {
+    if (!root_ || !stylesheet_.has_value()) {
+        stylesheet_warnings_.clear();
+        return;
+    }
+
+    const StyleResolver resolver(theme_, stylesheet());
+    stylesheet_warnings_.clear();
+    apply_stylesheet_to_tree(*root_, resolver, &stylesheet_warnings_);
+    for (const std::string& warning : stylesheet_warnings_) {
+        std::cerr << "[tuinator:stylesheet] " << warning << '\n';
+    }
+}
+
+void Application::update_hover(Point position) {
+    Widget* target = nullptr;
+    if (root_ != nullptr) {
+        Widget* hit = root_->hit_test(position);
+        if (hit != nullptr && hit->wants_hover()) {
+            target = hit;
+        }
+    }
+
+    if (hovered_widget_ == target) {
+        return;
+    }
+
+    if (hovered_widget_ != nullptr) {
+        hovered_widget_->set_hovered(false);
+    }
+
+    hovered_widget_ = target;
+
+    if (hovered_widget_ != nullptr) {
+        hovered_widget_->set_hovered(true);
+    }
+
+    request_redraw();
+}
+
 void Application::set_root(std::unique_ptr<Widget> root) {
     startup_profile_mark("application.before_set_root");
     root_ = std::move(root);
@@ -110,6 +172,7 @@ void Application::set_root(std::unique_ptr<Widget> root) {
             layout_root();
             request_redraw();
         });
+        sync_stylesheet();
 
         if (terminal_ready_) {
             layout_root();
@@ -455,6 +518,18 @@ void Application::shutdown_terminal() {
     }
 }
 
+void Application::set_alternate_screen(bool enabled) {
+    if (backend_) {
+        backend_->set_alternate_screen(enabled);
+    }
+}
+
+void Application::set_clear_on_shutdown(bool enabled) {
+    if (backend_) {
+        backend_->set_clear_on_shutdown(enabled);
+    }
+}
+
 void Application::focus_widget(Widget* widget) {
     if (!widget) {
         return;
@@ -475,12 +550,13 @@ void Application::handle_event(const Event& event) {
         (void)resize;
         backend_->invalidate_graphics();
         layout_root();
-        clear_framebuffer_ = true;
         request_redraw();
         return;
     }
 
     if (const auto* mouse = std::get_if<MouseEvent>(&event)) {
+        update_hover(mouse->position);
+
         const bool hit = root_ && root_->hit_test(mouse->position) != nullptr;
         bool handled = false;
 
@@ -533,6 +609,13 @@ void Application::handle_event(const Event& event) {
                 focus_next();
             } else {
                 focus_prev();
+            }
+            return;
+        }
+
+        if (dispatch_keyboard_capture(root_.get(), event)) {
+            if (!shell_terminal_active()) {
+                request_redraw();
             }
             return;
         }
@@ -624,8 +707,7 @@ void Application::render() {
 
     BeginFrameOptions frame;
     frame.full_redraw = true;
-    frame.clear_buffer = clear_framebuffer_;
-    clear_framebuffer_ = false;
+    frame.clear_buffer = true;
     frame.dirty_region = terminal_bounds;
     Rect paint_clip = terminal_bounds;
 
@@ -643,6 +725,8 @@ void Application::render() {
         frame.dirty_region = paint_clip;
     }
 
+    debug_paint_begin_frame();
+
     startup_profile_mark("render.begin_frame");
     backend_->begin_frame(frame);
 
@@ -650,14 +734,16 @@ void Application::render() {
         Canvas canvas(*backend_);
         canvas.set_glyphs(theme_.glyphs);
         canvas.with_clip(paint_clip, [&](Canvas& clipped) {
-            PaintContext clipped_ctx{clipped, theme_};
+            PaintContext clipped_ctx{clipped, theme_, stylesheet()};
             root_->paint(clipped_ctx);
+            paint_split_dividers(*root_, clipped_ctx);
         });
     }
 
     startup_profile_mark("render.before_refresh");
     backend_->end_frame();
     startup_profile_mark("render.after_refresh");
+    debug_paint_log_frame(use_partial, paint_clip);
     dirty_region_.clear();
 }
 

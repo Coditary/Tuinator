@@ -27,7 +27,7 @@ TUINATOR_TEST(box_drawing_glyph_unicode_differs_from_ascii) {
 
 TUINATOR_TEST(all_box_drawings_lists_every_kind) {
     const auto kinds = tuinator::all_box_drawings();
-    TUINATOR_CHECK_EQ(kinds.size(), 33U);
+    TUINATOR_CHECK_EQ(kinds.size(), 35U);
     TUINATOR_CHECK_EQ(kinds.front(), tuinator::BoxDrawing::Horizontal);
     TUINATOR_CHECK_EQ(kinds.back(), tuinator::BoxDrawing::Cross);
 }

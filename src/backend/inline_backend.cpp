@@ -39,31 +39,6 @@ int ansi_color_code(Color color, bool foreground) {
     return -1;
 }
 
-#if TUINATOR_PLATFORM_POSIX
-
-Size query_terminal_size() {
-    winsize ws{};
-    const int fd = open("/dev/tty", O_RDWR | O_CLOEXEC);
-    if (fd >= 0) {
-        if (ioctl(fd, TIOCGWINSZ, &ws) == 0 && ws.ws_col > 0 && ws.ws_row > 0) {
-            close(fd);
-            return {static_cast<int>(ws.ws_col), static_cast<int>(ws.ws_row)};
-        }
-        close(fd);
-    }
-
-    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == 0 && ws.ws_col > 0 && ws.ws_row > 0) {
-        return {static_cast<int>(ws.ws_col), static_cast<int>(ws.ws_row)};
-    }
-    return {80, 24};
-}
-
-#else
-
-Size query_terminal_size() { return {80, 24}; }
-
-#endif
-
 bool uses_relative_draw(const InlineBackendOptions& options) {
     return options.anchor_row <= 0 && !options.pin_to_bottom;
 }
@@ -151,18 +126,44 @@ void InlineTerminalBackend::place_anchor(int term_height) {
     anchor_row_ = std::clamp(anchor_row_, 1, max_anchor);
 }
 
-void InlineTerminalBackend::sync_geometry_relative(const Size& term, bool initial) {
+void InlineTerminalBackend::sync_geometry_relative(const Size& term) {
     region_width_ = std::clamp(term.width, 1, 512);
-    if (initial || band_height_ <= 0) {
-        const int term_height = std::clamp(term.height, 1, 256);
-        band_height_ = compute_region_height(term_height, term_height);
-        region_height_ = band_height_;
+    const int term_height = std::clamp(term.height, 1, 256);
+    const int new_height = compute_region_height(term_height, term_height);
+    if (band_height_ <= 0 || new_height != band_height_) {
+        band_height_ = new_height;
     }
+    region_height_ = band_height_;
+}
+
+Size InlineTerminalBackend::query_terminal_size() const {
+    if (options_.terminal_size_query) {
+        const Size override_size = options_.terminal_size_query();
+        if (override_size.width > 0 && override_size.height > 0) {
+            return override_size;
+        }
+    }
+#if TUINATOR_PLATFORM_POSIX
+    winsize ws{};
+    const int fd = open("/dev/tty", O_RDWR | O_CLOEXEC);
+    if (fd >= 0) {
+        if (ioctl(fd, TIOCGWINSZ, &ws) == 0 && ws.ws_col > 0 && ws.ws_row > 0) {
+            close(fd);
+            return {static_cast<int>(ws.ws_col), static_cast<int>(ws.ws_row)};
+        }
+        close(fd);
+    }
+
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == 0 && ws.ws_col > 0 && ws.ws_row > 0) {
+        return {static_cast<int>(ws.ws_col), static_cast<int>(ws.ws_row)};
+    }
+#endif
+    return {80, 24};
 }
 
 void InlineTerminalBackend::sync_geometry(const Size& term, bool allow_reanchor) {
     if (relative_draw_) {
-        sync_geometry_relative(term, allow_reanchor && !anchor_locked_);
+        sync_geometry_relative(term);
         return;
     }
 
@@ -245,6 +246,7 @@ void InlineTerminalBackend::shutdown_impl() {
     relative_draw_ = false;
     cursor_anchor_row_ = 0;
     band_height_ = 0;
+    last_emitted_band_height_ = 0;
     frames_drawn_ = 0;
 }
 
@@ -378,8 +380,8 @@ std::optional<Event> InlineTerminalBackend::poll_event() {
     const int old_width = region_width_;
     const int old_height = region_height_;
     if (relative_draw_) {
-        sync_geometry_relative(term, false);
-        if (region_width_ != old_width) {
+        sync_geometry_relative(term);
+        if (region_width_ != old_width || region_height_ != old_height) {
             resize_buffer(region_width_, band_height_);
             return Resize{region_width_, band_height_};
         }
@@ -598,7 +600,7 @@ void InlineTerminalBackend::emit_frame_relative() {
     }
 #endif
     if (frames_drawn_ > 0) {
-        append_erase_lines(frame, band_height_);
+        append_erase_lines(frame, std::max(band_height_, last_emitted_band_height_));
     }
 
     for (int y = 0; y < band_height_; ++y) {
@@ -616,6 +618,7 @@ void InlineTerminalBackend::emit_frame_relative() {
 #endif
 
     write_output(frame);
+    last_emitted_band_height_ = band_height_;
     ++frames_drawn_;
 }
 
@@ -688,7 +691,7 @@ void InlineTerminalBackend::clear_terminal_region() {
         }
 
         std::string clear;
-        append_erase_lines(clear, band_height_);
+        append_erase_lines(clear, std::max(band_height_, last_emitted_band_height_));
         write_output(clear);
         return;
     }

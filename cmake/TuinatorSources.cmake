@@ -9,6 +9,8 @@ set(TUINATOR_CORE_SOURCES
     src/core/action_registry.cpp
     src/core/application.cpp
     src/core/inline_view.cpp
+    src/core/screen.cpp
+    src/debug/debug_paint.cpp
     src/debug/startup_profiler.cpp
     src/layout/box.cpp
     src/layout/grid.cpp
@@ -41,9 +43,15 @@ set(TUINATOR_CORE_SOURCES
     src/render/scrollbar/scrollbar.cpp
     src/render/terminal_image.cpp
     src/render/text.cpp
+    src/render/tty_overlay.cpp
     src/render/theme.cpp
+    src/render/stylesheet.cpp
+    src/render/style_resolver.cpp
+    src/render/widget_options.cpp
+    src/render/widget_option_schema.cpp
     src/widgets/widget.cpp
     src/widgets/capabilities.cpp
+    src/widgets/capabilities/widget_roles.cpp
     src/widgets/controls/button.cpp
     src/widgets/controls/checkbox.cpp
     src/widgets/controls/combo_box.cpp
@@ -53,6 +61,7 @@ set(TUINATOR_CORE_SOURCES
     src/widgets/controls/toggle.cpp
     src/widgets/display/big_text.cpp
     src/widgets/display/image_view.cpp
+    src/widgets/display/custom_paint.cpp
     src/widgets/display/label.cpp
     src/widgets/display/nerd_icon_catalog_gallery.cpp
     src/widgets/display/nerd_glyph_matrix_gallery.cpp
@@ -70,6 +79,7 @@ set(TUINATOR_CORE_SOURCES
     src/widgets/charts/bar_chart.cpp
     src/widgets/charts/candlestick_chart.cpp
     src/widgets/charts/chart_common.cpp
+    src/widgets/charts/chart_widget.cpp
     src/widgets/charts/gauge_chart.cpp
     src/widgets/charts/heatmap.cpp
     src/widgets/charts/histogram.cpp

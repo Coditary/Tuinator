@@ -1,5 +1,6 @@
 #include <tuinator/core/event.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/controls/text_area.hpp>
 
 #include <algorithm>
@@ -123,6 +124,10 @@ void TextArea::set_placeholder(std::string placeholder) {
     mark_dirty();
 }
 
+void TextArea::apply_stylesheet(const StyleResolver& styles) {
+    apply_multiline_text_input_stylesheet(*this, *this, styles);
+}
+
 void TextArea::set_line_numbers(bool enabled) {
     line_numbers_ = enabled;
     ensure_cursor_visible();
@@ -145,6 +150,16 @@ void TextArea::set_gutter_width(int width) {
     gutter_width_ = std::max(0, width);
     ensure_cursor_visible();
     mark_dirty();
+}
+
+void TextArea::set_min_width(int width) {
+    min_width_ = std::max(8, width);
+    mark_layout_dirty();
+}
+
+void TextArea::set_min_height(int height) {
+    min_height_ = std::max(3, height);
+    mark_layout_dirty();
 }
 
 void TextArea::set_on_change(std::function<void(const std::string&)> callback) { on_change_ = std::move(callback); }
@@ -388,7 +403,10 @@ void TextArea::paint(PaintContext& ctx) const {
     }
 
     const bool focused = is_focused();
-    const Style& text_style = focused ? focused_style_ : style_;
+    const StyleResolver& styles = ctx.styles();
+    const Style normal_style = styles.text(*this, style_);
+    const Style focused_style = styles.focused(*this, focused_style_);
+    const Style& text_style = focused ? focused_style : normal_style;
 
     Style number_style = text_style;
     number_style.dim = true;

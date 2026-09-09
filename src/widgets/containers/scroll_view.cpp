@@ -1,5 +1,6 @@
 #include <tuinator/core/event.hpp>
 #include <tuinator/core/geometry.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/containers/scroll_view.hpp>
 
 #include <algorithm>
@@ -30,7 +31,26 @@ bool widget_tree_contains(const Widget* root, const Widget* target) {
 } // namespace
 
 ScrollView::ScrollView(std::unique_ptr<Widget> content, ScrollViewOptions options)
-    : content_(std::move(content)), options_(std::move(options)) {}
+    : content_(std::move(content)), options_(std::move(options)) {
+    attach_child_widget(content_.get());
+}
+
+void ScrollView::set_content(std::unique_ptr<Widget> content) {
+    content_ = std::move(content);
+    attach_child_widget(content_.get());
+    bind_content_dirty_callback();
+    refresh_content();
+    mark_layout_dirty();
+}
+
+void ScrollView::set_options(ScrollViewOptions options) {
+    options_ = std::move(options);
+    mark_layout_dirty();
+}
+
+void ScrollView::apply_stylesheet(const StyleResolver& styles) {
+    apply_scroll_view_stylesheet(*this, styles);
+}
 
 int ScrollView::max_scroll_x() const {
     const auto metrics = scrollbar_metrics();
@@ -194,7 +214,7 @@ void ScrollView::paint(PaintContext& ctx) const {
     const auto layout = scrollbar_layout();
     const Rect viewport{{0, 0}, {layout.metrics.viewport_width, layout.metrics.viewport_height}};
 
-    canvas.fill_rect(viewport, ' ', options_.background);
+    paint_bounds_background(ctx, options_.background);
 
     ctx.with_clip(viewport, [&](PaintContext& clipped_ctx) {
         clipped_ctx.with_clip({{-scroll_x_, -scroll_y_},

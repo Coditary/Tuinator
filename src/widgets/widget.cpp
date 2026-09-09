@@ -1,6 +1,9 @@
+#include <tuinator/debug/debug_paint.hpp>
+#include <tuinator/render/style_resolver.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <algorithm>
+#include <string_view>
 #include <variant>
 
 namespace tuinator {
@@ -19,6 +22,17 @@ void Widget::layout(Rect bounds) {
     for (auto& child : children_) {
         child->layout(bounds_);
     }
+}
+
+void Widget::paint_bounds_background(PaintContext& ctx, Style fallback) const {
+    if (bounds_.width <= 0 || bounds_.height <= 0) {
+        return;
+    }
+
+    debug_paint_note_background_fill();
+
+    const Style background = ctx.styles().text(*this, fallback);
+    ctx.canvas.fill_rect({{0, 0}, bounds_.size()}, ' ', background);
 }
 
 void Widget::paint(PaintContext& ctx) const {
@@ -107,7 +121,47 @@ void Widget::add_child(std::unique_ptr<Widget> child) {
     if (on_layout_) {
         child->set_on_layout(on_layout_);
     }
+    attach_child_widget(child.get());
     children_.push_back(std::move(child));
+}
+
+void Widget::set_widget_id(std::string id) {
+    widget_id_ = std::move(id);
+    mark_dirty();
+}
+
+void Widget::add_widget_class(std::string class_name) {
+    if (has_widget_class(class_name)) {
+        return;
+    }
+    widget_classes_.push_back(std::move(class_name));
+    mark_dirty();
+}
+
+void Widget::clear_widget_classes() {
+    if (widget_classes_.empty()) {
+        return;
+    }
+    widget_classes_.clear();
+    mark_dirty();
+}
+
+bool Widget::has_widget_class(std::string_view class_name) const {
+    return std::find(widget_classes_.begin(), widget_classes_.end(), class_name) != widget_classes_.end();
+}
+
+void Widget::apply_stylesheet(const StyleResolver& styles) {
+    const WidgetOptions opts = styles.options(*this);
+    if (opts.has("flex")) {
+        set_flex(opts.int_or("flex", flex()));
+    }
+}
+
+void Widget::attach_child_widget(Widget* child) {
+    if (child == nullptr) {
+        return;
+    }
+    child->parent_ = this;
 }
 
 void Widget::set_focused(bool focused) {
@@ -116,6 +170,24 @@ void Widget::set_focused(bool focused) {
     }
 
     focused_ = focused;
+    mark_dirty();
+}
+
+void Widget::set_enabled(bool enabled) {
+    if (enabled_ == enabled) {
+        return;
+    }
+
+    enabled_ = enabled;
+    mark_dirty();
+}
+
+void Widget::set_hovered(bool hovered) {
+    if (hovered_ == hovered) {
+        return;
+    }
+
+    hovered_ = hovered;
     mark_dirty();
 }
 

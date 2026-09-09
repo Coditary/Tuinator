@@ -4,6 +4,7 @@
 #include <tuinator/backend/memory_backend.hpp>
 #include <tuinator/core/action_registry.hpp>
 #include <tuinator/core/application.hpp>
+#include <tuinator/core/screen.hpp>
 #include <tuinator/core/event.hpp>
 #include <tuinator/core/geometry.hpp>
 #include <tuinator/core/inline_view.hpp>
@@ -32,6 +33,9 @@
 #include <tuinator/render/paint_context.hpp>
 #include <tuinator/render/scrollbar.hpp>
 #include <tuinator/render/style.hpp>
+#include <tuinator/render/style_resolver.hpp>
+#include <tuinator/render/widget_options.hpp>
+#include <tuinator/render/stylesheet.hpp>
 #include <tuinator/render/terminal_image.hpp>
 #include <tuinator/render/text.hpp>
 #include <tuinator/render/theme.hpp>
@@ -51,6 +55,7 @@
 // Display
 #include <tuinator/render/nerd_glyph_catalog.hpp>
 #include <tuinator/widgets/display/big_text.hpp>
+#include <tuinator/widgets/display/custom_paint.hpp>
 #include <tuinator/widgets/display/image_view.hpp>
 #include <tuinator/widgets/display/label.hpp>
 #include <tuinator/widgets/display/nerd_glyph_matrix_gallery.hpp>
@@ -75,6 +80,7 @@
 #include <tuinator/widgets/charts/bar_chart.hpp>
 #include <tuinator/widgets/charts/candlestick_chart.hpp>
 #include <tuinator/widgets/charts/chart_common.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
 #include <tuinator/widgets/charts/gauge_chart.hpp>
 #include <tuinator/widgets/charts/heatmap.hpp>
 #include <tuinator/widgets/charts/histogram.hpp>
@@ -92,6 +98,7 @@
 // Chrome
 #include <tuinator/scene/scene.hpp>
 #include <tuinator/widgets/capabilities.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/chrome/dialog.hpp>
 #include <tuinator/widgets/chrome/shell_terminal.hpp>
 #include <tuinator/widgets/chrome/source_control_panel.hpp>

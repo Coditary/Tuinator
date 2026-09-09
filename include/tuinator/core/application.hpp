@@ -4,13 +4,16 @@
 #include <tuinator/core/geometry.hpp>
 #include <tuinator/render/canvas.hpp>
 #include <tuinator/render/dirty_region.hpp>
+#include <tuinator/render/stylesheet.hpp>
 #include <tuinator/render/theme.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <chrono>
 #include <cstddef>
+#include <filesystem>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace tuinator {
@@ -32,6 +35,11 @@ class Application {
     void set_theme(Theme theme);
     const Theme& theme() const { return theme_; }
 
+    void set_stylesheet(Stylesheet stylesheet);
+    void load_stylesheet(const std::filesystem::path& path);
+    const Stylesheet* stylesheet() const;
+    const std::vector<std::string>& stylesheet_warnings() const { return stylesheet_warnings_; }
+
     TerminalBackend& backend() { return *backend_; }
     const TerminalBackend& backend() const { return *backend_; }
 
@@ -49,6 +57,9 @@ class Application {
 
     /// Release the terminal backend (for inline mode teardown).
     void shutdown_terminal();
+
+    void set_alternate_screen(bool enabled);
+    void set_clear_on_shutdown(bool enabled);
 
   private:
     struct TimerEntry {
@@ -79,10 +90,13 @@ class Application {
     bool any_widget_needs_periodic_idle() const;
     bool shell_terminal_active() const;
     void sync_mouse_cursor_policy();
+    void sync_stylesheet();
+    void update_hover(Point position);
 
     std::unique_ptr<TerminalBackend> backend_;
     std::unique_ptr<Widget> root_;
     Theme theme_;
+    std::optional<Stylesheet> stylesheet_;
     std::vector<Widget*> focusable_;
     std::vector<TimerEntry> timers_;
     TimerId next_timer_id_ = 1;
@@ -90,7 +104,8 @@ class Application {
     bool running_ = false;
     DirtyRegion dirty_region_;
     bool terminal_ready_ = false;
-    bool clear_framebuffer_ = false;
+    Widget* hovered_widget_ = nullptr;
+    std::vector<std::string> stylesheet_warnings_;
 };
 
 } // namespace tuinator

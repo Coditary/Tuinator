@@ -1,4 +1,6 @@
 #include <tuinator/layout/box.hpp>
+#include <tuinator/widgets/capabilities.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 
 #include <algorithm>
 #include <numeric>
@@ -118,6 +120,20 @@ void layout_horizontal_children(const Rect& bounds, int gap, int padding,
 
 VBox::VBox(BoxOptions options) : gap_(options.gap), padding_(options.padding) {}
 
+void VBox::set_gap(int gap) {
+    gap_ = std::max(0, gap);
+    mark_layout_dirty();
+}
+
+void VBox::set_padding(int padding) {
+    padding_ = std::max(0, padding);
+    mark_layout_dirty();
+}
+
+void VBox::apply_stylesheet(const StyleResolver& styles) {
+    apply_layout_box_stylesheet(*this, *this, styles);
+}
+
 Size VBox::preferred_size() const {
     int width = 0;
     int height = padding_ * 2;
@@ -141,10 +157,7 @@ void VBox::layout(Rect bounds) {
 }
 
 void VBox::paint(PaintContext& ctx) const {
-    Canvas& canvas = ctx.canvas;
-    if (bounds_.width > 0 && bounds_.height > 0) {
-        canvas.fill_rect({{0, 0}, bounds_.size()}, ' ');
-    }
+    paint_bounds_background(ctx);
 
     for (const auto& child : children_) {
         const Rect local{
@@ -160,6 +173,10 @@ void VBox::paint(PaintContext& ctx) const {
 
 bool VBox::handle_event(const Event& event) {
     if (std::holds_alternative<KeyPress>(event)) {
+        if (dispatch_keyboard_capture(this, event)) {
+            return true;
+        }
+
         for (auto& child : children_) {
             if (child->has_focused_descendant() && child->handle_event(event)) {
                 return true;
@@ -188,6 +205,20 @@ bool VBox::handle_event(const Event& event) {
 
 HBox::HBox(BoxOptions options) : gap_(options.gap), padding_(options.padding) {}
 
+void HBox::set_gap(int gap) {
+    gap_ = std::max(0, gap);
+    mark_layout_dirty();
+}
+
+void HBox::set_padding(int padding) {
+    padding_ = std::max(0, padding);
+    mark_layout_dirty();
+}
+
+void HBox::apply_stylesheet(const StyleResolver& styles) {
+    apply_layout_box_stylesheet(*this, *this, styles);
+}
+
 Size HBox::preferred_size() const {
     int width = padding_ * 2;
     int height = 0;
@@ -211,10 +242,7 @@ void HBox::layout(Rect bounds) {
 }
 
 void HBox::paint(PaintContext& ctx) const {
-    Canvas& canvas = ctx.canvas;
-    if (bounds_.width > 0 && bounds_.height > 0) {
-        canvas.fill_rect({{0, 0}, bounds_.size()}, ' ');
-    }
+    paint_bounds_background(ctx);
 
     for (const auto& child : children_) {
         const Rect local{
@@ -299,6 +327,10 @@ bool HBox::handle_event(const Event& event) {
         }
 
         return false;
+    }
+
+    if (dispatch_keyboard_capture(this, event)) {
+        return true;
     }
 
     for (auto& child : children_) {

@@ -1,4 +1,5 @@
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
 #include <tuinator/widgets/charts/waterfall_chart.hpp>
 
 #include <algorithm>
@@ -17,6 +18,13 @@ void WaterfallChart::set_steps(std::vector<WaterfallStep> steps) {
 void WaterfallChart::set_options(WaterfallChartOptions options) {
     options_ = std::move(options);
     mark_dirty();
+}
+
+void WaterfallChart::apply_stylesheet(const StyleResolver& styles) {
+    apply_chart_stylesheet(*this, styles,
+                           {&options_.min_width, &options_.min_height, &options_.show_axis, &options_.show_grid,
+                            &options_.style, nullptr});
+    mark_layout_dirty();
 }
 
 std::vector<WaterfallChart::Segment> WaterfallChart::compute_segments() const {
@@ -71,15 +79,24 @@ Size WaterfallChart::preferred_size() const {
 
 void WaterfallChart::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;
-    if (bounds_.width <= 0 || bounds_.height <= 0 || steps_.empty()) {
+    if (bounds_.width <= 0 || bounds_.height <= 0) {
         return;
     }
+
+    paint_.prepare(ctx, *this, options_.title_style, options_.axis_style, options_.grid_style, options_.axis_style);
+    chart_paint_background(ctx, *this, bounds_.size());
+    if (steps_.empty()) {
+        return;
+    }
+
+    const Style total_style = resolve_chart_accent_style(ctx, *this, options_.total_style);
+    const Style connector_style = resolve_chart_text_style(ctx, *this, options_.connector_style);
 
     const int footer_rows = options_.show_labels ? 1 : 0;
     const ChartPlotArea plot = chart_compute_plot(bounds_, options_.title, footer_rows, options_.show_axis);
 
     if (!options_.title.empty()) {
-        canvas.draw_text({0, 0}, options_.title, options_.title_style);
+        canvas.draw_text({0, 0}, options_.title, paint_.styles.title);
     }
 
     const std::vector<Segment> segments = compute_segments();
@@ -87,7 +104,7 @@ void WaterfallChart::paint(PaintContext& ctx) const {
     const double max_v = range_max(segments);
     const double span = std::max(1e-6, max_v - min_v);
 
-    chart_paint_horizontal_grid(canvas, plot, min_v, max_v, options_.axis_style, options_.grid_style,
+    chart_paint_horizontal_grid(canvas, plot, min_v, max_v, paint_.styles.axis, paint_.styles.grid,
                                 options_.show_axis);
 
     const int count = static_cast<int>(segments.size());
@@ -107,7 +124,7 @@ void WaterfallChart::paint(PaintContext& ctx) const {
         const int y1 =
             plot.top + plot.height - 1 - static_cast<int>((segment.end - min_v) / span * (plot.height - 1) + 0.5);
 
-        Style style = options_.total_style;
+        Style style = total_style;
         if (!segment.is_total && i < static_cast<int>(steps_.size())) {
             const WaterfallStep& step = steps_[static_cast<std::size_t>(i)];
             style = step.delta >= 0.0 ? step.up_style : step.down_style;
@@ -127,7 +144,7 @@ void WaterfallChart::paint(PaintContext& ctx) const {
         if (options_.show_connectors && i + 1 < count && !segment.is_total) {
             const int connector_y =
                 plot.top + plot.height - 1 - static_cast<int>((segment.end - min_v) / span * (plot.height - 1) + 0.5);
-            canvas.draw_hline(x + body_w, connector_y, gap + body_w, options_.connector_style);
+            canvas.draw_hline(x + body_w, connector_y, gap + body_w, connector_style);
         }
 
         if (options_.show_labels) {
@@ -138,8 +155,8 @@ void WaterfallChart::paint(PaintContext& ctx) const {
                 label = steps_[static_cast<std::size_t>(i)].label;
             }
             const int label_slot = options_.compact_layout ? slot : stretch_slot;
-            canvas.draw_text({x, plot.top + plot.height}, label.substr(0, static_cast<std::size_t>(label_slot)),
-                             options_.axis_style);
+            const std::size_t bytes = text_byte_length_for_width(label, label_slot);
+            canvas.draw_text({x, plot.top + plot.height}, label.substr(0, bytes), paint_.styles.axis);
         }
     }
 }

@@ -1,7 +1,10 @@
 #pragma once
 
+#include <tuinator/render/border_style.hpp>
 #include <tuinator/render/glyphs.hpp>
 #include <tuinator/render/style.hpp>
+#include <tuinator/render/style_resolver.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <memory>
@@ -10,14 +13,22 @@
 
 namespace tuinator {
 
-class Panel : public Widget {
+class Panel : public Widget, public Pane {
   public:
     Panel(std::string title, Style border_style = {}, Style title_style = {},
           std::optional<BorderGlyphs> glyphs = std::nullopt);
 
     void set_title(std::string title);
-    void set_content(std::unique_ptr<Widget> content);
-    Widget* content() const { return content_.get(); }
+    void set_content(std::unique_ptr<Widget> content) override;
+    Widget* content() const override { return content_.get(); }
+
+    void set_border_edges(BorderEdges edges) override;
+    BorderEdges border_edges() const override { return border_edges_; }
+    void reset_border_edges();
+    std::string_view pane_title() const override { return title_; }
+
+    std::string_view widget_type_name() const override { return "Panel"; }
+    void apply_stylesheet(const StyleResolver& styles) override;
 
     void set_on_dirty(std::function<void(Rect)> callback) override;
 
@@ -38,6 +49,8 @@ class Panel : public Widget {
     Style border_style_;
     Style title_style_;
     std::optional<BorderGlyphs> glyphs_;
+    BorderEdges configured_border_edges_{true, true, true, true};
+    BorderEdges border_edges_{true, true, true, true};
     std::unique_ptr<Widget> content_;
 };
 

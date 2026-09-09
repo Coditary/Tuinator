@@ -1,3 +1,5 @@
+#include <tuinator/render/text.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/containers/panel.hpp>
 
 #include <algorithm>
@@ -6,16 +8,47 @@
 namespace tuinator {
 
 Panel::Panel(std::string title, Style border_style, Style title_style, std::optional<BorderGlyphs> glyphs)
-    : title_(std::move(title)), border_style_(border_style), title_style_(title_style), glyphs_(std::move(glyphs)) {}
+    : title_(std::move(title)), border_style_(std::move(border_style)), title_style_(std::move(title_style)),
+      glyphs_(std::move(glyphs)) {}
 
 void Panel::set_title(std::string title) {
     title_ = std::move(title);
     mark_dirty();
 }
 
+void Panel::apply_stylesheet(const StyleResolver& styles) {
+    apply_bordered_pane_stylesheet(*this, *this, styles);
+    mark_dirty();
+}
+
+void Panel::set_border_edges(BorderEdges edges) {
+    if (configured_border_edges_.top == edges.top && configured_border_edges_.right == edges.right &&
+        configured_border_edges_.bottom == edges.bottom && configured_border_edges_.left == edges.left &&
+        border_edges_.top == edges.top && border_edges_.right == edges.right &&
+        border_edges_.bottom == edges.bottom && border_edges_.left == edges.left) {
+        return;
+    }
+
+    configured_border_edges_ = edges;
+    border_edges_ = edges;
+    mark_dirty();
+}
+
+void Panel::reset_border_edges() {
+    if (border_edges_.top == configured_border_edges_.top && border_edges_.right == configured_border_edges_.right &&
+        border_edges_.bottom == configured_border_edges_.bottom &&
+        border_edges_.left == configured_border_edges_.left) {
+        return;
+    }
+
+    border_edges_ = configured_border_edges_;
+    mark_dirty();
+}
+
 void Panel::set_content(std::unique_ptr<Widget> content) {
     content_ = std::move(content);
     if (content_) {
+        attach_child_widget(content_.get());
         content_->set_on_dirty(on_dirty_);
     }
     if (content_ && on_layout_) {
@@ -46,11 +79,16 @@ Size Panel::preferred_size() const {
 
 Rect Panel::content_bounds() const {
     const int title_rows = title_.empty() ? 0 : 1;
+    const int left_inset = border_edges_.left ? 1 : 0;
+    const int right_inset = border_edges_.right ? 1 : 0;
+    const int top_inset = border_edges_.top ? 1 : 0;
+    const int bottom_inset = border_edges_.bottom ? 1 : 0;
+
     return {
-        bounds_.x + 1,
-        bounds_.y + 1 + title_rows,
-        std::max(0, bounds_.width - 2),
-        std::max(0, bounds_.height - 2 - title_rows),
+        bounds_.x + left_inset,
+        bounds_.y + top_inset + title_rows,
+        std::max(0, bounds_.width - left_inset - right_inset),
+        std::max(0, bounds_.height - top_inset - bottom_inset - title_rows),
     };
 }
 
@@ -67,17 +105,79 @@ void Panel::paint(PaintContext& ctx) const {
         return;
     }
 
-    if (glyphs_.has_value()) {
-        canvas.draw_box({{0, 0}, bounds_.size()}, border_style_, *glyphs_);
-    } else {
-        canvas.draw_box({{0, 0}, bounds_.size()}, border_style_);
+    const Rect rect{{0, 0}, bounds_.size()};
+    const StyleResolver& styles = ctx.styles();
+    const BorderGlyphs glyphs = glyphs_.has_value() ? *glyphs_ : styles.border_glyphs(*this);
+    const Style border_style = styles.border(*this, border_style_);
+    const Style title_style = styles.title(*this, title_style_);
+
+    const Rect content = content_bounds();
+    const Rect local_content{
+        content.x - bounds_.x,
+        content.y - bounds_.y,
+        content.width,
+        content.height,
+    };
+    if (local_content.width > 0 && local_content.height > 0) {
+        canvas.fill_rect(local_content, ' ', styles.text(*this, border_style_));
+    }
+    const int left = rect.x;
+    const int right = rect.right() - 1;
+    const int top = rect.y;
+    const int bottom = rect.bottom() - 1;
+
+    if (border_edges_.top && border_edges_.left) {
+        canvas.draw_text({left, top}, glyphs.top_left, border_style);
+    }
+    if (border_edges_.top && border_edges_.right) {
+        canvas.draw_text({right, top}, glyphs.top_right, border_style);
+    }
+    if (border_edges_.bottom && border_edges_.left) {
+        canvas.draw_text({left, bottom}, glyphs.bottom_left, border_style);
+    }
+    if (border_edges_.bottom && border_edges_.right) {
+        canvas.draw_text({right, bottom}, glyphs.bottom_right, border_style);
+    }
+
+    if (border_edges_.top) {
+        const int start = border_edges_.left ? left + 1 : left;
+        const int end = border_edges_.right ? right - 1 : right;
+        for (int x = start; x <= end; ++x) {
+            canvas.draw_text({x, top}, glyphs.horizontal, border_style);
+        }
+    }
+
+    if (border_edges_.bottom) {
+        const int start = border_edges_.left ? left + 1 : left;
+        const int end = border_edges_.right ? right - 1 : right;
+        for (int x = start; x <= end; ++x) {
+            canvas.draw_text({x, bottom}, glyphs.horizontal, border_style);
+        }
+    }
+
+    if (border_edges_.left) {
+        const int start = border_edges_.top ? top + 1 : top;
+        const int end = border_edges_.bottom ? bottom - 1 : bottom;
+        for (int y = start; y <= end; ++y) {
+            canvas.draw_text({left, y}, glyphs.vertical, border_style);
+        }
+    }
+
+    if (border_edges_.right) {
+        const int start = border_edges_.top ? top + 1 : top;
+        const int end = border_edges_.bottom ? bottom - 1 : bottom;
+        for (int y = start; y <= end; ++y) {
+            canvas.draw_text({right, y}, glyphs.vertical, border_style);
+        }
     }
 
     if (!title_.empty()) {
         const std::string label = " " + title_ + " ";
-        const int max_width = std::max(0, bounds_.width - 2);
-        const std::string clipped = label.substr(0, static_cast<std::size_t>(max_width));
-        canvas.draw_text({1, 0}, clipped, title_style_);
+        const int title_x = border_edges_.left ? 1 : 0;
+        const int title_y = top;
+        const int max_width = std::max(0, bounds_.width - title_x);
+        const std::size_t bytes = text_byte_length_for_width(label, max_width);
+        canvas.draw_text({title_x, title_y}, label.substr(0, bytes), title_style);
     }
 
     if (!content_) {
