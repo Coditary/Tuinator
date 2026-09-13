@@ -1,6 +1,8 @@
 #include <tuinator/render/theme.hpp>
+#include <tuinator/widgets/capabilities.hpp>
 #include <tuinator/widgets/controls/combo_box.hpp>
 #include <tuinator/widgets/controls/slider.hpp>
+#include <tuinator/widgets/controls/text_input.hpp>
 #include <tuinator/widgets/display/progress_bar.hpp>
 #include <tuinator/widgets/display/spinner.hpp>
 #include <tuinator/widgets/menu/menu_bar.hpp>
@@ -271,6 +273,81 @@ TUINATOR_TEST(tree_view_expands_node) {
     const int before = tree.selected_index();
     TUINATOR_CHECK(tree.handle_event(tuinator::KeyPress{tuinator::Key::Down}));
     TUINATOR_CHECK(tree.selected_index() > before);
+}
+
+TUINATOR_TEST(text_input_clears_inner_area) {
+    tuinator::MemoryTerminalBackend backend({8, 1});
+    backend.init();
+    backend.draw_text(1, 0, "STALE", tuinator::Style{});
+
+    tuinator::TextInput input({.min_width = 4});
+    input.set_value("a");
+    input.layout({0, 0, 8, 1});
+
+    tuinator::Canvas canvas(backend);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    input.paint(ctx);
+
+    TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 1, 0), 'a');
+    TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 2, 0), ' ');
+    TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 4, 0), ' ');
+    TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 7, 0), ']');
+}
+
+TUINATOR_TEST(text_input_scrolls_to_show_cursor) {
+    tuinator::MemoryTerminalBackend backend({10, 1});
+    backend.init();
+
+    tuinator::TextInput input({.min_width = 4});
+    input.set_value("abcdefghij");
+    input.set_focused(true);
+    input.layout({0, 0, 10, 1});
+
+    tuinator::Canvas canvas(backend);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    input.paint(ctx);
+
+    TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 1, 0), 'd');
+    TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 7, 0), 'j');
+    TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 8, 0), '_');
+}
+
+TUINATOR_TEST(text_input_accepts_text_beyond_min_width) {
+    tuinator::TextInput input({.min_width = 4});
+    input.layout({0, 0, 8, 1});
+    input.set_focused(true);
+
+    for (char ch = 'a'; ch <= 'h'; ++ch) {
+        TUINATOR_CHECK(input.handle_event(tuinator::KeyPress{.character = ch}));
+    }
+
+    TUINATOR_CHECK_EQ(input.value(), "abcdefgh");
+}
+
+TUINATOR_TEST(text_input_escape_clears_selection) {
+    tuinator::TextInput input;
+    input.set_value("hello");
+    input.set_focused(true);
+    input.layout({0, 0, 10, 1});
+
+    TUINATOR_CHECK(input.handle_event(tuinator::KeyPress{.character = 1}));
+    TUINATOR_CHECK(input.handle_event(tuinator::KeyPress{.key = tuinator::Key::Escape}));
+    TUINATOR_CHECK(!input.handle_event(tuinator::KeyPress{.key = tuinator::Key::Escape}));
+}
+
+TUINATOR_TEST(combo_box_escape_closes_open_dropdown) {
+    tuinator::ComboBox combo(tuinator::Theme{}.label, tuinator::Theme{}.button_focused);
+    combo.set_items({"A", "B", "C"});
+    combo.layout({0, 0, 12, 7});
+    combo.set_focused(true);
+
+    TUINATOR_CHECK(combo.handle_event(tuinator::KeyPress{.character = ' '}));
+    TUINATOR_CHECK(combo.is_dropdown_open());
+
+    tuinator::KeyPress escape{};
+    escape.key = tuinator::Key::Escape;
+    TUINATOR_CHECK(combo.handle_event(escape));
+    TUINATOR_CHECK(!combo.is_dropdown_open());
 }
 
 TUINATOR_TEST(menu_bar_has_items) {

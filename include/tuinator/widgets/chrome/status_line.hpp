@@ -48,6 +48,8 @@ class StatusLine : public Widget {
     const std::vector<StatusSegment>& center() const { return center_; }
     const std::vector<StatusSegment>& right() const { return right_; }
 
+    std::string_view widget_type_name() const override { return "StatusLine"; }
+
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 

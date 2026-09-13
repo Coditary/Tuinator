@@ -1,3 +1,5 @@
+#include <tuinator/backend/terminal_backend.hpp>
+#include <tuinator/core/geometry.hpp>
 #include <tuinator/layout/box.hpp>
 #include <tuinator/render/scrollbar.hpp>
 #include <tuinator/render/theme.hpp>
@@ -12,6 +14,36 @@
 
 #include "render_helper.hpp"
 #include "test_harness.hpp"
+
+namespace {
+
+void render_partial_root(tuinator::Widget& root, tuinator::MemoryTerminalBackend& backend,
+                         const tuinator::Widget& dirty_source) {
+    const tuinator::Size term = backend.terminal_size();
+    root.layout({0, 0, term.width, term.height});
+
+    const tuinator::Rect dirty = tuinator::intersect(dirty_source.bounds(), {{0, 0}, term});
+    if (dirty.width <= 0 || dirty.height <= 0) {
+        return;
+    }
+
+    tuinator::BeginFrameOptions frame{};
+    frame.full_redraw = false;
+    frame.dirty_region = dirty;
+    backend.begin_frame(frame);
+
+    tuinator::Canvas canvas(backend);
+    const tuinator::Theme theme = tuinator::dark_theme();
+    canvas.set_glyphs(theme.glyphs);
+    const tuinator::Rect clip = dirty;
+    canvas.with_clip(clip, [&](tuinator::Canvas& clipped) {
+        tuinator::PaintContext ctx{clipped, theme};
+        root.paint(ctx);
+    });
+    backend.end_frame();
+}
+
+} // namespace
 
 TUINATOR_TEST(scrollbar_style_presets_provide_distinct_glyphs) {
     const auto ascii = tuinator::ScrollbarStyles::ascii().glyphs();
@@ -220,6 +252,33 @@ TUINATOR_TEST(scroll_view_paints_scrollbars_for_tall_content) {
 
     TUINATOR_CHECK(tuinator::test::row_contains(backend, 0, "^"));
     TUINATOR_CHECK(tuinator::test::row_contains(backend, 4, "v"));
+}
+
+TUINATOR_TEST(scroll_view_partial_redraw_clears_stale_rows) {
+    tuinator::MemoryTerminalBackend backend({30, 6});
+    backend.init();
+
+    auto list = std::make_unique<tuinator::VBox>(tuinator::BoxOptions{.gap = 0});
+    for (int i = 1; i <= 40; ++i) {
+        list->add_child(std::make_unique<tuinator::Label>("Item " + std::to_string(i)));
+    }
+
+    tuinator::ScrollViewOptions options;
+    options.width = 30;
+    options.height = 6;
+    options.scrollbars = tuinator::scrollbar_options(tuinator::ScrollbarPreset::Ascii);
+
+    tuinator::ScrollView scroll(std::move(list), options);
+    scroll.layout({0, 0, 30, 6});
+
+    scroll.scroll_to(0, 0);
+    tuinator::test::render_root(scroll, backend);
+    TUINATOR_CHECK(tuinator::test::row_contains(backend, 2, "Item 3"));
+
+    scroll.scroll_to(0, 27);
+    render_partial_root(scroll, backend, scroll);
+    TUINATOR_CHECK(tuinator::test::row_contains(backend, 2, "Item 30"));
+    TUINATOR_CHECK(!tuinator::test::row_contains(backend, 2, "Item 3 "));
 }
 
 TUINATOR_TEST(scroll_view_maps_content_dirty_to_screen) {

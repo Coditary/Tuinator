@@ -1,4 +1,5 @@
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
 #include <tuinator/widgets/charts/line_chart.hpp>
 
 #include <algorithm>
@@ -54,6 +55,13 @@ void LineChart::set_style(ChartGlyphStyle style) {
 void LineChart::set_mode(LineChartMode mode) {
     options_.mode = mode;
     mark_dirty();
+}
+
+void LineChart::apply_stylesheet(const StyleResolver& styles) {
+    apply_chart_stylesheet(*this, styles,
+                           {&options_.min_width, &options_.min_height, &options_.show_axes, &options_.show_grid,
+                            &options_.style, &options_.custom_glyph});
+    mark_layout_dirty();
 }
 
 void LineChart::push_value(std::size_t series_index, double value, std::size_t max_points) {
@@ -183,19 +191,19 @@ void LineChart::paint_grid(Canvas& canvas, const PlotArea& plot, double min_v, d
     const int lines = options_.mode == LineChartMode::Sparkline ? 0 : 4;
     for (int i = 0; i <= lines; ++i) {
         const int y = plot.top + plot.height - 1 - (i * (plot.height - 1) / std::max(1, lines));
-        canvas.draw_hline(plot.left, y, plot.width, options_.grid_style);
+        canvas.draw_hline(plot.left, y, plot.width, paint_.styles.grid);
 
         if (options_.show_axes && options_.mode != LineChartMode::Sparkline) {
             const double value = min_v + (max_v - min_v) * static_cast<double>(i) / std::max(1, lines);
             std::ostringstream label;
             label << std::fixed << std::setprecision(1) << value;
-            canvas.draw_text({0, y}, label.str(), options_.axis_style);
+            canvas.draw_text({0, y}, label.str(), paint_.styles.axis);
         }
     }
 
     if (options_.mirror) {
         const int mid_y = plot.top + plot.height / 2;
-        canvas.draw_hline(plot.left, mid_y, plot.width, options_.axis_style);
+        canvas.draw_hline(plot.left, mid_y, plot.width, paint_.styles.axis);
     }
 }
 
@@ -267,7 +275,13 @@ void LineChart::paint_series(Canvas& canvas, const PlotArea& plot, const LineCha
 
 void LineChart::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;
-    if (bounds_.width <= 0 || bounds_.height <= 0 || series_.empty()) {
+    if (bounds_.width <= 0 || bounds_.height <= 0) {
+        return;
+    }
+
+    paint_.prepare(ctx, *this, options_.title_style, options_.axis_style, options_.grid_style, options_.legend_style);
+    chart_paint_background(ctx, *this, bounds_.size());
+    if (series_.empty()) {
         return;
     }
 
@@ -276,7 +290,7 @@ void LineChart::paint(PaintContext& ctx) const {
     const double max_v = value_max();
 
     if (!options_.title.empty()) {
-        canvas.draw_text({0, 0}, options_.title, options_.title_style);
+        canvas.draw_text({0, 0}, options_.title, paint_.styles.title);
     }
 
     if (options_.mode != LineChartMode::Sparkline) {
@@ -295,7 +309,7 @@ void LineChart::paint(PaintContext& ctx) const {
                 continue;
             }
             canvas.draw_text({x, y}, item.label + " ",
-                             item.style.foreground == Color::Default ? options_.legend_style : item.style);
+                             item.style.foreground == Color::Default ? paint_.styles.value : item.style);
             x += text_display_width(item.label) + 1;
         }
     }

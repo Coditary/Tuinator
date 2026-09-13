@@ -1,5 +1,6 @@
 #include <tuinator/core/event.hpp>
 #include <tuinator/core/geometry.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/containers/scroll_view.hpp>
 
 #include <algorithm>
@@ -30,7 +31,24 @@ bool widget_tree_contains(const Widget* root, const Widget* target) {
 } // namespace
 
 ScrollView::ScrollView(std::unique_ptr<Widget> content, ScrollViewOptions options)
-    : content_(std::move(content)), options_(std::move(options)) {}
+    : content_(std::move(content)), options_(std::move(options)) {
+    attach_child_widget(content_.get());
+}
+
+void ScrollView::set_content(std::unique_ptr<Widget> content) {
+    content_ = std::move(content);
+    attach_child_widget(content_.get());
+    bind_content_dirty_callback();
+    refresh_content();
+    mark_layout_dirty();
+}
+
+void ScrollView::set_options(ScrollViewOptions options) {
+    options_ = std::move(options);
+    mark_layout_dirty();
+}
+
+void ScrollView::apply_stylesheet(const StyleResolver& styles) { apply_scroll_view_stylesheet(*this, styles); }
 
 int ScrollView::max_scroll_x() const {
     const auto metrics = scrollbar_metrics();
@@ -66,12 +84,87 @@ Point ScrollView::to_content_local(Point terminal) const {
     return {local.x + scroll_x_, local.y + scroll_y_};
 }
 
+Rect ScrollView::scroll_damage_rect(int prev_scroll_x, int prev_scroll_y) const {
+    if (bounds_.width <= 0 || bounds_.height <= 0) {
+        return bounds_;
+    }
+
+    const ScrollbarLayout layout = scrollbar_layout();
+    const bool show_arrows = options_.scrollbars.behavior.show_arrows;
+
+    Rect damage{
+        bounds_.x,
+        bounds_.y,
+        layout.metrics.viewport_width,
+        layout.metrics.viewport_height,
+    };
+
+    if (layout.metrics.show_vertical) {
+        const int track_offset = show_arrows ? 1 : 0;
+        const int bar_x = bounds_.x + layout.vertical_bar_x;
+
+        const auto thumb_rect = [&](int thumb_start, int thumb_size) {
+            if (thumb_size <= 0) {
+                return Rect{};
+            }
+            return Rect{bar_x, bounds_.y + layout.vertical_bar_y + track_offset + thumb_start, 1, thumb_size};
+        };
+
+        damage = unite(damage, thumb_rect(layout.vertical_thumb.start, layout.vertical_thumb.size));
+
+        if (prev_scroll_y != scroll_y_) {
+            const ScrollbarLayout prev_layout =
+                compute_scrollbar_layout(bounds_.width, bounds_.height, content_width_, content_height_, prev_scroll_x,
+                                         prev_scroll_y, options_.scrollbars.config, show_arrows);
+            damage = unite(damage, thumb_rect(prev_layout.vertical_thumb.start, prev_layout.vertical_thumb.size));
+        }
+
+        damage = unite(damage, Rect{bar_x, bounds_.y + layout.vertical_bar_y, 1, layout.vertical_bar_height});
+    }
+
+    if (layout.metrics.show_horizontal) {
+        const int bar_y = bounds_.y + layout.horizontal_bar_y;
+        damage = unite(damage, Rect{bounds_.x + layout.horizontal_bar_x, bar_y, layout.horizontal_bar_width, 1});
+
+        if (prev_scroll_x != scroll_x_) {
+            const ScrollbarLayout prev_layout =
+                compute_scrollbar_layout(bounds_.width, bounds_.height, content_width_, content_height_, prev_scroll_x,
+                                         prev_scroll_y, options_.scrollbars.config, show_arrows);
+            const int track_offset = show_arrows ? 1 : 0;
+            const int thumb_start = prev_layout.horizontal_thumb.start;
+            const int thumb_size = prev_layout.horizontal_thumb.size;
+            if (thumb_size > 0) {
+                damage = unite(damage, Rect{bounds_.x + layout.horizontal_bar_x + track_offset + thumb_start, bar_y,
+                                            thumb_size, 1});
+            }
+        }
+
+        const int track_offset = show_arrows ? 1 : 0;
+        const int thumb_start = layout.horizontal_thumb.start;
+        const int thumb_size = layout.horizontal_thumb.size;
+        if (thumb_size > 0) {
+            damage = unite(
+                damage, Rect{bounds_.x + layout.horizontal_bar_x + track_offset + thumb_start, bar_y, thumb_size, 1});
+        }
+    }
+
+    return unite(damage, bounds_);
+}
+
 void ScrollView::scroll_to(int x, int y) {
+    const int prev_scroll_x = scroll_x_;
+    const int prev_scroll_y = scroll_y_;
     scroll_x_ = x;
     scroll_y_ = y;
     clamp_scroll();
+    if (prev_scroll_x == scroll_x_ && prev_scroll_y == scroll_y_) {
+        return;
+    }
     layout_content();
-    mark_dirty();
+    if (!on_dirty_) {
+        return;
+    }
+    on_dirty_(scroll_damage_rect(prev_scroll_x, prev_scroll_y));
 }
 
 void ScrollView::scroll_by(int delta_x, int delta_y) { scroll_to(scroll_x_ + delta_x, scroll_y_ + delta_y); }
@@ -194,7 +287,7 @@ void ScrollView::paint(PaintContext& ctx) const {
     const auto layout = scrollbar_layout();
     const Rect viewport{{0, 0}, {layout.metrics.viewport_width, layout.metrics.viewport_height}};
 
-    canvas.fill_rect(viewport, ' ', options_.background);
+    paint_bounds_background(ctx, options_.background);
 
     ctx.with_clip(viewport, [&](PaintContext& clipped_ctx) {
         clipped_ctx.with_clip({{-scroll_x_, -scroll_y_},
@@ -265,6 +358,7 @@ bool ScrollView::handle_event(const Event& event) {
     if (const auto* mouse = std::get_if<MouseEvent>(&event)) {
         if (scrollbar_state_.pointer_active() && mouse->action == MouseAction::Release) {
             scrollbar_state_.reset_drag();
+            mark_dirty();
             return true;
         }
 

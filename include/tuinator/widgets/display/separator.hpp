@@ -9,6 +9,8 @@ class Separator : public Widget {
   public:
     explicit Separator(Style style = {});
 
+    std::string_view widget_type_name() const override { return "Separator"; }
+
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 

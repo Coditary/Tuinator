@@ -23,6 +23,7 @@ class ContextMenu : public Widget {
     void close();
 
     bool wants_full_screen() const override { return true; }
+    std::string_view widget_type_name() const override { return "ContextMenu"; }
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
     bool handle_event(const Event& event) override;
@@ -41,6 +42,7 @@ class ContextMenu : public Widget {
 
     std::vector<MenuItem> items_;
     MenuBarLook look_;
+    bool custom_look_ = false;
     Point anchor_{};
     int active_item_ = 0;
     std::vector<int> submenu_path_;

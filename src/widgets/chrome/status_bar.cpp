@@ -21,7 +21,7 @@ void StatusBar::paint(PaintContext& ctx) const {
         return;
     }
 
-    Style bar_style = style_;
+    Style bar_style = ctx.styles().text(*this, style_);
     if (bar_style.background == Color::Default && bar_style.foreground == Color::Default) {
         bar_style.background = Color::Blue;
         bar_style.foreground = Color::White;
@@ -30,9 +30,9 @@ void StatusBar::paint(PaintContext& ctx) const {
     const std::string fill(static_cast<std::size_t>(bounds_.width), ' ');
     canvas.draw_text({0, 0}, fill, bar_style);
 
-    const int max_width = bounds_.width;
-    const std::string clipped = text_.substr(0, static_cast<std::size_t>(std::max(0, max_width)));
-    canvas.draw_text({0, 0}, clipped, bar_style);
+    const int max_width = std::max(0, bounds_.width);
+    const std::size_t bytes = text_byte_length_for_width(text_, max_width);
+    canvas.draw_text({0, 0}, text_.substr(0, bytes), bar_style);
 }
 
 } // namespace tuinator

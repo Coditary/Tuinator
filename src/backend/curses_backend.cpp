@@ -5,6 +5,7 @@
 #include <tuinator/render/graphics_protocol.hpp>
 #include <tuinator/render/terminal_image.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/render/tty_overlay.hpp>
 
 #include <array>
 #include <clocale>
@@ -101,6 +102,21 @@ Rgb palette_to_rgb(Color color) {
     return {};
 }
 
+Style style_for_truecolor_ansi(Style style) {
+    if (!style.foreground_rgb.has_value() && style.foreground != Color::Default) {
+        style.foreground_rgb = palette_to_rgb(style.foreground);
+    }
+    if (!style.background_rgb.has_value() && style.background != Color::Default) {
+        style.background_rgb = palette_to_rgb(style.background);
+    }
+    return style;
+}
+
+bool ansi_style_equal(const Style& a, const Style& b) {
+    return a.foreground == b.foreground && a.background == b.background && a.foreground_rgb == b.foreground_rgb &&
+           a.background_rgb == b.background_rgb && a.bold == b.bold && a.dim == b.dim && a.reverse == b.reverse;
+}
+
 FILE* open_tty_output() { return std::fopen("/dev/tty", "we"); }
 
 void reset_tty_attributes() {
@@ -161,6 +177,27 @@ void send_tty_sequence_to(FILE* output, const char* sequence) {
     fflush(output);
 }
 
+// Synchronized output (CSI ? 2026 h/l) makes each frame atomic: the terminal
+// buffers all writes between the markers and presents them at once, so even a
+// full-screen clear+repaint does not flicker. Unknown private modes are ignored
+// by terminals that lack support, but we still gate on a allowlist plus env
+// override (TUINATOR_SYNC_UPDATE=0/1) to stay conservative.
+bool detect_sync_updates() {
+    const char* env = std::getenv("TUINATOR_SYNC_UPDATE");
+    if (env != nullptr && env[0] != '\0') {
+        return std::strcmp(env, "0") != 0;
+    }
+
+    const char* term = std::getenv("TERM");
+    if (term == nullptr) {
+        return false;
+    }
+
+    return std::strstr(term, "kitty") != nullptr || std::strstr(term, "foot") != nullptr ||
+           std::strstr(term, "alacritty") != nullptr || std::strstr(term, "wezterm") != nullptr ||
+           std::strstr(term, "ghostty") != nullptr || std::strstr(term, "contour") != nullptr;
+}
+
 bool terminal_name_suggests_xterm_mouse() {
     const char* term = std::getenv("TERM");
     if (term == nullptr) {
@@ -206,12 +243,46 @@ void debug_mouse_event(int ch, const MEVENT& mouse) {
     }
 }
 
+MouseButton mouse_button_from_state(mmask_t state) {
+#ifdef BUTTON3_PRESSED
+    if (state &
+        (BUTTON3_PRESSED | BUTTON3_RELEASED | BUTTON3_CLICKED | BUTTON3_DOUBLE_CLICKED | BUTTON3_TRIPLE_CLICKED)) {
+        return MouseButton::Right;
+    }
+#endif
+
+#ifdef BUTTON2_PRESSED
+    if (state &
+        (BUTTON2_PRESSED | BUTTON2_RELEASED | BUTTON2_CLICKED | BUTTON2_DOUBLE_CLICKED | BUTTON2_TRIPLE_CLICKED)) {
+        return MouseButton::Middle;
+    }
+#endif
+
+    return MouseButton::Left;
+}
+
 MouseAction mouse_action_from_state(mmask_t state) {
-    if (state & BUTTON1_CLICKED) {
+    const mmask_t clicked = BUTTON1_CLICKED
+#ifdef BUTTON2_CLICKED
+                            | BUTTON2_CLICKED
+#endif
+#ifdef BUTTON3_CLICKED
+                            | BUTTON3_CLICKED
+#endif
+        ;
+    if (state & clicked) {
         return MouseAction::Click;
     }
 
-    if (state & BUTTON1_RELEASED) {
+    const mmask_t released = BUTTON1_RELEASED
+#ifdef BUTTON2_RELEASED
+                             | BUTTON2_RELEASED
+#endif
+#ifdef BUTTON3_RELEASED
+                             | BUTTON3_RELEASED
+#endif
+        ;
+    if (state & released) {
         return MouseAction::Release;
     }
 
@@ -239,7 +310,15 @@ MouseAction mouse_action_from_state(mmask_t state) {
     }
 #endif
 
-    if (state & (BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED | BUTTON1_TRIPLE_CLICKED)) {
+    const mmask_t pressed = BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED | BUTTON1_TRIPLE_CLICKED
+#ifdef BUTTON2_PRESSED
+                            | BUTTON2_PRESSED | BUTTON2_DOUBLE_CLICKED | BUTTON2_TRIPLE_CLICKED
+#endif
+#ifdef BUTTON3_PRESSED
+                            | BUTTON3_PRESSED | BUTTON3_DOUBLE_CLICKED | BUTTON3_TRIPLE_CLICKED
+#endif
+        ;
+    if (state & pressed) {
         if (state & REPORT_MOUSE_POSITION) {
             return MouseAction::Move;
         }
@@ -409,6 +488,11 @@ void CursesBackend::init() {
     scrollok(stdscr, FALSE);
     timeout(poll_timeout_ms_);
 
+    if (alternate_screen()) {
+        write_tty_sequence("\033[?1049h");
+        alternate_screen_active_ = true;
+    }
+
     erase();
     refresh();
     startup_profile_mark("curses.after_initial_refresh");
@@ -421,6 +505,7 @@ void CursesBackend::init() {
 #endif
         colors_enabled_ = true;
         true_color_enabled_ = detect_true_color();
+        sync_updates_supported_ = detect_sync_updates();
 #if defined(TUINATOR_BACKEND_NCURSES) && defined(NCURSES_EXT_FUNCS)
         if (true_color_enabled_) {
             extended_colors_available_ = init_extended_color(kExtendedColorBase, 1000, 0, 0) != ERR;
@@ -573,6 +658,14 @@ void CursesBackend::shutdown() {
 
     disable_mouse();
     cleanup_kitty_graphics();
+    if (FILE* output = output_stream()) {
+        if (alternate_screen_active_) {
+            send_tty_sequence_to(output, "\033[?1049l");
+            alternate_screen_active_ = false;
+        } else if (clear_on_shutdown()) {
+            send_tty_sequence_to(output, "\033[2J");
+        }
+    }
     reset_tty_attributes();
     endwin();
 #if defined(TUINATOR_BACKEND_NCURSES)
@@ -646,6 +739,7 @@ std::optional<Event> CursesBackend::read_event(bool block) {
         MouseEvent event{};
         event.position = {mouse.x, mouse.y};
         event.action = mouse_action_from_state(state);
+        event.button = mouse_button_from_state(state);
         event.left_pressed = left_button_down_;
         last_mouse_position_ = event.position;
         return event;
@@ -702,9 +796,23 @@ void CursesBackend::begin_frame(BeginFrameOptions options) {
     pending_image_draws_.clear();
 
     const Rect terminal{{0, 0}, terminal_size()};
+    if (terminal.width != ansi_cells_width_ || terminal.height != ansi_cells_height_) {
+        ansi_cells_width_ = terminal.width;
+        ansi_cells_height_ = terminal.height;
+        ansi_cells_.assign(static_cast<std::size_t>(std::max(0, terminal.width)) *
+                               static_cast<std::size_t>(std::max(0, terminal.height)),
+                           AnsiCell{});
+    }
+
+    full_frame_redraw_ = options.full_redraw;
     if (options.full_redraw) {
         frame_clip_ = terminal;
+        ansi_clip_ = terminal;
+        // Full frames paint non-RGB cells through curses, which the ANSI shadow
+        // buffer cannot see; everything known so far is stale afterwards.
+        invalidate_ansi_cells();
         if (options.clear_buffer) {
+            cleanup_kitty_graphics();
             if (FILE* output = output_stream()) {
                 send_tty_sequence_to(output, "\033[2J");
             }
@@ -714,24 +822,70 @@ void CursesBackend::begin_frame(BeginFrameOptions options) {
     }
 
     frame_clip_ = intersect(options.dirty_region, terminal);
+    if (options.ansi_visible_region.width > 0 || options.ansi_visible_region.height > 0) {
+        ansi_clip_ = intersect(options.ansi_visible_region, terminal);
+    } else {
+        ansi_clip_ = frame_clip_;
+    }
     clear_region(options.dirty_region);
+    if (true_color_enabled_) {
+        // True-color partial frames repaint through the diffed ANSI flush, so
+        // blanking the band directly on the tty here would only flash - and it
+        // would happen outside the synchronized-update bracket. Just drop kitty
+        // placements overlapping the band.
+        const Rect kitty = kitty_placement_rect();
+        if (kitty.width > 0 && kitty.height > 0) {
+            const Rect overlap = intersect(frame_clip_, kitty);
+            if (overlap.width > 0 && overlap.height > 0) {
+                cleanup_kitty_graphics();
+            }
+        }
+    } else {
+        clear_partial_overlays(frame_clip_);
+    }
 }
 
-bool CursesBackend::ansi_draw_visible(const AnsiDraw& draw) const {
-    if (draw.text.empty()) {
-        return false;
+void CursesBackend::clear_partial_overlays(Rect region) {
+    if (region.width <= 0 || region.height <= 0) {
+        return;
     }
 
-    const int width = text_display_width(draw.text);
-    const Rect draw_rect{draw.x, draw.y, width, 1};
-    const Rect visible = intersect(draw_rect, frame_clip_);
-    return visible.width > 0 && visible.height > 0;
+    if (FILE* output = output_stream()) {
+        clear_tty_overlay_region(output, region, terminal_size());
+    }
+
+    const Rect kitty = kitty_placement_rect();
+    if (kitty.width > 0 && kitty.height > 0) {
+        const Rect overlap = intersect(region, kitty);
+        if (overlap.width > 0 && overlap.height > 0) {
+            cleanup_kitty_graphics();
+        }
+    }
+}
+
+Rect CursesBackend::kitty_placement_rect() const {
+    if (!kitty_image_ready_ || last_kitty_placement_.cols <= 0 || last_kitty_placement_.rows <= 0) {
+        return {};
+    }
+
+    return {last_kitty_placement_.x, last_kitty_placement_.y, last_kitty_placement_.cols, last_kitty_placement_.rows};
 }
 
 void CursesBackend::clear_region(Rect region) {
     const Size term = terminal_size();
     region = intersect(region, {{0, 0}, term});
     if (region.width <= 0 || region.height <= 0) {
+        return;
+    }
+
+    if (true_color_enabled_) {
+        // True-color partial frames bypass curses entirely (text is flushed as direct
+        // ANSI), so blanks written to stdscr would never reach the screen. Queue the
+        // erase as ANSI draws instead; they flush before this frame's widget draws.
+        const std::string blanks(static_cast<std::size_t>(region.width), ' ');
+        for (int y = region.y; y < region.bottom(); ++y) {
+            queue_ansi_draw(region.x, y, blanks, {});
+        }
         return;
     }
 
@@ -795,13 +949,22 @@ void CursesBackend::present_text_cursor(FILE* output) {
 
 void CursesBackend::present_frame() {
     FILE* output = output_stream();
-    const bool sync_updates = text_cursor_position_.has_value();
+    const bool sync_updates = sync_updates_supported_;
     if (sync_updates && output != nullptr) {
         send_tty_sequence_to(output, "\033[?2026h");
     }
 
     prepare_refresh(output);
-    refresh();
+    if (full_frame_redraw_) {
+        refresh();
+    } else if (!true_color_enabled_) {
+        // touchline() refreshes whole rows and would stomp ANSI in sibling panes.
+        for (int y = frame_clip_.y; y < frame_clip_.bottom(); ++y) {
+            touchline(stdscr, y, 1);
+        }
+        wnoutrefresh(stdscr);
+        doupdate();
+    }
     flush_ansi_draws(output);
     flush_image_draws(output);
     present_text_cursor(output);
@@ -922,44 +1085,46 @@ void CursesBackend::queue_ansi_draw(int x, int y, std::string_view text, Style s
     });
 }
 
-void CursesBackend::draw_text_ansi(FILE* output, int x, int y, std::string_view text, Style style) {
-    if (output == nullptr) {
+void CursesBackend::emit_ansi_run(FILE* output, int x, int y, std::string_view text, const Style& style) {
+    if (output == nullptr || text.empty()) {
         return;
     }
 
-    char header[128];
-    int hlen = 0;
+    const Style resolved = style_for_truecolor_ansi(style);
 
-    if (style.foreground_rgb.has_value()) {
-        const Rgb& rgb = *style.foreground_rgb;
+    char header[192];
+    int hlen = std::snprintf(header, sizeof(header), "\033[%d;%dH\033[0m", y + 1, x + 1);
+
+    if (resolved.foreground_rgb.has_value()) {
+        const Rgb& rgb = *resolved.foreground_rgb;
         hlen += std::snprintf(header + hlen, sizeof(header) - hlen, "\033[38;2;%u;%u;%um", rgb.r, rgb.g, rgb.b);
     }
 
-    if (style.background_rgb.has_value()) {
-        const Rgb& rgb = *style.background_rgb;
+    if (resolved.background_rgb.has_value()) {
+        const Rgb& rgb = *resolved.background_rgb;
         hlen += std::snprintf(header + hlen, sizeof(header) - hlen, "\033[48;2;%u;%u;%um", rgb.r, rgb.g, rgb.b);
     }
 
-    if (style.bold) {
+    if (resolved.bold) {
         hlen += std::snprintf(header + hlen, sizeof(header) - hlen, "\033[1m");
     }
 
-    if (style.dim) {
+    if (resolved.dim) {
         hlen += std::snprintf(header + hlen, sizeof(header) - hlen, "\033[2m");
     }
 
-    if (style.reverse) {
+    if (resolved.reverse) {
         hlen += std::snprintf(header + hlen, sizeof(header) - hlen, "\033[7m");
     }
 
-    std::fprintf(output, "\033[%d;%dH", y + 1, x + 1);
-    if (hlen > 0) {
-        std::fwrite(header, 1, static_cast<std::size_t>(hlen), output);
+    std::fwrite(header, 1, static_cast<std::size_t>(hlen), output);
+    std::fwrite(text.data(), 1, text.size(), output);
+}
+
+void CursesBackend::invalidate_ansi_cells() {
+    for (AnsiCell& cell : ansi_cells_) {
+        cell.known = false;
     }
-    if (!text.empty()) {
-        std::fwrite(text.data(), 1, text.size(), output);
-    }
-    std::fputs("\033[0m", output);
 }
 
 void CursesBackend::flush_ansi_draws(FILE* output) {
@@ -967,16 +1132,143 @@ void CursesBackend::flush_ansi_draws(FILE* output) {
         return;
     }
 
-    if (output == nullptr) {
+    if (output == nullptr || ansi_cells_width_ <= 0 || ansi_cells_height_ <= 0) {
         pending_ansi_draws_.clear();
         return;
     }
 
-    for (const AnsiDraw& draw : pending_ansi_draws_) {
-        if (!ansi_draw_visible(draw)) {
+    // Group draws by terminal row, preserving paint order within a row.
+    std::unordered_map<int, std::vector<std::size_t>> draws_by_row;
+    for (std::size_t i = 0; i < pending_ansi_draws_.size(); ++i) {
+        const AnsiDraw& draw = pending_ansi_draws_[i];
+        if (draw.y < ansi_clip_.y || draw.y >= ansi_clip_.bottom() || draw.y >= ansi_cells_height_) {
             continue;
         }
-        draw_text_ansi(output, draw.x, draw.y, draw.text, draw.style);
+        draws_by_row[draw.y].push_back(i);
+    }
+
+    const int clip_left = std::max(0, ansi_clip_.x);
+    const int clip_right = std::min(ansi_clip_.right(), ansi_cells_width_);
+    const int row_len = clip_right - clip_left;
+    if (row_len <= 0) {
+        pending_ansi_draws_.clear();
+        return;
+    }
+
+    std::vector<AnsiCell> row_cur(static_cast<std::size_t>(row_len));
+    std::string run_text;
+
+    for (const auto& entry : draws_by_row) {
+        const int row_y = entry.first;
+        const std::vector<std::size_t>& indices = entry.second;
+        const std::size_t row_base = static_cast<std::size_t>(row_y) * static_cast<std::size_t>(ansi_cells_width_);
+
+        for (int i = 0; i < row_len; ++i) {
+            row_cur[static_cast<std::size_t>(i)] = ansi_cells_[row_base + static_cast<std::size_t>(clip_left + i)];
+        }
+
+        // Compose this frame's draws onto the previous screen state.
+        for (const std::size_t idx : indices) {
+            const AnsiDraw& draw = pending_ansi_draws_[idx];
+            int cx = draw.x;
+            for (const TextGlyph& glyph : text_glyph_breaks(draw.text)) {
+                const int gw = glyph.width;
+                if (cx + gw <= clip_left) {
+                    cx += gw;
+                    continue;
+                }
+                if (cx >= clip_right) {
+                    break;
+                }
+                if (cx < clip_left || cx + gw > clip_right) {
+                    // Straddles the clip edge: terminals cannot draw half a glyph.
+                    cx += gw;
+                    continue;
+                }
+
+                AnsiCell& cell = row_cur[static_cast<std::size_t>(cx - clip_left)];
+                if (cell.width == 0 && cx > clip_left) {
+                    // Overwriting the second half of a wide glyph destroys its owner.
+                    AnsiCell& owner = row_cur[static_cast<std::size_t>(cx - clip_left - 1)];
+                    owner.glyph = " ";
+                    owner.style = Style{};
+                    owner.width = 1;
+                }
+                if (cell.width == 2 && cx + 1 < clip_right) {
+                    // Overwriting the first half of a wide glyph clears its tail.
+                    AnsiCell& tail = row_cur[static_cast<std::size_t>(cx - clip_left + 1)];
+                    tail.glyph = " ";
+                    tail.style = Style{};
+                    tail.width = 1;
+                }
+
+                cell.glyph = draw.text.substr(glyph.offset, glyph.length);
+                cell.style = draw.style;
+                cell.width = static_cast<std::uint8_t>(gw);
+
+                if (gw == 2) {
+                    AnsiCell& cont = row_cur[static_cast<std::size_t>(cx - clip_left + 1)];
+                    if (cont.width == 2 && cx + 2 < clip_right) {
+                        AnsiCell& tail = row_cur[static_cast<std::size_t>(cx - clip_left + 2)];
+                        tail.glyph = " ";
+                        tail.style = Style{};
+                        tail.width = 1;
+                    }
+                    cont.glyph.clear();
+                    cont.style = draw.style;
+                    cont.width = 0;
+                }
+
+                cx += gw;
+            }
+        }
+
+        // Diff against the shadow buffer and emit only changed runs.
+        run_text.clear();
+        Style run_style{};
+        int run_start = -1;
+
+        auto flush_run = [&] {
+            if (run_start >= 0) {
+                emit_ansi_run(output, run_start, row_y, run_text, run_style);
+                run_start = -1;
+                run_text.clear();
+            }
+        };
+
+        for (int i = 0; i < row_len; ++i) {
+            const int x = clip_left + i;
+            AnsiCell& cur = row_cur[static_cast<std::size_t>(i)];
+            AnsiCell& prev = ansi_cells_[row_base + static_cast<std::size_t>(x)];
+
+            const bool changed = !prev.known || prev.width != cur.width || prev.glyph != cur.glyph ||
+                                 !ansi_style_equal(prev.style, cur.style);
+            if (!changed) {
+                if (cur.width != 0) {
+                    flush_run();
+                }
+                continue;
+            }
+
+            if (cur.width == 0) {
+                // Continuation cell: emitted via its owner's wide glyph.
+                prev = cur;
+                prev.known = true;
+                continue;
+            }
+
+            if (run_start >= 0 && ansi_style_equal(run_style, cur.style)) {
+                run_text += cur.glyph;
+            } else {
+                flush_run();
+                run_start = x;
+                run_style = cur.style;
+                run_text = cur.glyph;
+            }
+            prev = cur;
+            prev.known = true;
+        }
+        flush_run();
     }
 
     std::fflush(output);
@@ -1130,10 +1422,11 @@ void CursesBackend::draw_text(int x, int y, std::string_view text, Style style) 
 
     const int pair = color_pair_for(style);
     const bool has_rgb = style.foreground_rgb.has_value() || style.background_rgb.has_value();
-    const bool use_ansi_draw = true_color_enabled_ && has_rgb;
+    const bool partial_frame = !full_frame_redraw_;
 
-    if (use_ansi_draw) {
-        queue_ansi_draw(x, y, text, style);
+    if (true_color_enabled_ && (has_rgb || partial_frame)) {
+        const Style draw_style = partial_frame && !has_rgb ? style_for_truecolor_ansi(style) : style;
+        queue_ansi_draw(x, y, text, draw_style);
         return;
     }
 

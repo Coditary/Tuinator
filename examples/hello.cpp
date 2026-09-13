@@ -4,12 +4,10 @@
 
 int main() {
     tuinator::Application app;
+    const tuinator::Theme theme = tuinator::dark_theme();
 
-    auto label = std::make_unique<tuinator::Label>("Hello Tuinator", tuinator::Style{
-                                                                         .foreground = tuinator::Color::Cyan,
-                                                                         .bold = true,
-                                                                     });
+    auto root = tuinator::make_screen({.gap = 1, .padding = 2});
+    root->add_child(std::make_unique<tuinator::Label>("Hello Tuinator", theme.heading));
 
-    app.set_root(std::move(label));
-    return app.run();
+    return tuinator::run_screen(app, std::move(root));
 }

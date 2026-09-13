@@ -87,6 +87,56 @@ TUINATOR_TEST(inline_backend_relative_height_from_options) {
     backend.shutdown();
 }
 
+TUINATOR_TEST(inline_backend_relative_resizes_height_when_terminal_grows) {
+    tuinator::Size term{80, 24};
+    tuinator::InlineTerminalBackend backend({
+        .terminal_size_query = [&term]() { return term; },
+    });
+    backend.init();
+    TUINATOR_CHECK_EQ(backend.terminal_size().height, 8);
+
+    term.height = 36;
+    const std::optional<tuinator::Event> resize = backend.poll_event();
+    TUINATOR_CHECK(resize.has_value());
+    TUINATOR_CHECK(std::holds_alternative<tuinator::Resize>(*resize));
+    TUINATOR_CHECK_EQ(std::get<tuinator::Resize>(*resize).height, 12);
+    TUINATOR_CHECK_EQ(backend.terminal_size().height, 12);
+    backend.shutdown();
+}
+
+TUINATOR_TEST(inline_backend_relative_keeps_fixed_height_when_terminal_grows) {
+    tuinator::Size term{80, 24};
+    tuinator::InlineTerminalBackend backend({
+        .height = 7,
+        .terminal_size_query = [&term]() { return term; },
+    });
+    backend.init();
+    TUINATOR_CHECK_EQ(backend.terminal_size().height, 7);
+
+    term.height = 36;
+    const std::optional<tuinator::Event> resize = backend.poll_event();
+    TUINATOR_CHECK(!resize.has_value());
+    TUINATOR_CHECK_EQ(backend.terminal_size().height, 7);
+    backend.shutdown();
+}
+
+TUINATOR_TEST(inline_backend_relative_clamps_height_when_terminal_shrinks) {
+    tuinator::Size term{80, 24};
+    tuinator::InlineTerminalBackend backend({
+        .height = 12,
+        .terminal_size_query = [&term]() { return term; },
+    });
+    backend.init();
+    TUINATOR_CHECK_EQ(backend.terminal_size().height, 12);
+
+    term.height = 8;
+    const std::optional<tuinator::Event> resize = backend.poll_event();
+    TUINATOR_CHECK(resize.has_value());
+    TUINATOR_CHECK_EQ(std::get<tuinator::Resize>(*resize).height, 8);
+    TUINATOR_CHECK_EQ(backend.terminal_size().height, 8);
+    backend.shutdown();
+}
+
 TUINATOR_TEST(inline_backend_relative_redraw_erases_previous_band) {
     CaptureOutput capture;
     TUINATOR_CHECK(capture.file != nullptr);

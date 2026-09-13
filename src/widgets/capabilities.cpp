@@ -140,6 +140,33 @@ Widget* find_pointer_active_widget(Widget* node) {
     return found;
 }
 
+Widget* find_keyboard_capture_widget(Widget* node) {
+    if (node == nullptr) {
+        return nullptr;
+    }
+
+    for (auto it = node->children().rbegin(); it != node->children().rend(); ++it) {
+        if (Widget* found = find_keyboard_capture_widget(it->get())) {
+            return found;
+        }
+    }
+
+    if (node->captures_keyboard()) {
+        return node;
+    }
+
+    return nullptr;
+}
+
+bool dispatch_keyboard_capture(Widget* root, const Event& event) {
+    if (!std::holds_alternative<KeyPress>(event)) {
+        return false;
+    }
+
+    Widget* capture = find_keyboard_capture_widget(root);
+    return capture != nullptr && capture->handle_event(event);
+}
+
 MouseEvent adjust_mouse_for_widget(Widget* root, Widget* target, const MouseEvent& mouse) {
     MouseEvent adjusted = mouse;
     std::vector<Scrollable*> scroll_chain;

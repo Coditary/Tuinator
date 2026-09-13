@@ -59,6 +59,8 @@ class SourceControlPanel : public Widget {
 
     void set_on_select(std::function<void(int section_index, int entry_index, const SourceControlEntry&)> callback);
 
+    std::string_view widget_type_name() const override { return "SourceControlPanel"; }
+
     Size preferred_size() const override;
     void layout(Rect bounds) override;
     void paint(PaintContext& ctx) const override;

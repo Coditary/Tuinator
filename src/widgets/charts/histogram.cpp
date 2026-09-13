@@ -1,4 +1,5 @@
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
 #include <tuinator/widgets/charts/histogram.hpp>
 
 #include <algorithm>
@@ -19,6 +20,13 @@ void Histogram::set_options(HistogramOptions options) {
     mark_dirty();
 }
 
+void Histogram::apply_stylesheet(const StyleResolver& styles) {
+    apply_chart_stylesheet(*this, styles,
+                           {&options_.min_width, &options_.min_height, &options_.show_axis, &options_.show_grid,
+                            &options_.style, &options_.custom_glyph});
+    mark_layout_dirty();
+}
+
 Size Histogram::preferred_size() const {
     return {
         std::max(options_.min_width, static_cast<int>(bins_.size()) * 2 + 6),
@@ -28,7 +36,13 @@ Size Histogram::preferred_size() const {
 
 void Histogram::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;
-    if (bounds_.width <= 0 || bounds_.height <= 0 || bins_.empty()) {
+    if (bounds_.width <= 0 || bounds_.height <= 0) {
+        return;
+    }
+
+    paint_.prepare(ctx, *this, options_.title_style, options_.axis_style, options_.grid_style, options_.count_style);
+    chart_paint_background(ctx, *this, bounds_.size());
+    if (bins_.empty()) {
         return;
     }
 
@@ -36,7 +50,7 @@ void Histogram::paint(PaintContext& ctx) const {
     const ChartPlotArea plot = chart_compute_plot(bounds_, options_.title, footer_rows, options_.show_axis);
 
     if (!options_.title.empty()) {
-        canvas.draw_text({0, 0}, options_.title, options_.title_style);
+        canvas.draw_text({0, 0}, options_.title, paint_.styles.title);
     }
 
     double max_v = options_.max_value;
@@ -50,8 +64,7 @@ void Histogram::paint(PaintContext& ctx) const {
     const double min_v = options_.min_value;
     const double span = std::max(1e-6, max_v - min_v);
 
-    chart_paint_horizontal_grid(canvas, plot, min_v, max_v, options_.axis_style, options_.grid_style,
-                                options_.show_axis);
+    chart_paint_horizontal_grid(canvas, plot, min_v, max_v, paint_.styles.axis, paint_.styles.grid, options_.show_axis);
 
     const int count = static_cast<int>(bins_.size());
     const int bar_width = std::max(1, plot.width / std::max(1, count));
@@ -69,12 +82,12 @@ void Histogram::paint(PaintContext& ctx) const {
         }
 
         if (options_.show_counts && filled > 0) {
-            canvas.draw_text({x, std::max(plot.top, y - 1)}, chart_format_value(bin.count), options_.count_style);
+            canvas.draw_text({x, std::max(plot.top, y - 1)}, chart_format_value(bin.count), paint_.styles.value);
         }
 
         if (options_.show_labels) {
-            const std::string label = bin.label.substr(0, static_cast<std::size_t>(bar_width));
-            canvas.draw_text({x, plot.top + plot.height}, label, options_.axis_style);
+            const std::size_t bytes = text_byte_length_for_width(bin.label, bar_width);
+            canvas.draw_text({x, plot.top + plot.height}, bin.label.substr(0, bytes), paint_.styles.axis);
         }
     }
 }

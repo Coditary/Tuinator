@@ -150,7 +150,7 @@ void CommandPalette::paint(PaintContext& ctx) const {
     const Rect box{x, y, width, height};
     canvas.draw_box(box, palette_border_style(), unicode_rounded_border_glyphs());
 
-    const Theme theme = dark_theme();
+    const Theme& theme = ctx.theme;
     canvas.draw_text({x + 2, y + 1}, "> " + query_ + "_", theme.heading);
 
     const int list_y = y + 2;

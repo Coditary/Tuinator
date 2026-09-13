@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tuinator/render/style.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <functional>
@@ -9,18 +10,20 @@
 
 namespace tuinator {
 
-class ListView : public Widget {
+class ListView : public Widget, public SelectableList {
   public:
     ListView(Style item_style = {}, Style selected_style = {});
 
     const std::vector<std::string>& items() const { return items_; }
-    int selected_index() const { return selected_index_; }
+    int selected_index() const override { return selected_index_; }
 
     void set_items(std::vector<std::string> items);
     void add_item(std::string item);
-    void set_selected_index(int index);
+    void set_selected_index(int index) override;
     void set_on_select(std::function<void(int index, const std::string& item)> callback);
     void set_on_activate(std::function<void(int index, const std::string& item)> callback);
+
+    std::string_view widget_type_name() const override { return "ListView"; }
 
     Size preferred_size() const override;
     void layout(Rect bounds) override;

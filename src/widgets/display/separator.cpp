@@ -14,7 +14,8 @@ void Separator::paint(PaintContext& ctx) const {
         return;
     }
 
-    canvas.draw_hline(0, 0, bounds_.width, style_);
+    paint_bounds_background(ctx, style_);
+    canvas.draw_hline(0, 0, bounds_.width, ctx.styles().border(*this, style_));
 }
 
 } // namespace tuinator

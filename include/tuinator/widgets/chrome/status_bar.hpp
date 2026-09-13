@@ -14,6 +14,8 @@ class StatusBar : public Widget {
     const std::string& text() const { return text_; }
     void set_text(std::string text);
 
+    std::string_view widget_type_name() const override { return "StatusBar"; }
+
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 

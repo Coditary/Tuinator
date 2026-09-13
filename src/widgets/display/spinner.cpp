@@ -38,8 +38,13 @@ void Spinner::paint(PaintContext& ctx) const {
         return;
     }
 
+    paint_bounds_background(ctx, style_);
+
     const std::string text = "< " + std::to_string(value_) + " >";
-    const Style& active = is_focused() ? focused_style_ : style_;
+    const StyleResolver& styles = ctx.styles();
+    const Style normal = styles.text(*this, style_);
+    const Style focused = styles.focused(*this, focused_style_);
+    const Style& active = is_focused() ? focused : normal;
     canvas.draw_text({0, 0}, text, active);
 }
 

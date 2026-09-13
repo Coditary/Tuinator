@@ -159,6 +159,42 @@ int text_display_width(std::string_view text) {
     return width;
 }
 
+std::vector<TextGlyph> text_glyph_breaks(std::string_view text) {
+    std::vector<TextGlyph> glyphs;
+    std::size_t index = 0;
+
+    for_each_utf8_scalar(text, [&](char32_t ch, std::size_t bytes) {
+        const std::size_t offset = index;
+        index += bytes;
+
+        if (ch == 0xFE0F) {
+            if (!glyphs.empty()) {
+                glyphs.back().length += bytes;
+                if (glyphs.back().width == 1) {
+                    glyphs.back().width = 2;
+                }
+            }
+            return;
+        }
+
+        int cell = base_cell_width(ch);
+        if (cell <= 0 && ch >= 0x80) {
+            cell = (ch >= 0x10000) ? 2 : 1;
+        }
+        if (cell <= 0) {
+            // Zero-width scalar: merge into the preceding cluster.
+            if (!glyphs.empty()) {
+                glyphs.back().length += bytes;
+            }
+            return;
+        }
+
+        glyphs.push_back(TextGlyph{offset, bytes, cell});
+    });
+
+    return glyphs;
+}
+
 std::size_t text_byte_length_for_width(std::string_view text, int max_columns) {
     if (max_columns <= 0 || text.empty()) {
         return 0;

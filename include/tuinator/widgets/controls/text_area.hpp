@@ -2,6 +2,8 @@
 
 #include <tuinator/render/scrollbar.hpp>
 #include <tuinator/render/style.hpp>
+#include <tuinator/render/style_resolver.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <functional>
@@ -43,11 +45,13 @@ struct TextAreaOptions {
     ScrollbarOptions scrollbars{};
 };
 
-class TextArea : public Widget {
+class TextArea : public Widget, public MultiLineTextInput {
   public:
     TextArea(TextAreaOptions options = {}, Style style = {}, Style focused_style = {});
 
     std::string value() const;
+    std::string_view field_value() const override;
+    std::string_view field_placeholder() const override { return placeholder_; }
     const std::string& title() const { return title_; }
     int cursor_row() const { return cursor_row_; }
     int cursor_column() const { return cursor_col_; }
@@ -62,7 +66,14 @@ class TextArea : public Widget {
     void set_status_bar(bool enabled);
     void set_gutter_renderer(GutterRenderer renderer);
     void set_gutter_width(int width);
+    void set_min_width(int width);
+    void set_min_height(int height);
+    int min_width() const { return min_width_; }
+    int min_height() const { return min_height_; }
     void set_on_change(std::function<void(const std::string&)> callback);
+
+    std::string_view widget_type_name() const override { return "TextArea"; }
+    void apply_stylesheet(const StyleResolver& styles) override;
 
     Size preferred_size() const override;
     void layout(Rect bounds) override;
@@ -106,6 +117,7 @@ class TextArea : public Widget {
     Style focused_style_;
     GutterRenderer gutter_renderer_;
     std::function<void(const std::string&)> on_change_;
+    mutable std::string field_value_cache_;
 };
 
 } // namespace tuinator

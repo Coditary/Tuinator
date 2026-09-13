@@ -1,6 +1,9 @@
 #pragma once
 
+#include <tuinator/render/style_resolver.hpp>
 #include <tuinator/widgets/charts/chart_common.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
+#include <tuinator/widgets/charts/chart_widget_paint.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <string>
@@ -35,7 +38,7 @@ struct WaterfallChartOptions {
     Style total_style{};
 };
 
-class WaterfallChart : public Widget {
+class WaterfallChart : public Widget, public ChartWidget {
   public:
     WaterfallChart(std::vector<WaterfallStep> steps = {}, WaterfallChartOptions options = {});
 
@@ -44,6 +47,9 @@ class WaterfallChart : public Widget {
 
     void set_steps(std::vector<WaterfallStep> steps);
     void set_options(WaterfallChartOptions options);
+
+    std::string_view widget_type_name() const override { return "WaterfallChart"; }
+    void apply_stylesheet(const StyleResolver& styles) override;
 
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
@@ -61,6 +67,7 @@ class WaterfallChart : public Widget {
 
     std::vector<WaterfallStep> steps_;
     WaterfallChartOptions options_;
+    mutable ChartPaintSupport paint_{};
 };
 
 } // namespace tuinator

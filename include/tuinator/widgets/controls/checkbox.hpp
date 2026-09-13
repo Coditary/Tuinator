@@ -2,6 +2,7 @@
 
 #include <tuinator/render/style.hpp>
 #include <tuinator/render/theme.hpp>
+#include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <functional>
@@ -43,7 +44,7 @@ const CheckboxStyle* checkbox_style_named(std::string_view name);
 CheckboxOptions checkbox_options_default(const Theme& theme);
 void apply_checkbox_style(CheckboxOptions& options, const CheckboxStyle& style, const Theme& theme);
 
-class Checkbox : public Widget {
+class Checkbox : public Widget, public ToggleControl {
   public:
     Checkbox(std::string label, bool checked = false, CheckboxOptions options = {},
              std::function<void(bool)> on_change = {});
@@ -53,12 +54,16 @@ class Checkbox : public Widget {
 
     const std::string& label() const { return label_; }
     bool checked() const { return checked_; }
+    bool is_checked() const override { return checked_; }
     const CheckboxOptions& options() const { return options_; }
 
     void set_label(std::string label);
-    void set_checked(bool checked);
+    void set_checked(bool checked) override;
     void set_options(CheckboxOptions options);
     void set_glyphs(CheckboxGlyphs glyphs);
+
+    std::string_view widget_type_name() const override { return "Checkbox"; }
+    bool wants_hover() const override { return true; }
 
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;

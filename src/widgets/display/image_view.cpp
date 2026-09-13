@@ -34,7 +34,14 @@ Size ImageView::preferred_size() const {
 
 void ImageView::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;
-    if (image_.empty() || bounds_.width <= 0 || bounds_.height <= 0) {
+    if (bounds_.width <= 0 || bounds_.height <= 0) {
+        return;
+    }
+
+    paint_bounds_background(ctx);
+
+    if (image_.empty()) {
+        canvas.invalidate_graphics();
         return;
     }
 

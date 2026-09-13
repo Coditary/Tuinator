@@ -6,9 +6,13 @@
 
 #include <functional>
 #include <memory>
+#include <string>
+#include <string_view>
 #include <vector>
 
 namespace tuinator {
+
+class StyleResolver;
 
 class Widget {
   public:
@@ -18,10 +22,14 @@ class Widget {
     virtual void layout(Rect bounds);
     virtual void paint(PaintContext& ctx) const;
 
+    /// Fill widget bounds with the resolved background style before drawing content.
+    void paint_bounds_background(PaintContext& ctx, Style fallback = {}) const;
+
     virtual bool handle_event(const Event& event);
     virtual bool is_focusable() const { return false; }
     virtual bool wants_full_screen() const { return false; }
     virtual bool captures_pointer() const { return false; }
+    virtual bool captures_keyboard() const { return captures_pointer() || is_dropdown_open(); }
     virtual bool pointer_active() const { return false; }
     virtual bool wants_hover_redraw() const { return false; }
     virtual void on_idle() {}
@@ -42,10 +50,19 @@ class Widget {
     bool is_focused() const { return focused_; }
     void set_focused(bool focused);
 
+    bool is_enabled() const { return enabled_; }
+    void set_enabled(bool enabled);
+
+    bool is_hovered() const { return hovered_; }
+    void set_hovered(bool hovered);
+    virtual bool wants_hover() const { return false; }
+
+    virtual bool is_dropdown_open() const { return false; }
+
     virtual bool has_focused_descendant() const;
 
     virtual void set_on_dirty(std::function<void(Rect)> callback);
-    void set_on_layout(std::function<void()> callback);
+    virtual void set_on_layout(std::function<void()> callback);
     void mark_dirty();
     void mark_layout_dirty();
 
@@ -57,13 +74,32 @@ class Widget {
     virtual void for_each_child(const std::function<void(Widget*)>& visitor);
     virtual void for_each_descendant(const std::function<void(Widget*)>& visitor);
 
+    virtual std::string_view widget_type_name() const { return "Widget"; }
+
+    void set_widget_id(std::string id);
+    const std::string& widget_id() const { return widget_id_; }
+
+    void add_widget_class(std::string class_name);
+    void clear_widget_classes();
+    bool has_widget_class(std::string_view class_name) const;
+
+    Widget* parent_widget() const { return parent_; }
+
+    virtual void apply_stylesheet(const StyleResolver& styles);
+
   protected:
+    void attach_child_widget(Widget* child);
     Rect bounds_{};
     bool focused_ = false;
+    bool enabled_ = true;
+    bool hovered_ = false;
     int flex_ = 0;
     std::function<void(Rect)> on_dirty_;
     std::function<void()> on_layout_;
     std::vector<std::unique_ptr<Widget>> children_;
+    Widget* parent_ = nullptr;
+    std::string widget_id_;
+    std::vector<std::string> widget_classes_;
 };
 
 } // namespace tuinator

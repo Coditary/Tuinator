@@ -96,9 +96,16 @@ void Tabs::layout(Rect bounds) {
 
 void Tabs::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;
-    Style normal = options_.tab_style;
-    Style selected = options_.selected_tab_style;
-    if (selected.foreground == Color::Default) {
+    if (bounds_.width <= 0 || bounds_.height <= 0) {
+        return;
+    }
+
+    const StyleResolver& styles = ctx.styles();
+    Style normal = styles.text(*this, options_.tab_style);
+    paint_bounds_background(ctx, normal);
+    Style selected = styles.selected(*this, options_.selected_tab_style);
+    if (selected.foreground == Color::Default && !selected.foreground_rgb && selected.background == Color::Default &&
+        !selected.background_rgb) {
         selected = normal;
         selected.background = Color::Cyan;
         selected.foreground = Color::Black;
@@ -112,11 +119,13 @@ void Tabs::paint(PaintContext& ctx) const {
         if (is_focused() && i == selected_index_) {
             style.bold = true;
         }
-        if (x >= bounds_.width) {
+        const int remaining = bounds_.width - x;
+        if (remaining <= 0) {
             break;
         }
-        canvas.draw_text({x, 0}, label, style);
-        x += text_display_width(label) + 1;
+        const std::size_t bytes = text_byte_length_for_width(label, remaining);
+        canvas.draw_text({x, 0}, label.substr(0, bytes), style);
+        x += text_display_width(label.substr(0, bytes)) + 1;
     }
 
     if (is_focused()) {

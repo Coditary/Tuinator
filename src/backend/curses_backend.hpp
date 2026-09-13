@@ -56,6 +56,17 @@ class CursesBackend final : public TerminalBackend {
         std::string place;
     };
 
+    // One terminal cell of the ANSI shadow frame buffer. The true-color path
+    // bypasses curses, so it keeps its own copy of the screen and diffs each
+    // frame against it: unchanged cells emit nothing, which keeps partial
+    // frames small and flash-free.
+    struct AnsiCell {
+        std::string glyph;
+        Style style{};
+        std::uint8_t width = 1; // 0 marks the continuation cell of a wide glyph
+        bool known = false;     // false = screen state unknown, must be emitted
+    };
+
     static constexpr int kColorCount = 8;
     static constexpr int kPairSlots = 1 + kColorCount + kColorCount + (kColorCount * kColorCount);
     static constexpr int kExtendedColorBase = 256;
@@ -67,7 +78,8 @@ class CursesBackend final : public TerminalBackend {
     void queue_ansi_draw(int x, int y, std::string_view text, Style style);
     void flush_ansi_draws(FILE* output);
     void flush_image_draws(FILE* output);
-    void draw_text_ansi(FILE* output, int x, int y, std::string_view text, Style style);
+    void emit_ansi_run(FILE* output, int x, int y, std::string_view text, const Style& style);
+    void invalidate_ansi_cells();
     FILE* output_stream() const;
     void write_tty_sequence(const char* sequence);
     void prepare_refresh(FILE* output);
@@ -88,10 +100,15 @@ class CursesBackend final : public TerminalBackend {
     int mouse_tracking_mode() const;
     void cleanup_kitty_graphics();
     void clear_region(Rect region);
-    bool ansi_draw_visible(const AnsiDraw& draw) const;
+    void clear_partial_overlays(Rect region);
+    Rect kitty_placement_rect() const;
 
     Rect frame_clip_{{0, 0}, {0, 0}};
+    Rect ansi_clip_{{0, 0}, {0, 0}};
+    bool full_frame_redraw_ = true;
+    bool sync_updates_supported_ = false;
 
+    bool alternate_screen_active_ = false;
     bool initialized_ = false;
     bool colors_enabled_ = false;
     bool true_color_enabled_ = false;
@@ -115,6 +132,9 @@ class CursesBackend final : public TerminalBackend {
     std::unordered_map<std::uint64_t, int> extended_pair_cache_;
     std::vector<AnsiDraw> pending_ansi_draws_;
     std::vector<ImageDraw> pending_image_draws_;
+    std::vector<AnsiCell> ansi_cells_;
+    int ansi_cells_width_ = 0;
+    int ansi_cells_height_ = 0;
     std::uint32_t kitty_cached_hash_ = 0;
     bool kitty_image_ready_ = false;
 

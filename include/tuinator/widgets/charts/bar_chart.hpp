@@ -1,6 +1,9 @@
 #pragma once
 
+#include <tuinator/render/style_resolver.hpp>
 #include <tuinator/widgets/charts/chart_common.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
+#include <tuinator/widgets/charts/chart_widget_paint.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <functional>
@@ -8,6 +11,8 @@
 #include <vector>
 
 namespace tuinator {
+
+class PaintContext;
 
 enum class BarChartOrientation {
     Vertical,
@@ -42,7 +47,7 @@ struct BarChartOptions {
     Style value_style{};
 };
 
-class BarChart : public Widget {
+class BarChart : public Widget, public ChartWidget {
   public:
     BarChart(std::vector<BarChartBar> bars = {}, BarChartOptions options = {});
 
@@ -54,6 +59,9 @@ class BarChart : public Widget {
     void set_style(ChartGlyphStyle style);
     void set_interactive(bool interactive);
     void set_on_change(std::function<void(const std::vector<BarChartBar>&)> callback);
+
+    std::string_view widget_type_name() const override { return "BarChart"; }
+    void apply_stylesheet(const StyleResolver& styles) override;
 
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
@@ -88,6 +96,7 @@ class BarChart : public Widget {
 
     std::vector<BarChartBar> bars_;
     BarChartOptions options_;
+    mutable ChartPaintSupport paint_{};
     std::function<void(const std::vector<BarChartBar>&)> on_change_;
 
     bool dragging_ = false;

@@ -5,10 +5,19 @@ set(TUINATOR_TEST_SOURCES
     core/test_inline_backend.cpp
     core/test_inline_view.cpp
     core/test_dirty_region.cpp
+    core/test_screen.cpp
+    core/test_debug_paint.cpp
     render/test_glyphs.cpp
     render/test_border_style.cpp
     render/test_block_element.cpp
     render/test_box_drawing.cpp
+    render/test_stylesheet.cpp
+    render/test_stylesheet_pseudo_tokens.cpp
+    render/test_hover_and_warnings.cpp
+    render/test_tty_overlay.cpp
+    render/test_widget_options.cpp
+    widgets/test_stylesheet_widgets.cpp
+    widgets/test_widget_roles.cpp
     render/test_file_icon.cpp
     render/test_git_change_status.cpp
     render/test_ui_icon.cpp
@@ -24,6 +33,8 @@ set(TUINATOR_TEST_SOURCES
     widgets/test_menu_bar.cpp
     widgets/test_text_area.cpp
     widgets/test_scrollbar.cpp
+    widgets/test_split_pane.cpp
+    widgets/test_custom_paint.cpp
     widgets/test_throbber.cpp
     widgets/test_big_text.cpp
     widgets/test_image.cpp

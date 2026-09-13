@@ -1,15 +1,19 @@
 #include <tuinator/backend/inline_backend.hpp>
 #include <tuinator/core/application.hpp>
+#include <tuinator/debug/debug_paint.hpp>
 #include <tuinator/debug/startup_profiler.hpp>
 #include <tuinator/render/graphics_protocol.hpp>
 #include <tuinator/render/paint_context.hpp>
+#include <tuinator/render/style_resolver.hpp>
 #include <tuinator/render/theme.hpp>
 #include <tuinator/widgets/capabilities.hpp>
+#include <tuinator/widgets/containers/split_pane.hpp>
 
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <unistd.h>
 #include <variant>
 
@@ -59,15 +63,6 @@ bool is_viewport_scroll_key(const KeyPress& key) {
     }
 }
 
-bool widget_wants_hover_redraw(Widget* root, Point position) {
-    if (root == nullptr) {
-        return false;
-    }
-
-    Widget* target = root->hit_test(position);
-    return target != nullptr && target->wants_hover_redraw();
-}
-
 bool widget_is_shell_terminal(const Widget* widget) { return widget != nullptr && widget->is_shell_terminal(); }
 
 } // namespace
@@ -100,6 +95,62 @@ void Application::set_theme(Theme theme) {
     request_redraw();
 }
 
+void Application::set_stylesheet(Stylesheet stylesheet) {
+    stylesheet_ = std::move(stylesheet);
+    ThemeOptions options = stylesheet_->theme_options();
+    if (options.border_style || options.glyphs != GlyphSet::Auto) {
+        set_theme(dark_theme(options));
+    }
+    sync_stylesheet();
+    request_redraw();
+}
+
+void Application::load_stylesheet(const std::filesystem::path& path) {
+    set_stylesheet(Stylesheet::load_from_file(path));
+}
+
+const Stylesheet* Application::stylesheet() const { return stylesheet_.has_value() ? &*stylesheet_ : nullptr; }
+
+void Application::sync_stylesheet() {
+    if (!root_ || !stylesheet_.has_value()) {
+        stylesheet_warnings_.clear();
+        return;
+    }
+
+    const StyleResolver resolver(theme_, stylesheet());
+    stylesheet_warnings_.clear();
+    apply_stylesheet_to_tree(*root_, resolver, &stylesheet_warnings_);
+    for (const std::string& warning : stylesheet_warnings_) {
+        std::cerr << "[tuinator:stylesheet] " << warning << '\n';
+    }
+}
+
+void Application::update_hover(Point position) {
+    Widget* target = nullptr;
+    if (root_ != nullptr) {
+        Widget* hit = root_->hit_test(position);
+        if (hit != nullptr && hit->wants_hover()) {
+            target = hit;
+        }
+    }
+
+    if (hovered_widget_ == target) {
+        return;
+    }
+
+    if (hovered_widget_ != nullptr) {
+        hovered_widget_->set_hovered(false);
+    }
+
+    hovered_widget_ = target;
+
+    if (hovered_widget_ != nullptr) {
+        hovered_widget_->set_hovered(true);
+    }
+    // set_hovered() dirties the affected widgets itself; when the hover target
+    // did not change appearance, nothing was marked and nothing is repainted.
+}
+
 void Application::set_root(std::unique_ptr<Widget> root) {
     startup_profile_mark("application.before_set_root");
     root_ = std::move(root);
@@ -110,6 +161,7 @@ void Application::set_root(std::unique_ptr<Widget> root) {
             layout_root();
             request_redraw();
         });
+        sync_stylesheet();
 
         if (terminal_ready_) {
             layout_root();
@@ -219,7 +271,6 @@ bool Application::any_widget_needs_periodic_idle() const {
 
 void Application::process_timers() {
     const auto now = std::chrono::steady_clock::now();
-    bool fired = false;
 
     for (TimerEntry& timer : timers_) {
         if (!timer.active || now < timer.next_fire) {
@@ -230,8 +281,6 @@ void Application::process_timers() {
             timer.callback();
         }
 
-        fired = true;
-
         if (timer.repeat) {
             timer.next_fire = now + std::chrono::milliseconds(timer.interval_ms);
         } else {
@@ -241,10 +290,6 @@ void Application::process_timers() {
 
     timers_.erase(std::remove_if(timers_.begin(), timers_.end(), [](const TimerEntry& timer) { return !timer.active; }),
                   timers_.end());
-
-    if (fired && !dirty_region_.needs_render()) {
-        request_redraw();
-    }
 }
 
 void Application::refresh_focus() {
@@ -255,8 +300,16 @@ void Application::refresh_focus() {
 void Application::request_redraw() { dirty_region_.mark_full(); }
 
 void Application::request_redraw(Rect region) {
+    if (const char* debug = std::getenv("TUINATOR_DEBUG_DIRTY");
+        debug != nullptr && debug[0] != '\0' && std::strcmp(debug, "0") != 0) {
+        std::fprintf(stderr, "tuinator-region: %d,%d %dx%d\n", region.x, region.y, region.width, region.height);
+    }
+
+    // An empty region means the reporting widget paints nothing (zero-sized or
+    // hidden, e.g. an inactive stacked tab) — there is nothing to repaint.
+    // Treating it as a full redraw would turn every such report into a
+    // full-screen clear.
     if (region.width <= 0 || region.height <= 0) {
-        dirty_region_.mark_full();
         return;
     }
 
@@ -311,7 +364,11 @@ void Application::rebuild_focus_list() {
     }
 }
 
-void Application::sync_mouse_cursor_policy() { backend_->set_mouse_cursor_suppressed(shell_terminal_active()); }
+void Application::sync_mouse_cursor_policy() {
+    // While a mouse button is held (scrollbar/split drag), suppress the fallback
+    // text cursor at the pointer position — it would overwrite glyphs under the cursor.
+    backend_->set_mouse_cursor_suppressed(shell_terminal_active() || backend_->pointer_active());
+}
 
 bool Application::shell_terminal_active() const {
     if (widget_is_shell_terminal(root_.get())) {
@@ -336,7 +393,8 @@ void Application::update_focus() {
     }
 
     sync_mouse_cursor_policy();
-    request_redraw();
+    // set_focused()/ensure_focus_visible() dirty the affected regions; when the
+    // focus did not actually move, nothing was marked and nothing is repainted.
 }
 
 void Application::focus_next() {
@@ -427,6 +485,7 @@ int Application::run() {
         }
 
         poll_idle();
+        sync_mouse_cursor_policy();
 
         render();
     }
@@ -448,10 +507,38 @@ void Application::present() {
     render();
 }
 
+void Application::repaint_all() {
+    if (should_run_headless()) {
+        return;
+    }
+
+    ensure_terminal();
+    layout_root();
+    rebuild_focus_list();
+    update_focus();
+    request_redraw({{0, 0}, terminal_size()});
+}
+
+void Application::invalidate() { request_redraw(); }
+
+void Application::invalidate(Rect region) { request_redraw(region); }
+
 void Application::shutdown_terminal() {
     if (backend_ && terminal_ready_) {
         backend_->shutdown();
         terminal_ready_ = false;
+    }
+}
+
+void Application::set_alternate_screen(bool enabled) {
+    if (backend_) {
+        backend_->set_alternate_screen(enabled);
+    }
+}
+
+void Application::set_clear_on_shutdown(bool enabled) {
+    if (backend_) {
+        backend_->set_clear_on_shutdown(enabled);
     }
 }
 
@@ -475,12 +562,13 @@ void Application::handle_event(const Event& event) {
         (void)resize;
         backend_->invalidate_graphics();
         layout_root();
-        clear_framebuffer_ = true;
         request_redraw();
         return;
     }
 
     if (const auto* mouse = std::get_if<MouseEvent>(&event)) {
+        update_hover(mouse->position);
+
         const bool hit = root_ && root_->hit_test(mouse->position) != nullptr;
         bool handled = false;
 
@@ -497,16 +585,9 @@ void Application::handle_event(const Event& event) {
             handled = root_->handle_event(event);
         }
 
-        // Pure hover motion should not erase and repaint the whole frame — that
-        // flickers text and re-places Kitty graphics on every pixel of movement.
-        const bool motion_while_dragging = mouse->action == MouseAction::Move && mouse->left_pressed;
-        const bool hover_needs_redraw =
-            mouse->action == MouseAction::Move && widget_wants_hover_redraw(root_.get(), mouse->position);
-        const bool needs_redraw =
-            mouse->action != MouseAction::Move || motion_while_dragging || handled || hover_needs_redraw;
-        if (needs_redraw) {
-            request_redraw();
-        } else if (mouse->action == MouseAction::Move) {
+        // Widgets that reacted to the mouse mark their own dirty regions; when
+        // nothing was marked there is nothing to repaint.
+        if (mouse->action == MouseAction::Move) {
             backend_->refresh_mouse_cursor();
         }
 
@@ -525,7 +606,6 @@ void Application::handle_event(const Event& event) {
 
         if (key->key == Key::Tab || key->key == Key::BackTab) {
             if (root_ && root_->handle_event(event)) {
-                request_redraw();
                 return;
             }
 
@@ -537,10 +617,13 @@ void Application::handle_event(const Event& event) {
             return;
         }
 
+        if (dispatch_keyboard_capture(root_.get(), event)) {
+            return;
+        }
+
+        // Widgets that handled the key mark their own dirty region via on_dirty;
+        // when nothing was marked there is nothing to repaint.
         if (root_ && root_->handle_event(event)) {
-            if (!shell_terminal_active()) {
-                request_redraw();
-            }
             return;
         }
 
@@ -590,21 +673,18 @@ void Application::handle_event(const Event& event) {
                         }
 
                         scroll->scroll_by(0, delta);
-                        request_redraw();
                         return;
                     }
                 }
 
                 if (Scrollable* any_scroll = find_first_scrollable(root_.get())) {
                     any_scroll->scroll_by(0, delta);
-                    request_redraw();
                     return;
                 }
             }
 
             if (is_viewport_scroll_key(*key)) {
                 if (dispatch_scroll_keys(root_.get(), focused, event)) {
-                    request_redraw();
                     return;
                 }
             }
@@ -624,8 +704,7 @@ void Application::render() {
 
     BeginFrameOptions frame;
     frame.full_redraw = true;
-    frame.clear_buffer = clear_framebuffer_;
-    clear_framebuffer_ = false;
+    frame.clear_buffer = true;
     frame.dirty_region = terminal_bounds;
     Rect paint_clip = terminal_bounds;
 
@@ -633,15 +712,23 @@ void Application::render() {
     const bool use_partial = !dirty_region_.is_full() && !shell_active && !inline_backend;
 
     if (use_partial) {
-        paint_clip = intersect(dirty_region_.bounds(), terminal_bounds);
-        if (paint_clip.width <= 0 || paint_clip.height <= 0) {
+        Rect dirty_band = intersect(dirty_region_.bounds(), terminal_bounds);
+        if (dirty_band.width <= 0 || dirty_band.height <= 0) {
             dirty_region_.clear();
             return;
         }
 
         frame.full_redraw = false;
-        frame.dirty_region = paint_clip;
+        frame.dirty_region = dirty_band;
+        frame.ansi_visible_region = dirty_band;
+        // Always paint the full tree: nested scroll offsets and the text cursor are
+        // established during paint. The backend limits actual output to the dirty
+        // band (per-cell ANSI clipping in true-color mode, touched rows otherwise),
+        // so sibling panes stay untouched.
+        paint_clip = terminal_bounds;
     }
+
+    debug_paint_begin_frame();
 
     startup_profile_mark("render.begin_frame");
     backend_->begin_frame(frame);
@@ -650,14 +737,16 @@ void Application::render() {
         Canvas canvas(*backend_);
         canvas.set_glyphs(theme_.glyphs);
         canvas.with_clip(paint_clip, [&](Canvas& clipped) {
-            PaintContext clipped_ctx{clipped, theme_};
+            PaintContext clipped_ctx{clipped, theme_, stylesheet()};
             root_->paint(clipped_ctx);
+            paint_split_dividers(*root_, clipped_ctx);
         });
     }
 
     startup_profile_mark("render.before_refresh");
     backend_->end_frame();
     startup_profile_mark("render.after_refresh");
+    debug_paint_log_frame(use_partial, paint_clip);
     dirty_region_.clear();
 }
 

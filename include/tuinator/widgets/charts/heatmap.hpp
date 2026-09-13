@@ -1,6 +1,9 @@
 #pragma once
 
+#include <tuinator/render/style_resolver.hpp>
 #include <tuinator/widgets/charts/chart_common.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
+#include <tuinator/widgets/charts/chart_widget_paint.hpp>
 #include <tuinator/widgets/widget.hpp>
 
 #include <string>
@@ -25,7 +28,7 @@ struct HeatmapOptions {
     Style high_style{};
 };
 
-class Heatmap : public Widget {
+class Heatmap : public Widget, public ChartWidget {
   public:
     Heatmap(std::vector<std::vector<double>> values = {}, std::vector<std::string> row_labels = {},
             std::vector<std::string> col_labels = {}, HeatmapOptions options = {});
@@ -36,6 +39,9 @@ class Heatmap : public Widget {
     void set_values(std::vector<std::vector<double>> values);
     void set_labels(std::vector<std::string> row_labels, std::vector<std::string> col_labels);
     void set_options(HeatmapOptions options);
+
+    std::string_view widget_type_name() const override { return "Heatmap"; }
+    void apply_stylesheet(const StyleResolver& styles) override;
 
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
@@ -48,6 +54,7 @@ class Heatmap : public Widget {
     std::vector<std::string> row_labels_;
     std::vector<std::string> col_labels_;
     HeatmapOptions options_;
+    mutable ChartPaintSupport paint_{};
 };
 
 } // namespace tuinator

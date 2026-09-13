@@ -80,6 +80,11 @@ void ListView::paint(PaintContext& ctx) const {
         return;
     }
 
+    const StyleResolver& styles = ctx.styles();
+    const Style item_style = styles.text(*this, item_style_);
+    const Style selected_style = styles.selected(*this, selected_style_);
+    paint_bounds_background(ctx, item_style);
+
     const int capacity = bounds_.height;
     for (int row = 0; row < capacity; ++row) {
         const int index = scroll_y_ + row;
@@ -88,7 +93,7 @@ void ListView::paint(PaintContext& ctx) const {
         }
 
         const bool selected = index == selected_index_;
-        const Style& style = selected ? selected_style_ : item_style_;
+        const Style& style = selected ? selected_style : item_style;
         const std::string prefix = selected ? "> " : "  ";
         const std::string& item = items_[static_cast<std::size_t>(index)];
 

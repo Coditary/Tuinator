@@ -249,7 +249,10 @@ void MenuBar::paint(PaintContext& ctx) const {
         const ParsedMenuText parsed = parse_menu_mnemonic(menu.title);
         const std::string padded = " " + parsed.text + " ";
         const bool active = open_ && i == active_menu_;
-        const Style& style = active ? active_style_ : style_;
+        const StyleResolver& styles = ctx.styles();
+        const Style normal_style = styles.text(*this, style_);
+        const Style active_style = styles.focused(*this, active_style_);
+        const Style& style = active ? active_style : normal_style;
         paint_menu_label(canvas, x + 1, 0, menu.title, style);
         x += text_display_width(padded) + 1;
     }

@@ -29,6 +29,8 @@ class ShellTerminal : public Widget {
 
     const AnsiTerminalBuffer& buffer() const { return buffer_; }
 
+    std::string_view widget_type_name() const override { return "ShellTerminal"; }
+
     Size preferred_size() const override;
     void layout(Rect bounds) override;
     void paint(PaintContext& ctx) const override;

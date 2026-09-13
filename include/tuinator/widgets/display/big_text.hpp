@@ -113,6 +113,8 @@ class BigText : public Widget {
     void set_style(Style style);
     void set_shadow_style(Style style);
 
+    std::string_view widget_type_name() const override { return "BigText"; }
+
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
 

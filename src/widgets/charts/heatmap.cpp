@@ -1,4 +1,5 @@
 #include <tuinator/render/text.hpp>
+#include <tuinator/widgets/charts/chart_widget.hpp>
 #include <tuinator/widgets/charts/heatmap.hpp>
 
 #include <algorithm>
@@ -25,6 +26,12 @@ void Heatmap::set_labels(std::vector<std::string> row_labels, std::vector<std::s
 void Heatmap::set_options(HeatmapOptions options) {
     options_ = std::move(options);
     mark_dirty();
+}
+
+void Heatmap::apply_stylesheet(const StyleResolver& styles) {
+    apply_chart_stylesheet(*this, styles,
+                           {&options_.min_width, &options_.min_height, nullptr, nullptr, &options_.style, nullptr});
+    mark_layout_dirty();
 }
 
 double Heatmap::value_min() const {
@@ -79,7 +86,12 @@ Size Heatmap::preferred_size() const {
 
 void Heatmap::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;
-    if (bounds_.width <= 0 || bounds_.height <= 0 || values_.empty()) {
+    if (bounds_.width <= 0 || bounds_.height <= 0) {
+        return;
+    }
+
+    chart_paint_background(ctx, *this, bounds_.size());
+    if (values_.empty()) {
         return;
     }
 
@@ -97,9 +109,11 @@ void Heatmap::paint(PaintContext& ctx) const {
         label_width = std::min(label_width + 1, bounds_.width / 3);
     }
 
+    paint_.prepare(ctx, *this, options_.title_style, options_.label_style, {}, options_.label_style);
+
     int top = 0;
     if (!options_.title.empty()) {
-        canvas.draw_text({0, top}, options_.title, options_.title_style);
+        canvas.draw_text({0, top}, options_.title, paint_.styles.title);
         ++top;
     }
 
@@ -117,8 +131,8 @@ void Heatmap::paint(PaintContext& ctx) const {
     const double max_v = value_max();
     const double span = std::max(1e-6, max_v - min_v);
 
-    Style low = options_.low_style;
-    Style high = options_.high_style;
+    Style low = resolve_chart_accent_style(ctx, *this, options_.low_style);
+    Style high = resolve_chart_accent_style(ctx, *this, options_.high_style);
     if (low.foreground == Color::Default) {
         low.foreground = Color::Blue;
     }
@@ -135,9 +149,9 @@ void Heatmap::paint(PaintContext& ctx) const {
             const std::string label = col < static_cast<int>(col_labels_.size())
                                           ? col_labels_[static_cast<std::size_t>(col)]
                                           : std::to_string(col);
-            canvas.draw_text({col_x, grid_top - col_label_row},
-                             label.substr(0, static_cast<std::size_t>(std::min(1, grid_right - col_x))),
-                             options_.label_style);
+            const int label_cols = std::max(0, std::min(1, grid_right - col_x));
+            const std::size_t bytes = text_byte_length_for_width(label, label_cols);
+            canvas.draw_text({col_x, grid_top - col_label_row}, label.substr(0, bytes), paint_.styles.axis);
         }
     }
 
@@ -147,7 +161,7 @@ void Heatmap::paint(PaintContext& ctx) const {
             break;
         }
         if (options_.show_row_labels && row < static_cast<int>(row_labels_.size())) {
-            canvas.draw_text({0, y}, row_labels_[static_cast<std::size_t>(row)], options_.label_style);
+            canvas.draw_text({0, y}, row_labels_[static_cast<std::size_t>(row)], paint_.styles.axis);
         }
 
         for (int col = 0; col < cols && col < static_cast<int>(values_[static_cast<std::size_t>(row)].size()); ++col) {
