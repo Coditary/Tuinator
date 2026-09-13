@@ -68,6 +68,7 @@ class ScrollView : public Widget, public Scrollable, public SingleChildContainer
     Point to_content_local(Point terminal) const;
     bool handle_scrollbar_mouse(const MouseEvent& mouse);
     ScrollbarScrollActions scrollbar_actions();
+    Rect scroll_damage_rect(int prev_scroll_x, int prev_scroll_y) const;
 
     std::unique_ptr<Widget> content_;
     ScrollViewOptions options_;

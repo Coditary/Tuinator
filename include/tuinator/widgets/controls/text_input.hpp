@@ -24,6 +24,8 @@ class TextInput : public Widget, public TextInputField {
     std::string_view field_value() const override { return value_; }
     std::string_view field_placeholder() const override { return placeholder_; }
 
+    [[nodiscard]] std::size_t cursor_position() const { return cursor_; }
+    [[nodiscard]] int horizontal_scroll() const { return scroll_x_; }
     void set_value(std::string value);
     void set_placeholder(std::string placeholder);
     void set_on_change(std::function<void(const std::string&)> callback);

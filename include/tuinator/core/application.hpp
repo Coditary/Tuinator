@@ -55,6 +55,15 @@ class Application {
     // Draw one frame immediately (useful for profiling and tests).
     void present();
 
+    /// Re-layout and repaint the whole screen on the next render pass. Unlike
+    /// present(), the frame goes through the partial-render path without a
+    /// full-screen clear, so the backend emits only cells that changed.
+    void repaint_all();
+
+    /// Mark part of the terminal dirty for the next render pass (no full-screen clear).
+    void invalidate();
+    void invalidate(Rect region);
+
     /// Release the terminal backend (for inline mode teardown).
     void shutdown_terminal();
 
