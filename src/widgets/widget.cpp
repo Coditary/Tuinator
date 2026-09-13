@@ -219,9 +219,8 @@ void Widget::mark_dirty() {
 
     if (const char* debug = std::getenv("TUINATOR_DEBUG_DIRTY");
         debug != nullptr && debug[0] != '\0' && std::strcmp(debug, "0") != 0) {
-        std::fprintf(stderr, "tuinator-dirty: %.*s at %d,%d %dx%d\n",
-                     static_cast<int>(widget_type_name().size()), widget_type_name().data(), bounds_.x, bounds_.y,
-                     bounds_.width, bounds_.height);
+        std::fprintf(stderr, "tuinator-dirty: %.*s at %d,%d %dx%d\n", static_cast<int>(widget_type_name().size()),
+                     widget_type_name().data(), bounds_.x, bounds_.y, bounds_.width, bounds_.height);
     }
 
     if (bounds_.width <= 0 || bounds_.height <= 0) {

@@ -113,9 +113,9 @@ Rect ScrollView::scroll_damage_rect(int prev_scroll_x, int prev_scroll_y) const 
         damage = unite(damage, thumb_rect(layout.vertical_thumb.start, layout.vertical_thumb.size));
 
         if (prev_scroll_y != scroll_y_) {
-            const ScrollbarLayout prev_layout = compute_scrollbar_layout(
-                bounds_.width, bounds_.height, content_width_, content_height_, prev_scroll_x, prev_scroll_y,
-                options_.scrollbars.config, show_arrows);
+            const ScrollbarLayout prev_layout =
+                compute_scrollbar_layout(bounds_.width, bounds_.height, content_width_, content_height_, prev_scroll_x,
+                                         prev_scroll_y, options_.scrollbars.config, show_arrows);
             damage = unite(damage, thumb_rect(prev_layout.vertical_thumb.start, prev_layout.vertical_thumb.size));
         }
 
@@ -127,15 +127,15 @@ Rect ScrollView::scroll_damage_rect(int prev_scroll_x, int prev_scroll_y) const 
         damage = unite(damage, Rect{bounds_.x + layout.horizontal_bar_x, bar_y, layout.horizontal_bar_width, 1});
 
         if (prev_scroll_x != scroll_x_) {
-            const ScrollbarLayout prev_layout = compute_scrollbar_layout(
-                bounds_.width, bounds_.height, content_width_, content_height_, prev_scroll_x, prev_scroll_y,
-                options_.scrollbars.config, show_arrows);
+            const ScrollbarLayout prev_layout =
+                compute_scrollbar_layout(bounds_.width, bounds_.height, content_width_, content_height_, prev_scroll_x,
+                                         prev_scroll_y, options_.scrollbars.config, show_arrows);
             const int track_offset = show_arrows ? 1 : 0;
             const int thumb_start = prev_layout.horizontal_thumb.start;
             const int thumb_size = prev_layout.horizontal_thumb.size;
             if (thumb_size > 0) {
-                damage = unite(damage, Rect{bounds_.x + layout.horizontal_bar_x + track_offset + thumb_start, bar_y, thumb_size,
-                                            1});
+                damage = unite(damage, Rect{bounds_.x + layout.horizontal_bar_x + track_offset + thumb_start, bar_y,
+                                            thumb_size, 1});
             }
         }
 
@@ -143,8 +143,8 @@ Rect ScrollView::scroll_damage_rect(int prev_scroll_x, int prev_scroll_y) const 
         const int thumb_start = layout.horizontal_thumb.start;
         const int thumb_size = layout.horizontal_thumb.size;
         if (thumb_size > 0) {
-            damage =
-                unite(damage, Rect{bounds_.x + layout.horizontal_bar_x + track_offset + thumb_start, bar_y, thumb_size, 1});
+            damage = unite(
+                damage, Rect{bounds_.x + layout.horizontal_bar_x + track_offset + thumb_start, bar_y, thumb_size, 1});
         }
     }
 

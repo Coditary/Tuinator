@@ -63,8 +63,8 @@ class CursesBackend final : public TerminalBackend {
     struct AnsiCell {
         std::string glyph;
         Style style{};
-        std::uint8_t width = 1;  // 0 marks the continuation cell of a wide glyph
-        bool known = false;      // false = screen state unknown, must be emitted
+        std::uint8_t width = 1; // 0 marks the continuation cell of a wide glyph
+        bool known = false;     // false = screen state unknown, must be emitted
     };
 
     static constexpr int kColorCount = 8;

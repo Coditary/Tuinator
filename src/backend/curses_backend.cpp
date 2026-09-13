@@ -113,9 +113,8 @@ Style style_for_truecolor_ansi(Style style) {
 }
 
 bool ansi_style_equal(const Style& a, const Style& b) {
-    return a.foreground == b.foreground && a.background == b.background &&
-           a.foreground_rgb == b.foreground_rgb && a.background_rgb == b.background_rgb && a.bold == b.bold &&
-           a.dim == b.dim && a.reverse == b.reverse;
+    return a.foreground == b.foreground && a.background == b.background && a.foreground_rgb == b.foreground_rgb &&
+           a.background_rgb == b.background_rgb && a.bold == b.bold && a.dim == b.dim && a.reverse == b.reverse;
 }
 
 FILE* open_tty_output() { return std::fopen("/dev/tty", "we"); }
@@ -246,15 +245,15 @@ void debug_mouse_event(int ch, const MEVENT& mouse) {
 
 MouseButton mouse_button_from_state(mmask_t state) {
 #ifdef BUTTON3_PRESSED
-    if (state & (BUTTON3_PRESSED | BUTTON3_RELEASED | BUTTON3_CLICKED | BUTTON3_DOUBLE_CLICKED |
-                 BUTTON3_TRIPLE_CLICKED)) {
+    if (state &
+        (BUTTON3_PRESSED | BUTTON3_RELEASED | BUTTON3_CLICKED | BUTTON3_DOUBLE_CLICKED | BUTTON3_TRIPLE_CLICKED)) {
         return MouseButton::Right;
     }
 #endif
 
 #ifdef BUTTON2_PRESSED
-    if (state & (BUTTON2_PRESSED | BUTTON2_RELEASED | BUTTON2_CLICKED | BUTTON2_DOUBLE_CLICKED |
-                 BUTTON2_TRIPLE_CLICKED)) {
+    if (state &
+        (BUTTON2_PRESSED | BUTTON2_RELEASED | BUTTON2_CLICKED | BUTTON2_DOUBLE_CLICKED | BUTTON2_TRIPLE_CLICKED)) {
         return MouseButton::Middle;
     }
 #endif
@@ -800,10 +799,9 @@ void CursesBackend::begin_frame(BeginFrameOptions options) {
     if (terminal.width != ansi_cells_width_ || terminal.height != ansi_cells_height_) {
         ansi_cells_width_ = terminal.width;
         ansi_cells_height_ = terminal.height;
-        ansi_cells_.assign(
-            static_cast<std::size_t>(std::max(0, terminal.width)) *
-                static_cast<std::size_t>(std::max(0, terminal.height)),
-            AnsiCell{});
+        ansi_cells_.assign(static_cast<std::size_t>(std::max(0, terminal.width)) *
+                               static_cast<std::size_t>(std::max(0, terminal.height)),
+                           AnsiCell{});
     }
 
     full_frame_redraw_ = options.full_redraw;
