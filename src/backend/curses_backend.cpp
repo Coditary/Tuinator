@@ -114,7 +114,8 @@ Style style_for_truecolor_ansi(Style style) {
 
 bool ansi_style_equal(const Style& a, const Style& b) {
     return a.foreground == b.foreground && a.background == b.background && a.foreground_rgb == b.foreground_rgb &&
-           a.background_rgb == b.background_rgb && a.bold == b.bold && a.dim == b.dim && a.reverse == b.reverse;
+           a.background_rgb == b.background_rgb && a.bold == b.bold && a.dim == b.dim && a.reverse == b.reverse &&
+           a.italic == b.italic && a.underline == b.underline && a.strikethrough == b.strikethrough;
 }
 
 FILE* open_tty_output() { return std::fopen("/dev/tty", "we"); }
@@ -552,13 +553,9 @@ void CursesBackend::enable_mouse() {
         // Default mode 1003 (all motion). Override: TUINATOR_MOUSE_TRACK=1002
         write_tty_sequence("\033[?1000l\033[?1002l\033[?1003l\033[?1006l");
 
-        char enable[40];
+        char enable[48];
         const int mode = mouse_tracking_mode();
-        if (mode == 1003 || mode == 1002) {
-            std::snprintf(enable, sizeof(enable), "\033[?1006;%dh", mode);
-        } else {
-            std::snprintf(enable, sizeof(enable), "\033[?%dh", mode);
-        }
+        std::snprintf(enable, sizeof(enable), "\033[?%dh\033[?1006h", mode);
         write_tty_sequence(enable);
 
         xterm_mouse_enabled_ = true;
@@ -591,7 +588,7 @@ void CursesBackend::disable_mouse() {
 int CursesBackend::mouse_tracking_mode() const {
     const char* mode = std::getenv("TUINATOR_MOUSE_TRACK");
     if (mode == nullptr || mode[0] == '\0') {
-        return 1003;
+        return 1002;
     }
 
     if (std::strcmp(mode, "1002") == 0) {
@@ -600,8 +597,11 @@ int CursesBackend::mouse_tracking_mode() const {
     if (std::strcmp(mode, "1000") == 0) {
         return 1000;
     }
+    if (std::strcmp(mode, "1003") == 0) {
+        return 1003;
+    }
 
-    return 1003;
+    return 1002;
 }
 
 void CursesBackend::set_poll_timeout_ms(int timeout_ms) {
@@ -1419,6 +1419,14 @@ void CursesBackend::draw_text(int x, int y, std::string_view text, Style style) 
     if (style.reverse) {
         attributes |= A_REVERSE;
     }
+    if (style.underline) {
+        attributes |= A_UNDERLINE;
+    }
+#ifdef A_ITALIC
+    if (style.italic) {
+        attributes |= A_ITALIC;
+    }
+#endif
 
     const int pair = color_pair_for(style);
     const bool has_rgb = style.foreground_rgb.has_value() || style.background_rgb.has_value();

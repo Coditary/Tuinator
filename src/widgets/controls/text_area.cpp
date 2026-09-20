@@ -1,11 +1,14 @@
 #include <tuinator/core/event.hpp>
+#include <tuinator/platform/clipboard.hpp>
 #include <tuinator/render/text.hpp>
+#include <tuinator/render/text_edit.hpp>
 #include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/controls/text_area.hpp>
 
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+#include <tuple>
 #include <variant>
 
 namespace tuinator {
@@ -113,6 +116,8 @@ void TextArea::set_value(std::string value) {
     lines_ = split_lines(value);
     cursor_row_ = 0;
     cursor_col_ = 0;
+    selection_anchor_row_ = 0;
+    selection_anchor_col_ = 0;
     scroll_x_ = 0;
     scroll_y_ = 0;
     clamp_cursor();
@@ -291,16 +296,25 @@ void TextArea::notify_change() {
 }
 
 void TextArea::insert_char(char ch) {
+    if (has_selection()) {
+        delete_selection();
+    }
+
     clamp_cursor();
     auto& line = lines_[static_cast<std::size_t>(cursor_row_)];
     line.insert(static_cast<std::size_t>(cursor_col_), 1, ch);
     ++cursor_col_;
+    clear_selection();
     ensure_cursor_visible();
     mark_dirty();
     notify_change();
 }
 
 void TextArea::insert_newline() {
+    if (has_selection()) {
+        delete_selection();
+    }
+
     clamp_cursor();
     auto& line = lines_[static_cast<std::size_t>(cursor_row_)];
     std::string rest = line.substr(static_cast<std::size_t>(cursor_col_));
@@ -308,6 +322,7 @@ void TextArea::insert_newline() {
     lines_.insert(lines_.begin() + cursor_row_ + 1, std::move(rest));
     ++cursor_row_;
     cursor_col_ = 0;
+    clear_selection();
     ensure_cursor_visible();
     mark_dirty();
     notify_change();
@@ -351,7 +366,7 @@ void TextArea::delete_at_cursor() {
     notify_change();
 }
 
-void TextArea::set_cursor(int row, int col) {
+void TextArea::set_cursor(int row, int col, bool extend_selection) {
     if (row < 0) {
         cursor_row_ = 0;
         cursor_col_ = 0;
@@ -363,42 +378,403 @@ void TextArea::set_cursor(int row, int col) {
         cursor_col_ = col;
         clamp_cursor();
     }
+
+    if (!extend_selection) {
+        selection_anchor_row_ = cursor_row_;
+        selection_anchor_col_ = cursor_col_;
+    }
+
     ensure_cursor_visible();
     mark_dirty();
 }
 
-Point TextArea::to_local(Point terminal) const { return {terminal.x - bounds_.x, terminal.y - bounds_.y}; }
+namespace {
 
-bool TextArea::handle_mouse(const MouseEvent& mouse) {
-    if (!contains_point(mouse.position)) {
+int compare_positions(int row_a, int col_a, int row_b, int col_b) {
+    if (row_a != row_b) {
+        return row_a < row_b ? -1 : 1;
+    }
+    if (col_a != col_b) {
+        return col_a < col_b ? -1 : 1;
+    }
+    return 0;
+}
+
+} // namespace
+
+bool TextArea::has_selection() const {
+    return selection_anchor_row_ != cursor_row_ || selection_anchor_col_ != cursor_col_;
+}
+
+bool TextArea::is_selected(int row, int col) const {
+    if (!has_selection()) {
         return false;
     }
 
+    const int start_cmp = compare_positions(selection_anchor_row_, selection_anchor_col_, cursor_row_, cursor_col_);
+    const int row_cmp_anchor = compare_positions(row, col, selection_anchor_row_, selection_anchor_col_);
+    const int row_cmp_cursor = compare_positions(row, col, cursor_row_, cursor_col_);
+    if (start_cmp < 0) {
+        return row_cmp_anchor >= 0 && row_cmp_cursor < 0;
+    }
+    return row_cmp_cursor >= 0 && row_cmp_anchor < 0;
+}
+
+void TextArea::clear_selection() {
+    selection_anchor_row_ = cursor_row_;
+    selection_anchor_col_ = cursor_col_;
+}
+
+void TextArea::select_all() {
+    selection_anchor_row_ = 0;
+    selection_anchor_col_ = 0;
+    cursor_row_ = line_count() - 1;
+    cursor_col_ = static_cast<int>(lines_.back().size());
+    ensure_cursor_visible();
+    mark_dirty();
+}
+
+std::string TextArea::selected_text() const {
+    if (!has_selection()) {
+        return {};
+    }
+
+    const bool forward = compare_positions(selection_anchor_row_, selection_anchor_col_, cursor_row_, cursor_col_) <= 0;
+    const int start_row = forward ? selection_anchor_row_ : cursor_row_;
+    const int start_col = forward ? selection_anchor_col_ : cursor_col_;
+    const int end_row = forward ? cursor_row_ : selection_anchor_row_;
+    const int end_col = forward ? cursor_col_ : selection_anchor_col_;
+
+    std::string out;
+    for (int row = start_row; row <= end_row; ++row) {
+        if (row > start_row) {
+            out.push_back('\n');
+        }
+        const std::string& line = lines_[static_cast<std::size_t>(row)];
+        const int from = row == start_row ? start_col : 0;
+        const int to = row == end_row ? end_col : static_cast<int>(line.size());
+        if (to > from) {
+            out.append(line.substr(static_cast<std::size_t>(from), static_cast<std::size_t>(to - from)));
+        }
+    }
+    return out;
+}
+
+void TextArea::delete_selection() {
+    if (!has_selection()) {
+        return;
+    }
+
+    const bool forward = compare_positions(selection_anchor_row_, selection_anchor_col_, cursor_row_, cursor_col_) <= 0;
+    const int start_row = forward ? selection_anchor_row_ : cursor_row_;
+    const int start_col = forward ? selection_anchor_col_ : cursor_col_;
+    const int end_row = forward ? cursor_row_ : selection_anchor_row_;
+    const int end_col = forward ? cursor_col_ : selection_anchor_col_;
+
+    if (start_row == end_row) {
+        auto& line = lines_[static_cast<std::size_t>(start_row)];
+        line.erase(static_cast<std::size_t>(start_col), static_cast<std::size_t>(end_col - start_col));
+    } else {
+        std::string merged = lines_[static_cast<std::size_t>(start_row)].substr(0, static_cast<std::size_t>(start_col));
+        merged += lines_[static_cast<std::size_t>(end_row)].substr(static_cast<std::size_t>(end_col));
+        lines_.erase(lines_.begin() + start_row + 1, lines_.begin() + end_row + 1);
+        lines_[static_cast<std::size_t>(start_row)] = std::move(merged);
+    }
+
+    cursor_row_ = start_row;
+    cursor_col_ = start_col;
+    clear_selection();
+    ensure_cursor_visible();
+    mark_dirty();
+    notify_change();
+}
+
+void TextArea::delete_word_before_cursor() {
+    if (has_selection()) {
+        delete_selection();
+        return;
+    }
+
+    clamp_cursor();
+    auto& line = lines_[static_cast<std::size_t>(cursor_row_)];
+    if (cursor_col_ > 0) {
+        const std::size_t start = text_edit::previous_word_boundary(line, static_cast<std::size_t>(cursor_col_));
+        line.erase(start, static_cast<std::size_t>(cursor_col_) - start);
+        cursor_col_ = static_cast<int>(start);
+    } else if (cursor_row_ > 0) {
+        delete_before_cursor();
+        return;
+    } else {
+        return;
+    }
+
+    clear_selection();
+    ensure_cursor_visible();
+    mark_dirty();
+    notify_change();
+}
+
+void TextArea::delete_word_after_cursor() {
+    if (has_selection()) {
+        delete_selection();
+        return;
+    }
+
+    clamp_cursor();
+    auto& line = lines_[static_cast<std::size_t>(cursor_row_)];
+    if (cursor_col_ < static_cast<int>(line.size())) {
+        const std::size_t end = text_edit::next_word_boundary(line, static_cast<std::size_t>(cursor_col_));
+        line.erase(static_cast<std::size_t>(cursor_col_), end - static_cast<std::size_t>(cursor_col_));
+    } else if (cursor_row_ + 1 < line_count()) {
+        delete_at_cursor();
+        return;
+    } else {
+        return;
+    }
+
+    clear_selection();
+    ensure_cursor_visible();
+    mark_dirty();
+    notify_change();
+}
+
+void TextArea::delete_line_before_cursor() {
+    if (cursor_col_ == 0 && cursor_row_ == 0) {
+        return;
+    }
+
+    if (cursor_col_ > 0) {
+        auto& line = lines_[static_cast<std::size_t>(cursor_row_)];
+        line.erase(0, static_cast<std::size_t>(cursor_col_));
+        cursor_col_ = 0;
+    } else if (cursor_row_ > 0) {
+        const std::string merged = std::move(lines_[static_cast<std::size_t>(cursor_row_)]);
+        lines_.erase(lines_.begin() + cursor_row_);
+        --cursor_row_;
+        cursor_col_ = static_cast<int>(lines_[static_cast<std::size_t>(cursor_row_)].size());
+        lines_[static_cast<std::size_t>(cursor_row_)] += merged;
+    }
+
+    clear_selection();
+    ensure_cursor_visible();
+    mark_dirty();
+    notify_change();
+}
+
+void TextArea::delete_line_after_cursor() {
+    clamp_cursor();
+    auto& line = lines_[static_cast<std::size_t>(cursor_row_)];
+    if (cursor_col_ < static_cast<int>(line.size())) {
+        line.erase(static_cast<std::size_t>(cursor_col_));
+    } else if (cursor_row_ + 1 < line_count()) {
+        line += lines_[static_cast<std::size_t>(cursor_row_ + 1)];
+        lines_.erase(lines_.begin() + cursor_row_ + 1);
+    } else {
+        return;
+    }
+
+    clear_selection();
+    ensure_cursor_visible();
+    mark_dirty();
+    notify_change();
+}
+
+void TextArea::delete_current_line() {
+    if (lines_.size() == 1) {
+        lines_[0].clear();
+        cursor_col_ = 0;
+    } else {
+        lines_.erase(lines_.begin() + cursor_row_);
+        if (cursor_row_ >= line_count()) {
+            cursor_row_ = line_count() - 1;
+        }
+        cursor_col_ = std::min(cursor_col_, static_cast<int>(lines_[static_cast<std::size_t>(cursor_row_)].size()));
+    }
+
+    clear_selection();
+    ensure_cursor_visible();
+    mark_dirty();
+    notify_change();
+}
+
+void TextArea::insert_text(std::string_view text) {
+    if (text.empty()) {
+        return;
+    }
+
+    if (has_selection()) {
+        delete_selection();
+    }
+
+    for (std::size_t index = 0; index < text.size();) {
+        const unsigned char byte = static_cast<unsigned char>(text[index]);
+        if (byte == '\r') {
+            ++index;
+            continue;
+        }
+        if (byte == '\n') {
+            insert_newline();
+            ++index;
+            continue;
+        }
+        if (byte == '\t') {
+            insert_char('\t');
+            ++index;
+            continue;
+        }
+        if (byte < 32) {
+            ++index;
+            continue;
+        }
+
+        const std::size_t length = utf8_char_length(text, index);
+        std::string& line = lines_[static_cast<std::size_t>(cursor_row_)];
+        line.insert(static_cast<std::size_t>(cursor_col_), text.substr(index, length));
+        cursor_col_ += static_cast<int>(length);
+        index += length;
+    }
+
+    selection_anchor_row_ = cursor_row_;
+    selection_anchor_col_ = cursor_col_;
+    ensure_cursor_visible();
+    mark_dirty();
+    notify_change();
+}
+
+void TextArea::copy_selection() {
+    if (!has_selection()) {
+        return;
+    }
+    clipboard::set(selected_text());
+}
+
+void TextArea::cut_selection() {
+    if (!has_selection()) {
+        return;
+    }
+    clipboard::set(selected_text());
+    delete_selection();
+}
+
+void TextArea::paste_from_clipboard() { insert_text(clipboard::get()); }
+
+bool TextArea::handle_shortcut(const KeyPress& key) {
+    if (is_altgr(key)) {
+        return false;
+    }
+
+    char shortcut = '\0';
+    if (key.ctrl && key.character >= 'a' && key.character <= 'z') {
+        shortcut = key.character;
+    } else if (key.character >= 1 && key.character <= 26) {
+        shortcut = static_cast<char>('a' + key.character - 1);
+    }
+
+    if (shortcut == '\0') {
+        return false;
+    }
+
+    switch (shortcut) {
+    case 'a': select_all(); return true;
+    case 'c': copy_selection(); return true;
+    case 'x': cut_selection(); return true;
+    case 'v':
+        // Paste is delivered as ClipboardPaste when bracketed-paste mode is active.
+        return true;
+    case 'w': delete_word_before_cursor(); return true;
+    case 'u': delete_line_before_cursor(); return true;
+    case 'k': delete_line_after_cursor(); return true;
+    default: break;
+    }
+
+    return false;
+}
+
+Point TextArea::to_local(Point terminal) const { return {terminal.x - bounds_.x, terminal.y - bounds_.y}; }
+
+int TextArea::byte_col_at_display(int row, int display_col, CaretAffinity affinity) const {
+    if (row < 0 || row >= line_count()) {
+        return 0;
+    }
+    return static_cast<int>(text_caret_index_at_column(lines_[static_cast<std::size_t>(row)], display_col, affinity));
+}
+
+bool TextArea::handle_mouse(const MouseEvent& mouse) {
     if (mouse.action == MouseAction::WheelUp) {
+        if (!contains_point(mouse.position)) {
+            return false;
+        }
         scroll_y_ = std::max(0, scroll_y_ - 3);
         mark_dirty();
         return true;
     }
     if (mouse.action == MouseAction::WheelDown) {
+        if (!contains_point(mouse.position)) {
+            return false;
+        }
         const int max_scroll = std::max(0, line_count() - content_height());
         scroll_y_ = std::min(max_scroll, scroll_y_ + 3);
         mark_dirty();
         return true;
     }
 
-    if (mouse.action != MouseAction::Click && mouse.action != MouseAction::Press) {
-        return false;
+    if (mouse.action == MouseAction::Release) {
+        if (selecting_with_mouse_) {
+            const Point local = to_local(mouse.position);
+            if (!(status_bar_ && local.y >= content_height())) {
+                const int row = scroll_y_ + local.y;
+                const int display_col = scroll_x_ + (local.x - gutter_width());
+                if (row != mouse_press_row_ || display_col != mouse_press_display_col_) {
+                    set_cursor(row, byte_col_at_display(row, display_col, CaretAffinity::After), true);
+                } else {
+                    set_cursor(row, mouse_press_col_, false);
+                }
+            }
+            selecting_with_mouse_ = false;
+            mark_dirty();
+            return true;
+        }
+        return contains_point(mouse.position);
     }
 
-    const Point local = to_local(mouse.position);
-    if (status_bar_ && local.y >= content_height()) {
+    if (mouse.action == MouseAction::Move) {
+        if (!selecting_with_mouse_ || !mouse.left_pressed) {
+            return false;
+        }
+
+        const Point local = to_local(mouse.position);
+        if (status_bar_ && local.y >= content_height()) {
+            return true;
+        }
+
+        const int row = scroll_y_ + local.y;
+        const int display_col = scroll_x_ + (local.x - gutter_width());
+        set_cursor(row, byte_col_at_display(row, display_col, CaretAffinity::After), true);
+        selecting_with_mouse_ = true;
         return true;
     }
 
-    const int row = scroll_y_ + local.y;
-    const int col = scroll_x_ + (local.x - gutter_width());
-    set_cursor(row, std::max(0, col));
-    return true;
+    if (mouse.action == MouseAction::Press || mouse.action == MouseAction::Click) {
+        if (!contains_point(mouse.position)) {
+            return false;
+        }
+
+        const Point local = to_local(mouse.position);
+        if (status_bar_ && local.y >= content_height()) {
+            return true;
+        }
+
+        const int row = scroll_y_ + local.y;
+        const int display_col = scroll_x_ + (local.x - gutter_width());
+        mouse_press_row_ = row;
+        mouse_press_display_col_ = display_col;
+        mouse_press_col_ = byte_col_at_display(row, display_col, CaretAffinity::Before);
+        set_cursor(row, mouse_press_col_, false);
+        selecting_with_mouse_ = true;
+        return true;
+    }
+
+    return false;
 }
 
 void TextArea::paint(PaintContext& ctx) const {
@@ -458,9 +834,13 @@ void TextArea::paint(PaintContext& ctx) const {
                                     ? line[static_cast<std::size_t>(char_index)]
                                     : ' ';
                 const bool at_cursor = focused && index == cursor_row_ && char_index == cursor_col_;
+                const bool selected = is_selected(index, char_index);
 
                 Style glyph_style = text_style;
-                if (at_cursor) {
+                if (selected) {
+                    glyph_style.reverse = !glyph_style.reverse;
+                }
+                if (at_cursor && !has_selection()) {
                     glyph_style.reverse = !glyph_style.reverse;
                 }
                 canvas.draw_char({gutter + col, row}, ch, glyph_style);
@@ -510,47 +890,84 @@ bool TextArea::handle_event(const Event& event) {
         return handle_mouse(*mouse);
     }
 
+    if (const auto* paste = std::get_if<ClipboardPaste>(&event)) {
+        if (!is_focused()) {
+            return false;
+        }
+        insert_text(paste->text);
+        return true;
+    }
+
     const auto* key = std::get_if<KeyPress>(&event);
     if (!key || !is_focused()) {
         return false;
     }
 
+    if (handle_shortcut(*key)) {
+        return true;
+    }
+
     switch (key->key) {
-    case Key::Backspace: delete_before_cursor(); return true;
-    case Key::Delete: delete_at_cursor(); return true;
+    case Key::Backspace:
+        if (key->ctrl) {
+            delete_current_line();
+        } else if (key->alt) {
+            delete_word_before_cursor();
+        } else if (has_selection()) {
+            delete_selection();
+        } else {
+            delete_before_cursor();
+        }
+        return true;
+    case Key::Delete:
+        if (key->ctrl || key->alt) {
+            delete_word_after_cursor();
+        } else if (has_selection()) {
+            delete_selection();
+        } else {
+            delete_at_cursor();
+        }
+        return true;
     case Key::Left:
         if (cursor_col_ > 0) {
-            set_cursor(cursor_row_, cursor_col_ - 1);
+            set_cursor(cursor_row_, cursor_col_ - 1, key->shift);
         } else if (cursor_row_ > 0) {
             const int prev_len = static_cast<int>(lines_[static_cast<std::size_t>(cursor_row_ - 1)].size());
-            set_cursor(cursor_row_ - 1, prev_len);
+            set_cursor(cursor_row_ - 1, prev_len, key->shift);
         }
         return true;
     case Key::Right: {
         const int line_len = static_cast<int>(lines_[static_cast<std::size_t>(cursor_row_)].size());
         if (cursor_col_ < line_len) {
-            set_cursor(cursor_row_, cursor_col_ + 1);
+            set_cursor(cursor_row_, cursor_col_ + 1, key->shift);
         } else if (cursor_row_ + 1 < line_count()) {
-            set_cursor(cursor_row_ + 1, 0);
+            set_cursor(cursor_row_ + 1, 0, key->shift);
         }
         return true;
     }
     case Key::Up:
         if (cursor_row_ > 0) {
-            set_cursor(cursor_row_ - 1, cursor_col_);
+            set_cursor(cursor_row_ - 1, cursor_col_, key->shift);
         }
         return true;
     case Key::Down:
         if (cursor_row_ + 1 < line_count()) {
-            set_cursor(cursor_row_ + 1, cursor_col_);
+            set_cursor(cursor_row_ + 1, cursor_col_, key->shift);
         }
         return true;
-    case Key::Home: set_cursor(cursor_row_, 0); return true;
+    case Key::Home: set_cursor(cursor_row_, 0, key->shift); return true;
     case Key::End:
-        set_cursor(cursor_row_, static_cast<int>(lines_[static_cast<std::size_t>(cursor_row_)].size()));
+        set_cursor(cursor_row_, static_cast<int>(lines_[static_cast<std::size_t>(cursor_row_)].size()), key->shift);
         return true;
-    case Key::PageUp: set_cursor(cursor_row_ - std::max(1, content_height()), cursor_col_); return true;
-    case Key::PageDown: set_cursor(cursor_row_ + std::max(1, content_height()), cursor_col_); return true;
+    case Key::PageUp: set_cursor(cursor_row_ - std::max(1, content_height()), cursor_col_, key->shift); return true;
+    case Key::PageDown: set_cursor(cursor_row_ + std::max(1, content_height()), cursor_col_, key->shift); return true;
+    case Key::Escape:
+        if (has_selection()) {
+            clear_selection();
+            mark_dirty();
+            return true;
+        }
+        return false;
     case Key::Enter: insert_newline(); return true;
     case Key::Tab: insert_char('\t'); return true;
     default: break;
@@ -566,8 +983,9 @@ bool TextArea::handle_event(const Event& event) {
         return true;
     }
 
-    if (is_printable(key->character)) {
-        insert_char(key->character);
+    const std::string insert_text_value = keypress_insert_text(*key);
+    if (!insert_text_value.empty() && allows_text_insert_modifiers(*key)) {
+        insert_text(insert_text_value);
         return true;
     }
 

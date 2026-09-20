@@ -21,7 +21,7 @@ const std::unordered_map<std::string, std::unordered_set<std::string>>& option_s
         {"VBox", {"gap", "padding"}},
         {"HBox", {"gap", "padding"}},
         {"Grid", {"gap", "padding", "columns", "column-count"}},
-        {"TextInput", {"min-width", "placeholder"}},
+        {"TextInput", {"min-width", "placeholder", "password"}},
         {"TextArea", {"min-width", "min-height", "line-numbers", "status-bar", "placeholder", "gutter-width"}},
         {"ScrollView", {"width", "height", "scrollbar-vertical", "scrollbar-horizontal"}},
         {"Slider", {"min-width"}},

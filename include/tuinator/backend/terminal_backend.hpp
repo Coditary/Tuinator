@@ -69,7 +69,7 @@ class TerminalBackend {
     virtual void set_clear_on_shutdown(bool enabled) { clear_on_shutdown_ = enabled; }
     bool clear_on_shutdown() const { return clear_on_shutdown_; }
 
-    /// Platform default: ncursesw on POSIX, PDCurses on Windows.
+    /// Platform default: pure ANSI on POSIX, PDCurses on Windows.
     static std::unique_ptr<TerminalBackend> create();
 
     /// Alias for create(). Kept for older call sites.

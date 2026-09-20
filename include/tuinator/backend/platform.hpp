@@ -11,7 +11,10 @@
 #if TUINATOR_PLATFORM_WINDOWS
 #define TUINATOR_BACKEND_ID pdcurses
 #define TUINATOR_BACKEND_NAME "pdcurses"
-#else
+#elif defined(TUINATOR_BACKEND_NCURSES)
 #define TUINATOR_BACKEND_ID ncurses
 #define TUINATOR_BACKEND_NAME "ncursesw"
+#else
+#define TUINATOR_BACKEND_ID ansi
+#define TUINATOR_BACKEND_NAME "ansi"
 #endif

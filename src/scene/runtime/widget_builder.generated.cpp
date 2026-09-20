@@ -1523,6 +1523,9 @@ void fill_TextInputOptions(tuinator::TextInputOptions& opts, const nlohmann::jso
     if (const nlohmann::json* value = json::find(node, "placeholder")) {
         opts.placeholder = json::as_string(*value);
     }
+    if (const nlohmann::json* value = json::find(node, "password")) {
+        opts.password = json::as_bool(*value, opts.password);
+    }
 }
 
 void fill_WaterfallChartOptions(tuinator::WaterfallChartOptions& opts, const nlohmann::json& node, SceneContext& ctx) {
@@ -2148,7 +2151,7 @@ std::unique_ptr<Widget> build_widget(const nlohmann::json& node, SceneContext& c
         return widget;
     }
     if (type == "Label") {
-        auto widget = std::make_unique<tuinator::Label>(json::node_string(node, "text"), style::resolve_style(json::sub(node, "style"), ctx.theme));
+        auto widget = std::make_unique<tuinator::Label>(json::node_string(node, "text"), style::resolve_style(json::sub(node, "style"), ctx.theme), json::node_bool(node, true, "selectable"));
         tuinator::Label* raw = widget.get();
         if (const std::string widget_id = json::node_string(node, "id"); !widget_id.empty()) {
             ctx.register_widget(widget_id, "Label", raw);

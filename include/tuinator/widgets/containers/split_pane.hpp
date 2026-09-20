@@ -1,5 +1,6 @@
 #pragma once
 
+#include <tuinator/core/event.hpp>
 #include <tuinator/render/paint_context.hpp>
 #include <tuinator/render/style_resolver.hpp>
 #include <tuinator/widgets/capabilities/widget_roles.hpp>
@@ -52,6 +53,7 @@ class SplitPane : public Widget, public BinaryContainer, public Splittable {
     void append_divider_line(std::vector<SplitDividerLine>& lines) const;
 
   private:
+    Rect inner_bounds() const;
     int divider_position() const;
     Rect divider_bounds() const;
     Rect divider_hit_bounds() const;
@@ -59,6 +61,7 @@ class SplitPane : public Widget, public BinaryContainer, public Splittable {
     void update_first_size_from_mouse(Point global_position);
     void begin_drag();
     void end_drag();
+    bool route_mouse_to_child(const MouseEvent& mouse);
 
     std::unique_ptr<Widget> first_;
     std::unique_ptr<Widget> second_;

@@ -9,9 +9,9 @@ int main() {
 
     auto form = std::make_unique<tuinator::VBox>(tuinator::BoxOptions{.gap = 1, .padding = 1});
 
-    form->add_child(std::make_unique<tuinator::Label>("Login", theme.heading));
+    form->add_child(std::make_unique<tuinator::Label>("Login", theme.heading, false));
 
-    form->add_child(std::make_unique<tuinator::Label>("Username", theme.label));
+    form->add_child(std::make_unique<tuinator::Label>("Username", theme.label, false));
 
     auto username =
         std::make_unique<tuinator::TextInput>(tuinator::TextInputOptions{.min_width = 24, .placeholder = "guest"},
@@ -19,11 +19,11 @@ int main() {
     auto* username_ptr = username.get();
     form->add_child(std::move(username));
 
-    form->add_child(std::make_unique<tuinator::Label>("Password", theme.label));
+    form->add_child(std::make_unique<tuinator::Label>("Password", theme.label, false));
 
-    auto password =
-        std::make_unique<tuinator::TextInput>(tuinator::TextInputOptions{.min_width = 24, .placeholder = "secret"},
-                                              theme.text_input, theme.text_input_focused);
+    auto password = std::make_unique<tuinator::TextInput>(
+        tuinator::TextInputOptions{.min_width = 24, .placeholder = "secret", .password = true}, theme.text_input,
+        theme.text_input_focused);
     form->add_child(std::move(password));
 
     form->add_child(std::make_unique<tuinator::Separator>(theme.border));
@@ -41,7 +41,8 @@ int main() {
     actions->add_child(std::make_unique<tuinator::Button>("Cancel", [&app]() { app.quit(); }, theme.danger));
     form->add_child(std::move(actions));
 
-    form->add_child(std::make_unique<tuinator::Label>("Tab between fields | type to edit | q to quit", theme.muted));
+    form->add_child(
+        std::make_unique<tuinator::Label>("Tab between fields | type to edit | q to quit", theme.muted, false));
 
     app.set_root(std::move(form));
     return app.run();

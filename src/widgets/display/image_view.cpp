@@ -50,7 +50,7 @@ void ImageView::paint(PaintContext& ctx) const {
         return;
     }
 
-    // Leave cells empty; Kitty/Sixel overlay is flushed after ncurses refresh.
+    // Leave cells empty; Kitty/Sixel overlay is flushed after the frame is presented.
     canvas.draw_image({0, 0}, {bounds_.width, bounds_.height}, image_);
 }
 

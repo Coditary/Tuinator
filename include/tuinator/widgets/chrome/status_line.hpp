@@ -48,12 +48,20 @@ class StatusLine : public Widget {
     const std::vector<StatusSegment>& center() const { return center_; }
     const std::vector<StatusSegment>& right() const { return right_; }
 
+    bool selectable() const { return selectable_; }
+    void set_selectable(bool selectable) { selectable_ = selectable; }
+
     std::string_view widget_type_name() const override { return "StatusLine"; }
 
     Size preferred_size() const override;
     void paint(PaintContext& ctx) const override;
+    bool handle_event(const Event& event) override;
+    bool is_focusable() const override { return false; }
+    Widget* hit_test_focusable(Point point) override;
 
   private:
+    std::string flattened_text() const;
+    void copy_text();
     int segment_width(const StatusSegment& segment) const;
     Style segment_style(const StatusSegment& segment) const;
     void paint_segment(Canvas& canvas, int x, int y, const StatusSegment& segment) const;
@@ -63,6 +71,7 @@ class StatusLine : public Widget {
     std::vector<StatusSegment> left_;
     std::vector<StatusSegment> center_;
     std::vector<StatusSegment> right_;
+    bool selectable_ = true;
 };
 
 } // namespace tuinator

@@ -2,6 +2,13 @@ set(TUINATOR_DEMOS
     golden-app hello form colors layout counter buttons windows mouse-test scroll theme startup-profile
     dashboard data controls menu image textarea throbber bigtext checkbox piechart charts
     diffview weather glyphs terminal-frame scene scene-runtime inline-tasks split-panes stylesheet scroll-hover
+    markdown
+    markdown-image
+    markdown-image-dual
+    image-dual
+    markdown-gif
+    video
+    asciidoc
 )
 
 foreach(demo IN LISTS TUINATOR_DEMOS)
@@ -22,6 +29,10 @@ endforeach()
 
 target_compile_definitions(tuinator-image PRIVATE
     TUINATOR_LENNA_PATH="${TUINATOR_SOURCE_DIR}/examples/assets/lenna.png")
+
+target_compile_definitions(tuinator-image-dual PRIVATE
+    TUINATOR_LENNA_PATH="${TUINATOR_SOURCE_DIR}/examples/assets/lenna.png"
+    TUINATOR_SPINNER_PATH="${TUINATOR_SOURCE_DIR}/examples/assets/spinner.gif")
 
 target_compile_definitions(tuinator-stylesheet PRIVATE
     TUINATOR_SOURCE_DIR="${TUINATOR_SOURCE_DIR}")

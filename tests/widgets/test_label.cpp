@@ -1,4 +1,5 @@
 #include <tuinator/layout/box.hpp>
+#include <tuinator/platform/clipboard.hpp>
 #include <tuinator/render/theme.hpp>
 #include <tuinator/widgets/display/label.hpp>
 
@@ -38,6 +39,64 @@ TUINATOR_TEST(label_regression_no_control_chars) {
             TUINATOR_CHECK(ch == ' ' || (ch >= 32 && ch < 127));
         }
     }
+}
+
+TUINATOR_TEST(label_mouse_drag_includes_character_under_cursor) {
+    tuinator::Label label("hello world", tuinator::Theme{}.label);
+    label.layout({0, 0, 30, 1});
+    label.set_focused(true);
+
+    const auto at = [](int x, int y) { return tuinator::Point{x, y}; };
+    TUINATOR_CHECK(label.handle_event(
+        tuinator::MouseEvent{at(9, 0), tuinator::MouseButton::Left, tuinator::MouseAction::Press, true}));
+    TUINATOR_CHECK(label.handle_event(
+        tuinator::MouseEvent{at(13, 0), tuinator::MouseButton::Left, tuinator::MouseAction::Release, false}));
+
+    tuinator::clipboard::set("");
+    TUINATOR_CHECK(label.handle_event(tuinator::KeyPress{.character = 'c', .ctrl = true}));
+    TUINATOR_CHECK_EQ(tuinator::clipboard::get(), "hello");
+}
+
+TUINATOR_TEST(label_mouse_drag_selects_text) {
+    tuinator::Label label("hello world", tuinator::Theme{}.label);
+    label.layout({0, 0, 30, 1});
+    label.set_focused(true);
+
+    const auto at = [](int x, int y) { return tuinator::Point{x, y}; };
+    TUINATOR_CHECK(label.handle_event(
+        tuinator::MouseEvent{at(9, 0), tuinator::MouseButton::Left, tuinator::MouseAction::Press, true}));
+    TUINATOR_CHECK(label.handle_event(
+        tuinator::MouseEvent{at(13, 0), tuinator::MouseButton::Left, tuinator::MouseAction::Release, false}));
+
+    tuinator::clipboard::set("");
+    TUINATOR_CHECK(label.handle_event(tuinator::KeyPress{.character = 'c', .ctrl = true}));
+    TUINATOR_CHECK_EQ(tuinator::clipboard::get(), "hello");
+}
+
+TUINATOR_TEST(label_hover_motion_does_not_select_text) {
+    tuinator::Label label("hello world", tuinator::Theme{}.label);
+    label.layout({0, 0, 30, 1});
+    label.set_focused(true);
+
+    const auto at = [](int x, int y) { return tuinator::Point{x, y}; };
+    TUINATOR_CHECK(!label.handle_event(
+        tuinator::MouseEvent{at(14, 0), tuinator::MouseButton::None, tuinator::MouseAction::Move, false}));
+    TUINATOR_CHECK(label.handle_event(
+        tuinator::MouseEvent{at(9, 0), tuinator::MouseButton::Left, tuinator::MouseAction::Press, true}));
+    TUINATOR_CHECK(label.handle_event(
+        tuinator::MouseEvent{at(13, 0), tuinator::MouseButton::Left, tuinator::MouseAction::Release, false}));
+
+    tuinator::clipboard::set("");
+    TUINATOR_CHECK(label.handle_event(tuinator::KeyPress{.character = 'c', .ctrl = true}));
+    TUINATOR_CHECK_EQ(tuinator::clipboard::get(), "hello");
+}
+
+TUINATOR_TEST(label_not_selectable_by_default_can_be_disabled) {
+    tuinator::Label label("secret", tuinator::Theme{}.label, false);
+    label.layout({0, 0, 10, 1});
+
+    TUINATOR_CHECK(!label.handle_event(
+        tuinator::MouseEvent{{0, 0}, tuinator::MouseButton::Left, tuinator::MouseAction::Press, true}));
 }
 
 TUINATOR_TEST(vbox_layout_assigns_bounds) {

@@ -1,31 +1,15 @@
 # Tuinator
 
-A modern C++ terminal UI library with a pluggable terminal backend (ncursesw on POSIX, PDCurses on Windows).
+A modern C++ terminal UI library with a pluggable terminal backend (pure ANSI on POSIX, PDCurses on Windows).
 
 ## Requirements
 
 - C++17 compiler
 - CMake 3.16+
-- **Linux / macOS / BSD:** ncursesw development headers
+- **Linux / macOS / BSD:** no extra libraries (ANSI backend writes directly to `/dev/tty`)
 - **Windows:** [PDCurses](https://pdcurses.org/) or PDCursesMod (e.g. via vcpkg)
 
-### Fedora / RHEL
-
-```bash
-sudo dnf install ncurses-devel
-```
-
-### Debian / Ubuntu
-
-```bash
-sudo apt install libncurses-dev
-```
-
-### macOS
-
-```bash
-brew install ncurses
-```
+Optional: pass `-DTUINATOR_USE_CURSES=ON` on POSIX to use the legacy ncurses backend instead.
 
 ### Windows
 
@@ -44,15 +28,15 @@ Or set `PDCURSES_INCLUDE_DIR` / `PDCURSES_LIBRARY` manually if CMake finds them 
 Tuinator uses a small `TerminalBackend` interface. The default factory picks the platform backend automatically:
 
 ```cpp
-auto backend = tuinator::TerminalBackend::create();  // ncursesw or PDCurses
+auto backend = tuinator::TerminalBackend::create();  // ANSI (POSIX) or PDCurses (Windows)
 ```
 
 | Platform | Backend | CMake define |
 |----------|---------|--------------|
-| Linux / macOS / BSD | ncursesw | `TUINATOR_BACKEND_NCURSES` |
+| Linux / macOS / BSD | ANSI | `TUINATOR_BACKEND_ANSI` |
 | Windows | PDCurses | `TUINATOR_BACKEND_PDCURSES` |
 
-The widget/event code is shared; only the curses layer differs. See `include/tuinator/backend/terminal_backend.hpp` and `include/tuinator/backend/platform.hpp`.
+The widget/event code is shared; only the terminal I/O layer differs. See `include/tuinator/backend/terminal_backend.hpp` and `include/tuinator/backend/platform.hpp`.
 
 ## Build
 

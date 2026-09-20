@@ -1,14 +1,15 @@
 BUILD_DIR := build
+DEMO_DIR := $(BUILD_DIR)/examples
 CMAKE := cmake
 CMAKE_FLAGS := -DCMAKE_BUILD_TYPE=Release
 CMAKE_CACHE := $(BUILD_DIR)/CMakeCache.txt
 
-DEMOS := hello form colors layout counter buttons windows mouse-test scroll scroll-hover theme dashboard data controls menu image textarea throbber bigtext checkbox piechart charts diffview weather glyphs terminal-frame scene scene-runtime split-panes
+DEMOS := hello form colors layout counter buttons windows mouse-test scroll scroll-hover theme dashboard data controls menu image textarea throbber bigtext checkbox piechart charts diffview weather glyphs terminal-frame scene scene-runtime split-panes markdown markdown-image markdown-gif asciidoc video
 RUNNABLE := $(DEMOS) profile
 
 .PHONY: all build configure clean rebuild help demos test test-all unit-test perf-test profile profile-quick scene-codegen scene-runtime-codegen scene-validate format format-check lint quality $(RUNNABLE)
 
-all: $(DEMOS:%=$(BUILD_DIR)/tuinator-%)
+all: $(DEMOS:%=$(DEMO_DIR)/tuinator-%)
 
 build: all
 
@@ -18,16 +19,16 @@ $(CMAKE_CACHE): CMakeLists.txt cmake/*.cmake examples/CMakeLists.txt tests/CMake
 	$(CMAKE) -B $(BUILD_DIR) $(CMAKE_FLAGS)
 
 # Build only the requested target (and its dependencies).
-$(BUILD_DIR)/tuinator-scene: examples/scenes/form.scene.json examples/scene_handlers.hpp scripts/generate_scene_cpp.py $(CMAKE_CACHE)
+$(DEMO_DIR)/tuinator-scene: examples/scenes/form.scene.json examples/scene_handlers.hpp scripts/generate_scene_cpp.py $(CMAKE_CACHE)
 	@python3 scripts/generate_scene_cpp.py examples/scenes/form.scene.json --handlers examples/scene_handlers.hpp
 	@python3 scripts/generate_scene_cpp.py examples/scenes/hello.scene.json --handlers examples/scene_handlers.hpp
 	@$(CMAKE) --build $(BUILD_DIR) --target tuinator-scene
 
-$(BUILD_DIR)/tuinator-scene-runtime: scripts/generate_scene_runtime_cpp.py scripts/scene_options.py $(CMAKE_CACHE)
+$(DEMO_DIR)/tuinator-scene-runtime: scripts/generate_scene_runtime_cpp.py scripts/scene_options.py $(CMAKE_CACHE)
 	@python3 scripts/generate_scene_runtime_cpp.py
 	@$(CMAKE) --build $(BUILD_DIR) --target tuinator-scene-runtime
 
-$(BUILD_DIR)/tuinator-%: $(CMAKE_CACHE)
+$(DEMO_DIR)/tuinator-%: $(CMAKE_CACHE)
 	@$(CMAKE) --build $(BUILD_DIR) --target tuinator-$*
 
 $(BUILD_DIR)/tuinator-tests: $(CMAKE_CACHE)
@@ -37,17 +38,17 @@ $(BUILD_DIR)/tuinator-perf-tests: $(CMAKE_CACHE)
 	@$(CMAKE) --build $(BUILD_DIR) --target tuinator-perf-tests
 
 define RUN_DEMO
-$(1): $(BUILD_DIR)/tuinator-$(1)
-	@./$(BUILD_DIR)/tuinator-$(1)
+$(1): $(DEMO_DIR)/tuinator-$(1)
+	@./$(DEMO_DIR)/tuinator-$(1)
 endef
 
 $(foreach demo,$(DEMOS),$(eval $(call RUN_DEMO,$(demo))))
 
-profile: $(BUILD_DIR)/tuinator-startup-profile
-	@./$(BUILD_DIR)/tuinator-startup-profile
+profile: $(DEMO_DIR)/tuinator-startup-profile
+	@./$(DEMO_DIR)/tuinator-startup-profile
 
-profile-quick: $(BUILD_DIR)/tuinator-startup-profile
-	@TUINATOR_PROFILE_QUICK=1 ./$(BUILD_DIR)/tuinator-startup-profile
+profile-quick: $(DEMO_DIR)/tuinator-startup-profile
+	@TUINATOR_PROFILE_QUICK=1 ./$(DEMO_DIR)/tuinator-startup-profile
 
 test test-all: build
 	@chmod +x scripts/test-all.sh
@@ -120,6 +121,11 @@ help:
 	@echo "  make scene          Login form built from generated C++"
 	@echo "  make scene-runtime  Load form.scene.json at runtime"
 	@echo "  make split-panes    Nested IDE-style split pane stress test"
+	@echo "  make markdown       Streaming MarkdownView demo (AI-style pipe)"
+	@echo "  make markdown-image Markdown image cases: block, inline, missing file"
+	@echo "  make markdown-gif   Animated GIF inside a markdown stream"
+	@echo "  make video          Video playback via ffmpeg pipe (terminal graphics)"
+	@echo "  make asciidoc       Streaming AsciiDocView demo (AI-style pipe)"
 	@echo ""
 	@echo "Scene codegen:"
 	@echo "  make scene-codegen  Regenerate C++ from examples/scenes/*.scene.json"

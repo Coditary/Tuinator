@@ -170,7 +170,7 @@ void VBox::paint(PaintContext& ctx) const {
 }
 
 bool VBox::handle_event(const Event& event) {
-    if (std::holds_alternative<KeyPress>(event)) {
+    if (std::holds_alternative<KeyPress>(event) || std::holds_alternative<ClipboardPaste>(event)) {
         if (dispatch_keyboard_capture(this, event)) {
             return true;
         }

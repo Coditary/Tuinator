@@ -103,6 +103,9 @@ Style style_from_cell(const VTermScreen* screen, const VTermScreenCell& cell) {
 
     style.dim = false;
     style.reverse = cell.attrs.reverse;
+    style.italic = cell.attrs.italic != 0;
+    style.underline = cell.attrs.underline != 0;
+    style.strikethrough = cell.attrs.strike != 0;
     return style;
 }
 
@@ -135,7 +138,13 @@ bool map_special_key(const KeyPress& key, VTermKey& out) {
     case Key::Delete: out = VTERM_KEY_DEL; return true;
     case Key::PageUp: out = VTERM_KEY_PAGEUP; return true;
     case Key::PageDown: out = VTERM_KEY_PAGEDOWN; return true;
-    default: return false;
+    case Key::Insert: out = VTERM_KEY_INS; return true;
+    default:
+        if (key.key >= Key::F1 && key.key <= Key::F12) {
+            out = static_cast<VTermKey>(VTERM_KEY_FUNCTION(static_cast<int>(key.key) - static_cast<int>(Key::F1) + 1));
+            return true;
+        }
+        return false;
     }
 }
 

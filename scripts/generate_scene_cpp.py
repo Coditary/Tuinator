@@ -661,7 +661,10 @@ def generate_label(node: dict[str, Any], state: GenerationState, theme_var: str,
     var = state.next_var("Label")
     text = node_property(node, "text", default="")
     style = emit_style(node_property(node, "style", default={}), theme_var)
-    state.nodes.append(f"    auto {var} = std::make_unique<tuinator::Label>({cpp_string(text)}, {style});")
+    selectable = node_property(node, "selectable", default=True)
+    state.nodes.append(
+        f"    auto {var} = std::make_unique<tuinator::Label>({cpp_string(text)}, {style}, {str(selectable).lower()});"
+    )
     register_id(node, var, "Label", state)
     return var
 
@@ -1042,6 +1045,9 @@ def generate_list_view(node: dict[str, Any], state: GenerationState, theme_var: 
             f"set_on_activate([&{app_var}](int index, const std::string& item) {{ "
             f"{handler_call(on_activate, state, app_var, 'index, item')}; }});",
         )
+    copyable = node_property(node, "copyable", default=True)
+    if not copyable:
+        state.nodes.append(f"    {var}->set_copyable(false);")
     register_id(node, var, "ListView", state)
     return var
 
@@ -1081,6 +1087,9 @@ def generate_table(node: dict[str, Any], state: GenerationState, theme_var: str,
             f"set_on_activate([&{app_var}](int row, const std::vector<std::string>& cells) {{ "
             f"{handler_call(on_activate, state, app_var, 'row, cells')}; }});",
         )
+    copyable = node_property(node, "copyable", default=True)
+    if not copyable:
+        state.nodes.append(f"    {var}->set_copyable(false);")
     register_id(node, var, "Table", state)
     return var
 
@@ -1104,6 +1113,9 @@ def generate_tree_view(node: dict[str, Any], state: GenerationState, theme_var: 
             f"set_on_select([&{app_var}](const std::string& path) {{ "
             f"{handler_call(on_select, state, app_var, 'path')}; }});",
         )
+    copyable = node_property(node, "copyable", default=True)
+    if not copyable:
+        state.nodes.append(f"    {var}->set_copyable(false);")
     register_id(node, var, "TreeView", state)
     return var
 
@@ -1445,6 +1457,9 @@ def generate_status_line(node: dict[str, Any], state: GenerationState, theme_var
             seg_var = state.next_var("status_segments")
             emit_status_segments(segments, seg_var, state)
             state.post_init.append(f"    {var}->set_{region}(std::move({seg_var}));")
+    selectable = node_property(node, "selectable", default=True)
+    if not selectable:
+        state.nodes.append(f"    {var}->set_selectable(false);")
     register_id(node, var, "StatusLine", state)
     return var
 

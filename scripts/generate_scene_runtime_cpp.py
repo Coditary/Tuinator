@@ -640,7 +640,8 @@ def gen_widget_cases() -> list[str]:
     ])
 
     case("Label", [
-        f"auto widget = std::make_unique<tuinator::Label>({rt_string('text')}, {rt_style('style')});",
+        f"auto widget = std::make_unique<tuinator::Label>({rt_string('text')}, {rt_style('style')}, "
+        f"{rt_bool('selectable', default=True)});",
         "tuinator::Label* raw = widget.get();",
         rt_register("Label"),
     ])
@@ -946,6 +947,7 @@ def gen_widget_cases() -> list[str]:
         "        });",
         "    });",
         "}",
+        f"if (!{rt_bool('copyable', default=True)}) {{ widget->set_copyable(false); }}",
         rt_register("ListView"),
     ])
 
@@ -981,6 +983,7 @@ def gen_widget_cases() -> list[str]:
         "        });",
         "    });",
         "}",
+        f"if (!{rt_bool('copyable', default=True)}) {{ widget->set_copyable(false); }}",
         rt_register("Table"),
     ])
 
@@ -1000,6 +1003,7 @@ def gen_widget_cases() -> list[str]:
         "        });",
         "    });",
         "}",
+        f"if (!{rt_bool('copyable', default=True)}) {{ widget->set_copyable(false); }}",
         rt_register("TreeView"),
     ])
 
@@ -1268,6 +1272,7 @@ def gen_widget_cases() -> list[str]:
         "        else { raw->set_right(std::move(segs)); }",
         "    });",
         "}",
+        f"if (!{rt_bool('selectable', default=True)}) {{ widget->set_selectable(false); }}",
         rt_register("StatusLine"),
     ])
 

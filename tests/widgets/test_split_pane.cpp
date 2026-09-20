@@ -1,5 +1,7 @@
+#include <tuinator/layout/box.hpp>
 #include <tuinator/render/box_drawing.hpp>
 #include <tuinator/widgets/containers/panel.hpp>
+#include <tuinator/widgets/containers/scroll_view.hpp>
 #include <tuinator/widgets/containers/split_pane.hpp>
 #include <tuinator/widgets/display/label.hpp>
 
@@ -179,6 +181,57 @@ TUINATOR_TEST(split_pane_restores_panel_borders_on_relayout) {
     TUINATOR_CHECK(!left_ptr->border_edges().right);
     TUINATOR_CHECK(left_ptr->border_edges().top);
     TUINATOR_CHECK(left_ptr->border_edges().bottom);
+}
+
+TUINATOR_TEST(split_pane_scrollbar_wins_over_adjacent_divider) {
+    auto list = std::make_unique<tuinator::VBox>(tuinator::BoxOptions{.gap = 0});
+    for (int i = 1; i <= 24; ++i) {
+        list->add_child(std::make_unique<tuinator::Label>("LEFT line " + std::to_string(i)));
+    }
+
+    tuinator::ScrollViewOptions scroll_options{.width = 16, .height = 8};
+    auto left_scroll = std::make_unique<tuinator::ScrollView>(std::move(list), scroll_options);
+    auto left_panel = std::make_unique<tuinator::Panel>("Left");
+    left_panel->set_border_edges({false, false, false, false});
+    left_panel->set_content(std::move(left_scroll));
+
+    auto split = std::make_unique<tuinator::SplitPane>(std::move(left_panel), make_label("RIGHT"),
+                                                       tuinator::SplitPaneOptions{
+                                                           .orientation = tuinator::SplitOrientation::Horizontal,
+                                                           .first_size = 16,
+                                                           .divider_hit_slop = 2,
+                                                       });
+    split->layout({0, 0, 40, 10});
+
+    const tuinator::Rect left_bounds = split->first()->bounds();
+    const tuinator::Point scrollbar_point{left_bounds.right() - 1, left_bounds.y + 2};
+    const int size_before = split->first_size();
+
+    TUINATOR_CHECK(split->handle_event(
+        tuinator::MouseEvent{scrollbar_point, tuinator::MouseButton::Left, tuinator::MouseAction::Press, true}));
+    TUINATOR_CHECK(split->handle_event(tuinator::MouseEvent{
+        {scrollbar_point.x, scrollbar_point.y + 1}, tuinator::MouseButton::Left, tuinator::MouseAction::Move, true}));
+    TUINATOR_CHECK_EQ(split->first_size(), size_before);
+
+    TUINATOR_CHECK(split->handle_event(tuinator::MouseEvent{{scrollbar_point.x, scrollbar_point.y + 1},
+                                                            tuinator::MouseButton::Left,
+                                                            tuinator::MouseAction::Release,
+                                                            false}));
+}
+
+TUINATOR_TEST(split_pane_outer_border_insets_children) {
+    auto split = std::make_unique<tuinator::SplitPane>(make_label("left"), make_label("right"),
+                                                       tuinator::SplitPaneOptions{
+                                                           .orientation = tuinator::SplitOrientation::Horizontal,
+                                                           .first_size = 10,
+                                                           .outer_border = true,
+                                                       });
+    split->layout({0, 0, 40, 10});
+
+    TUINATOR_CHECK_EQ(split->first()->bounds().x, 1);
+    TUINATOR_CHECK_EQ(split->first()->bounds().y, 1);
+    TUINATOR_CHECK_EQ(split->first()->bounds().bottom(), 9);
+    TUINATOR_CHECK_EQ(split->second()->bounds().bottom(), 9);
 }
 
 TUINATOR_TEST(split_pane_nested_drag_resizes_each_splitter) {

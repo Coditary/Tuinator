@@ -224,6 +224,9 @@ void Application::cancel_timer(TimerId id) {
 int Application::compute_poll_timeout_ms() const {
     constexpr int kPeriodicIdlePollMs = 16;
     int timeout = backend_->pointer_active() ? kPeriodicIdlePollMs : -1;
+    if (timeout < 0 && root_ != nullptr && find_pointer_active_widget(root_.get()) != nullptr) {
+        timeout = kPeriodicIdlePollMs;
+    }
 
     if (timeout < 0 && any_widget_needs_periodic_idle()) {
         timeout = kPeriodicIdlePollMs;
@@ -382,7 +385,16 @@ bool Application::shell_terminal_active() const {
     return widget_is_shell_terminal(focusable_[focus_index_]);
 }
 
+void Application::clear_pointer_focus() {
+    if (pointer_focus_widget_ != nullptr) {
+        pointer_focus_widget_->set_focused(false);
+        pointer_focus_widget_ = nullptr;
+    }
+}
+
 void Application::update_focus() {
+    clear_pointer_focus();
+
     for (Widget* widget : focusable_) {
         widget->set_focused(false);
     }
@@ -542,6 +554,8 @@ void Application::set_clear_on_shutdown(bool enabled) {
     }
 }
 
+void Application::set_pointer_hover_tracking(bool enabled) { pointer_hover_tracking_ = enabled; }
+
 void Application::focus_widget(Widget* widget) {
     if (!widget) {
         return;
@@ -555,12 +569,23 @@ void Application::focus_widget(Widget* widget) {
             return;
         }
     }
+
+    // Pointer-focusable widgets such as Labels are outside the tab order.
+    clear_pointer_focus();
+    for (Widget* focusable : focusable_) {
+        focusable->set_focused(false);
+    }
+    pointer_focus_widget_ = widget;
+    widget->set_focused(true);
+    ensure_focus_visible(root_.get(), widget);
+    sync_mouse_cursor_policy();
 }
 
 void Application::handle_event(const Event& event) {
     if (const auto* resize = std::get_if<Resize>(&event)) {
         (void)resize;
         backend_->invalidate_graphics();
+        needs_screen_clear_ = true;
         layout_root();
         request_redraw();
         return;
@@ -581,7 +606,8 @@ void Application::handle_event(const Event& event) {
         if (Widget* capture = find_pointer_active_widget(root_.get())) {
             const MouseEvent adjusted = adjust_mouse_for_widget(root_.get(), capture, *mouse);
             handled = capture->handle_event(adjusted);
-        } else if (root_) {
+        } else if (root_ && (mouse->action != MouseAction::Move || mouse->left_pressed || pointer_hover_tracking_)) {
+            // Mode 1003 reports hover motion; ignore it unless a button is held or hover tracking is on.
             handled = root_->handle_event(event);
         }
 
@@ -592,6 +618,19 @@ void Application::handle_event(const Event& event) {
         }
 
         debug_mouse_dispatch(*mouse, hit, handled);
+        return;
+    }
+
+    if (const auto* paste = std::get_if<ClipboardPaste>(&event)) {
+        if (pointer_focus_widget_ != nullptr && pointer_focus_widget_->handle_event(event)) {
+            return;
+        }
+
+        if (root_ && root_->handle_event(event)) {
+            return;
+        }
+
+        (void)paste;
         return;
     }
 
@@ -618,6 +657,10 @@ void Application::handle_event(const Event& event) {
         }
 
         if (dispatch_keyboard_capture(root_.get(), event)) {
+            return;
+        }
+
+        if (pointer_focus_widget_ != nullptr && pointer_focus_widget_->handle_event(event)) {
             return;
         }
 
@@ -701,10 +744,14 @@ void Application::render() {
     const Rect terminal_bounds{{0, 0}, term};
 
     const bool shell_active = shell_terminal_active();
+    if (shell_active != prev_shell_active_) {
+        needs_screen_clear_ = true;
+        prev_shell_active_ = shell_active;
+    }
 
     BeginFrameOptions frame;
     frame.full_redraw = true;
-    frame.clear_buffer = true;
+    frame.clear_buffer = needs_screen_clear_;
     frame.dirty_region = terminal_bounds;
     Rect paint_clip = terminal_bounds;
 
@@ -720,12 +767,14 @@ void Application::render() {
 
         frame.full_redraw = false;
         frame.dirty_region = dirty_band;
-        frame.ansi_visible_region = dirty_band;
         // Always paint the full tree: nested scroll offsets and the text cursor are
         // established during paint. The backend limits actual output to the dirty
-        // band (per-cell ANSI clipping in true-color mode, touched rows otherwise),
-        // so sibling panes stay untouched.
+        // band via per-cell clipping, so sibling panes stay untouched.
         paint_clip = terminal_bounds;
+    }
+
+    if (frame.full_redraw && frame.clear_buffer) {
+        needs_screen_clear_ = false;
     }
 
     debug_paint_begin_frame();

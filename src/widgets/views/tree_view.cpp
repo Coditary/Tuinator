@@ -1,4 +1,5 @@
 #include <tuinator/core/event.hpp>
+#include <tuinator/platform/clipboard.hpp>
 #include <tuinator/render/text.hpp>
 #include <tuinator/widgets/views/tree_view.hpp>
 
@@ -180,7 +181,20 @@ bool TreeView::handle_event(const Event& event) {
     default: break;
     }
 
+    if (copyable_ && is_ctrl_copy(*key)) {
+        copy_selected_label();
+        return true;
+    }
+
     return false;
+}
+
+void TreeView::copy_selected_label() {
+    if (visible_.empty() || selected_index_ < 0 || selected_index_ >= static_cast<int>(visible_.size())) {
+        return;
+    }
+
+    clipboard::set(visible_[static_cast<std::size_t>(selected_index_)].node->label);
 }
 
 void TreeView::toggle_selected() {

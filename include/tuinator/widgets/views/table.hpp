@@ -31,6 +31,9 @@ class Table : public Widget, public SelectableList {
     void set_selected_index(int index) override { set_selected_row(index); }
     void set_on_activate(std::function<void(int row, const std::vector<std::string>& cells)> callback);
 
+    bool copyable() const { return copyable_; }
+    void set_copyable(bool copyable) { copyable_ = copyable; }
+
     std::string_view widget_type_name() const override { return "Table"; }
 
     Size preferred_size() const override;
@@ -45,6 +48,7 @@ class Table : public Widget, public SelectableList {
     int visible_row_capacity() const;
     int row_at(Point local) const;
     int total_width() const;
+    void copy_selected_row();
 
     std::vector<TableColumn> columns_;
     std::vector<std::vector<std::string>> rows_;
@@ -54,6 +58,7 @@ class Table : public Widget, public SelectableList {
     Style cell_style_;
     Style selected_style_;
     std::function<void(int, const std::vector<std::string>&)> on_activate_;
+    bool copyable_ = true;
 };
 
 } // namespace tuinator

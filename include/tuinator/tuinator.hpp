@@ -12,6 +12,8 @@
 #include <tuinator/layout/grid.hpp>
 #include <tuinator/render/action_icon.hpp>
 #include <tuinator/render/air_quality_icon.hpp>
+#include <tuinator/render/animated_image.hpp>
+#include <tuinator/render/asciidoc.hpp>
 #include <tuinator/render/astronomy_icon.hpp>
 #include <tuinator/render/block_element.hpp>
 #include <tuinator/render/border_style.hpp>
@@ -27,6 +29,7 @@
 #include <tuinator/render/hazard_icon.hpp>
 #include <tuinator/render/line_icon.hpp>
 #include <tuinator/render/marine_alert_icon.hpp>
+#include <tuinator/render/markdown.hpp>
 #include <tuinator/render/measurement_icon.hpp>
 #include <tuinator/render/moon_icon.hpp>
 #include <tuinator/render/nerd_icon_set.hpp>
@@ -54,16 +57,19 @@
 
 // Display
 #include <tuinator/render/nerd_glyph_catalog.hpp>
+#include <tuinator/widgets/display/asciidoc_view.hpp>
 #include <tuinator/widgets/display/big_text.hpp>
 #include <tuinator/widgets/display/custom_paint.hpp>
 #include <tuinator/widgets/display/image_view.hpp>
 #include <tuinator/widgets/display/label.hpp>
+#include <tuinator/widgets/display/markdown_view.hpp>
 #include <tuinator/widgets/display/nerd_glyph_matrix_gallery.hpp>
 #include <tuinator/widgets/display/nerd_icon_catalog_gallery.hpp>
 #include <tuinator/widgets/display/progress_bar.hpp>
 #include <tuinator/widgets/display/separator.hpp>
 #include <tuinator/widgets/display/spinner.hpp>
 #include <tuinator/widgets/display/throbber.hpp>
+#include <tuinator/widgets/display/video_view.hpp>
 
 // Containers
 #include <tuinator/widgets/containers/panel.hpp>

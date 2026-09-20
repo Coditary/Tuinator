@@ -3,6 +3,7 @@
 #include <tuinator/render/scrollbar.hpp>
 #include <tuinator/render/style.hpp>
 #include <tuinator/render/style_resolver.hpp>
+#include <tuinator/render/text.hpp>
 #include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/widget.hpp>
 
@@ -80,6 +81,7 @@ class TextArea : public Widget, public MultiLineTextInput {
     void paint(PaintContext& ctx) const override;
     bool handle_event(const Event& event) override;
     bool is_focusable() const override { return true; }
+    bool pointer_active() const override { return selecting_with_mouse_; }
 
   private:
     int gutter_width() const;
@@ -96,9 +98,26 @@ class TextArea : public Widget, public MultiLineTextInput {
     void insert_newline();
     void delete_before_cursor();
     void delete_at_cursor();
-    void set_cursor(int row, int col);
+    void delete_selection();
+    void delete_word_before_cursor();
+    void delete_word_after_cursor();
+    void delete_line_before_cursor();
+    void delete_line_after_cursor();
+    void delete_current_line();
+    void insert_text(std::string_view text);
+    void copy_selection();
+    void cut_selection();
+    void paste_from_clipboard();
+    void select_all();
+    void clear_selection();
+    bool has_selection() const;
+    bool is_selected(int row, int col) const;
+    std::string selected_text() const;
+    bool handle_shortcut(const KeyPress& key);
+    void set_cursor(int row, int col, bool extend_selection = false);
     bool handle_mouse(const MouseEvent& mouse);
     Point to_local(Point terminal) const;
+    int byte_col_at_display(int row, int display_col, CaretAffinity affinity) const;
 
     std::vector<std::string> lines_{""};
     std::string title_;
@@ -110,6 +129,12 @@ class TextArea : public Widget, public MultiLineTextInput {
     int gutter_width_ = 0;
     int cursor_row_ = 0;
     int cursor_col_ = 0;
+    int selection_anchor_row_ = 0;
+    int selection_anchor_col_ = 0;
+    bool selecting_with_mouse_ = false;
+    int mouse_press_row_ = 0;
+    int mouse_press_col_ = 0;
+    int mouse_press_display_col_ = 0;
     int scroll_x_ = 0;
     int scroll_y_ = 0;
     ScrollbarOptions scrollbars_;

@@ -83,8 +83,8 @@ Use `text_display_width()` for layout and hit-testing.
 
 - Define explicit `:focused` / `:selected` rules when you care about focus rings.
   Without them, widget fallback styles are preserved (not overwritten by the base `text` rule).
-- RGB colors (`foreground-rgb`, `background-rgb`) use a direct TTY path on the curses backend.
-  Partial redraws clear the dirty TTY overlay automatically; still mark dirty rects accurately when content moves.
+- RGB colors (`foreground-rgb`, `background-rgb`) are rendered via the ANSI backend's frame buffer.
+  Partial redraws clear the dirty region automatically; still mark dirty rects accurately when content moves.
 - Re-applying a stylesheet to `TextInput` preserves `min_width` from the widget; set `min-width` in CSS if you override it.
 
 ## Images (Kitty / Sixel)

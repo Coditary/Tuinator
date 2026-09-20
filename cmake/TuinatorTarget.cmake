@@ -20,7 +20,7 @@ target_include_directories(tuinator
 
 if(TUINATOR_CURSES_TARGET)
     target_link_libraries(tuinator PUBLIC ${TUINATOR_CURSES_TARGET})
-else()
+elseif(TUINATOR_CURSES_LIBS)
     target_link_libraries(tuinator PUBLIC ${TUINATOR_CURSES_LIBS})
 endif()
 

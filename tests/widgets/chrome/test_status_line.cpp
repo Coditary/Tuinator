@@ -1,3 +1,5 @@
+#include <tuinator/core/event.hpp>
+#include <tuinator/platform/clipboard.hpp>
 #include <tuinator/widgets/chrome/status_line.hpp>
 
 #include "render_helper.hpp"
@@ -63,4 +65,16 @@ TUINATOR_TEST(status_line_renders_left_and_right_segments) {
     TUINATOR_CHECK(tuinator::test::row_has(backend, "LUA"));
     TUINATOR_CHECK(tuinator::test::row_has(backend, "43"));
     TUINATOR_CHECK(tuinator::test::row_has(backend, "feat/file-history"));
+}
+
+TUINATOR_TEST(status_line_ctrl_c_copies_segment_text) {
+    tuinator::StatusLine status;
+    status.set_left({{.text = "main"}, {.text = "branch"}});
+    status.set_right({{.text = "42"}});
+    status.layout({0, 0, 40, 1});
+    status.set_focused(true);
+
+    tuinator::clipboard::set("");
+    TUINATOR_CHECK(status.handle_event(tuinator::KeyPress{.character = 'c', .ctrl = true}));
+    TUINATOR_CHECK_EQ(tuinator::clipboard::get(), "main branch 42");
 }

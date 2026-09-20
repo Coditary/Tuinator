@@ -1,4 +1,5 @@
 #include <tuinator/core/event.hpp>
+#include <tuinator/platform/clipboard.hpp>
 #include <tuinator/render/text.hpp>
 #include <tuinator/widgets/views/list_view.hpp>
 
@@ -144,7 +145,20 @@ bool ListView::handle_event(const Event& event) {
     default: break;
     }
 
+    if (copyable_ && is_ctrl_copy(*key)) {
+        copy_selected_item();
+        return true;
+    }
+
     return false;
+}
+
+void ListView::copy_selected_item() {
+    if (items_.empty() || selected_index_ < 0 || selected_index_ >= static_cast<int>(items_.size())) {
+        return;
+    }
+
+    clipboard::set(items_[static_cast<std::size_t>(selected_index_)]);
 }
 
 void ListView::clamp_selection() {

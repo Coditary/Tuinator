@@ -296,13 +296,17 @@ void apply_text_input_stylesheet(TextInputField& field, Widget& widget, const St
     widget.Widget::apply_stylesheet(styles);
     if (auto* input = dynamic_cast<TextInput*>(&widget)) {
         TextInputOptions options{.min_width = input->min_width(),
-                                 .placeholder = std::string(field.field_placeholder())};
+                                 .placeholder = std::string(field.field_placeholder()),
+                                 .password = input->password()};
         const WidgetOptions opts = styles.options(widget);
         if (opts.has("min-width")) {
             options.min_width = opts.int_or("min-width", options.min_width);
         }
         if (opts.has("placeholder")) {
             options.placeholder = opts.string_or("placeholder", options.placeholder);
+        }
+        if (opts.has("password")) {
+            options.password = opts.bool_or("password", options.password);
         }
         input->set_options(options);
     }

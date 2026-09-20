@@ -17,12 +17,14 @@
       {
         "type": "Label",
         "text": "Login",
-        "style": "heading"
+        "style": "heading",
+        "selectable": false
       },
       {
         "type": "Label",
         "text": "Username",
-        "style": "label"
+        "style": "label",
+        "selectable": false
       },
       {
         "type": "TextInput",
@@ -33,12 +35,14 @@
       {
         "type": "Label",
         "text": "Password",
-        "style": "label"
+        "style": "label",
+        "selectable": false
       },
       {
         "type": "TextInput",
         "minWidth": 24,
-        "placeholder": "secret"
+        "placeholder": "secret",
+        "password": true
       },
       {
         "type": "Separator",
@@ -71,7 +75,8 @@
       {
         "type": "Label",
         "text": "Tab between fields | type to edit | q to quit",
-        "style": "muted"
+        "style": "muted",
+        "selectable": false
       }
     ]
   }

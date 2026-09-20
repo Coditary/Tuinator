@@ -67,6 +67,7 @@ OPTION_FIELDS: dict[str, list[tuple[tuple[str, ...], str, str]]] = {
     "TextInputOptions": [
         (("minWidth", "min_width"), "min_width", "int"),
         (("placeholder",), "placeholder", "string"),
+        (("password",), "password", "bool"),
     ],
     "TextAreaOptions": [
         (("minWidth", "min_width"), "min_width", "int"),

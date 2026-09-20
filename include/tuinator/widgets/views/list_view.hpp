@@ -23,6 +23,9 @@ class ListView : public Widget, public SelectableList {
     void set_on_select(std::function<void(int index, const std::string& item)> callback);
     void set_on_activate(std::function<void(int index, const std::string& item)> callback);
 
+    bool copyable() const { return copyable_; }
+    void set_copyable(bool copyable) { copyable_ = copyable; }
+
     std::string_view widget_type_name() const override { return "ListView"; }
 
     Size preferred_size() const override;
@@ -35,6 +38,7 @@ class ListView : public Widget, public SelectableList {
     void clamp_selection();
     void ensure_selected_visible();
     int row_at(Point local) const;
+    void copy_selected_item();
 
     std::vector<std::string> items_;
     int selected_index_ = 0;
@@ -43,6 +47,7 @@ class ListView : public Widget, public SelectableList {
     Style selected_style_;
     std::function<void(int, const std::string&)> on_select_;
     std::function<void(int, const std::string&)> on_activate_;
+    bool copyable_ = true;
 };
 
 } // namespace tuinator

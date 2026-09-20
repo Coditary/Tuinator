@@ -123,6 +123,47 @@ int width_of_scalars(const std::vector<char32_t>& chars) {
 
 } // namespace
 
+std::string utf8_from_codepoint(char32_t codepoint) {
+    std::string out;
+    if (codepoint <= 0x7F) {
+        out.push_back(static_cast<char>(codepoint));
+    } else if (codepoint <= 0x7FF) {
+        out.push_back(static_cast<char>(0xC0 | ((codepoint >> 6) & 0x1F)));
+        out.push_back(static_cast<char>(0x80 | (codepoint & 0x3F)));
+    } else if (codepoint <= 0xFFFF) {
+        out.push_back(static_cast<char>(0xE0 | ((codepoint >> 12) & 0x0F)));
+        out.push_back(static_cast<char>(0x80 | ((codepoint >> 6) & 0x3F)));
+        out.push_back(static_cast<char>(0x80 | (codepoint & 0x3F)));
+    } else if (codepoint <= 0x10FFFF) {
+        out.push_back(static_cast<char>(0xF0 | ((codepoint >> 18) & 0x07)));
+        out.push_back(static_cast<char>(0x80 | ((codepoint >> 12) & 0x3F)));
+        out.push_back(static_cast<char>(0x80 | ((codepoint >> 6) & 0x3F)));
+        out.push_back(static_cast<char>(0x80 | (codepoint & 0x3F)));
+    }
+    return out;
+}
+
+std::size_t utf8_char_length(std::string_view text, std::size_t index) {
+    if (index >= text.size()) {
+        return 0;
+    }
+
+    const unsigned char lead = static_cast<unsigned char>(text[index]);
+    if (lead < 0x80) {
+        return 1;
+    }
+    if ((lead & 0xE0) == 0xC0 && index + 1 < text.size()) {
+        return 2;
+    }
+    if ((lead & 0xF0) == 0xE0 && index + 2 < text.size()) {
+        return 3;
+    }
+    if ((lead & 0xF8) == 0xF0 && index + 3 < text.size()) {
+        return 4;
+    }
+    return 1;
+}
+
 int text_display_width(std::string_view text) {
     if (text.empty()) {
         return 0;
@@ -193,6 +234,28 @@ std::vector<TextGlyph> text_glyph_breaks(std::string_view text) {
     });
 
     return glyphs;
+}
+
+std::size_t text_caret_index_at_column(std::string_view text, int column, CaretAffinity affinity) {
+    if (text.empty() || column <= 0) {
+        return 0;
+    }
+
+    const std::vector<TextGlyph> glyphs = text_glyph_breaks(text);
+    int col = 0;
+    for (const TextGlyph& glyph : glyphs) {
+        if (glyph.width <= 0) {
+            continue;
+        }
+
+        const int next_col = col + glyph.width;
+        if (column < next_col) {
+            return affinity == CaretAffinity::After ? glyph.offset + glyph.length : glyph.offset;
+        }
+        col = next_col;
+    }
+
+    return text.size();
 }
 
 std::size_t text_byte_length_for_width(std::string_view text, int max_columns) {

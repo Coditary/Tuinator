@@ -362,6 +362,12 @@ bool ScrollView::handle_event(const Event& event) {
             return true;
         }
 
+        if (content_ && content_->pointer_active()) {
+            MouseEvent adjusted = *mouse;
+            adjusted.position = to_content_local(mouse->position);
+            return content_->handle_event(adjusted);
+        }
+
         if (!bounds_.contains(mouse->position)) {
             return false;
         }

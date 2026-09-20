@@ -1,13 +1,30 @@
+#include <tuinator/render/canvas.hpp>
 #include <tuinator/render/graphics_encode.hpp>
 #include <tuinator/render/graphics_protocol.hpp>
 #include <tuinator/render/terminal_image.hpp>
 #include <tuinator/widgets/display/image_view.hpp>
+
+#include <tuinator/backend/memory_backend.hpp>
 
 #include <string>
 #include <vector>
 
 #include "render_helper.hpp"
 #include "test_harness.hpp"
+
+TUINATOR_TEST(canvas_skips_partially_clipped_image) {
+    tuinator::MemoryTerminalBackend backend({40, 10});
+    backend.init();
+    backend.begin_frame();
+
+    tuinator::Canvas canvas(backend);
+    canvas.with_clip({0, 0, 40, 3}, [&](tuinator::Canvas& clipped) {
+        clipped.draw_image({0, 1}, {10, 5}, tuinator::TerminalImage::gradient(8, 8));
+    });
+
+    backend.end_frame();
+    TUINATOR_CHECK(backend.image_draws().empty());
+}
 
 TUINATOR_TEST(image_view_records_draw_request) {
     tuinator::MemoryTerminalBackend backend({60, 20});
@@ -38,7 +55,10 @@ TUINATOR_TEST(kitty_encoder_emits_graphics_sequence) {
     TUINATOR_CHECK(encoded.find("m=0;\033\\") != std::string::npos);
 
     const std::string placed = tuinator::encode_kitty_place(10, 4);
-    TUINATOR_CHECK(placed.find("a=p,i=1,c=10,r=4") != std::string::npos);
+    TUINATOR_CHECK(placed.find("a=p,i=1,p=1,c=10,r=4") != std::string::npos);
+
+    const std::string erased = tuinator::encode_kitty_delete(2);
+    TUINATOR_CHECK(erased.find("a=d,d=i,i=2") != std::string::npos);
 }
 
 TUINATOR_TEST(png_loader_reads_lenna_asset) {

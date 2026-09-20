@@ -1,4 +1,5 @@
 if(WIN32)
+    set(TUINATOR_USE_CURSES TRUE)
     set(TUINATOR_BACKEND_DEF TUINATOR_BACKEND_PDCURSES)
 
     set(TUINATOR_PDCURSES_ROOT "" CACHE PATH "Root directory of a PDCurses / PDCursesMod install")
@@ -45,29 +46,38 @@ if(WIN32)
         set(TUINATOR_CURSES_LIBS "${PDCURSES_LIBRARY}")
     endif()
 else()
-    set(TUINATOR_BACKEND_DEF TUINATOR_BACKEND_NCURSES)
+    option(TUINATOR_USE_CURSES "Use ncurses/PDCurses backend instead of pure ANSI (POSIX only)" OFF)
 
-    find_package(PkgConfig QUIET)
-    if(PKG_CONFIG_FOUND)
-        pkg_check_modules(NCURSES QUIET IMPORTED_TARGET ncursesw)
-    endif()
+    if(TUINATOR_USE_CURSES)
+        set(TUINATOR_BACKEND_DEF TUINATOR_BACKEND_NCURSES)
 
-    if(NOT NCURSES_FOUND)
-        set(CURSES_NEED_NCURSES TRUE)
-        set(CURSES_NEED_WIDE TRUE)
-        find_package(Curses REQUIRED)
-        add_library(Tuinator::NCURSES UNKNOWN IMPORTED)
-        set_target_properties(Tuinator::NCURSES PROPERTIES
-            IMPORTED_LOCATION "${CURSES_LIBRARIES}"
-            INTERFACE_INCLUDE_DIRECTORIES "${CURSES_INCLUDE_DIRS}"
-        )
-        set(TUINATOR_CURSES_TARGET Tuinator::NCURSES)
+        find_package(PkgConfig QUIET)
+        if(PKG_CONFIG_FOUND)
+            pkg_check_modules(NCURSES QUIET IMPORTED_TARGET ncursesw)
+        endif()
+
+        if(NOT NCURSES_FOUND)
+            set(CURSES_NEED_NCURSES TRUE)
+            set(CURSES_NEED_WIDE TRUE)
+            find_package(Curses REQUIRED)
+            add_library(Tuinator::NCURSES UNKNOWN IMPORTED)
+            set_target_properties(Tuinator::NCURSES PROPERTIES
+                IMPORTED_LOCATION "${CURSES_LIBRARIES}"
+                INTERFACE_INCLUDE_DIRECTORIES "${CURSES_INCLUDE_DIRS}"
+            )
+            set(TUINATOR_CURSES_TARGET Tuinator::NCURSES)
+        else()
+            set(TUINATOR_CURSES_TARGET PkgConfig::NCURSES)
+        endif()
+
+        set(TUINATOR_CURSES_INCLUDE "")
+        set(TUINATOR_CURSES_LIBS "")
     else()
-        set(TUINATOR_CURSES_TARGET PkgConfig::NCURSES)
+        set(TUINATOR_BACKEND_DEF TUINATOR_BACKEND_ANSI)
+        set(TUINATOR_CURSES_TARGET "")
+        set(TUINATOR_CURSES_INCLUDE "")
+        set(TUINATOR_CURSES_LIBS "")
     endif()
-
-    set(TUINATOR_CURSES_INCLUDE "")
-    set(TUINATOR_CURSES_LIBS "")
 endif()
 
 find_package(ZLIB REQUIRED)

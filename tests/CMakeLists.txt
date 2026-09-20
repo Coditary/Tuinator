@@ -3,6 +3,8 @@ set(TUINATOR_TEST_SOURCES
     core/test_text.cpp
     core/test_memory_backend.cpp
     core/test_inline_backend.cpp
+    backend/test_terminal_input.cpp
+    backend/test_ansi_backend_images.cpp
     core/test_inline_view.cpp
     core/test_dirty_region.cpp
     core/test_screen.cpp
@@ -16,6 +18,10 @@ set(TUINATOR_TEST_SOURCES
     render/test_hover_and_warnings.cpp
     render/test_tty_overlay.cpp
     render/test_widget_options.cpp
+    render/test_style_attributes.cpp
+    render/test_markdown.cpp
+    render/test_asciidoc.cpp
+    render/test_animated_image.cpp
     widgets/test_stylesheet_widgets.cpp
     widgets/test_widget_roles.cpp
     render/test_file_icon.cpp
@@ -27,6 +33,9 @@ set(TUINATOR_TEST_SOURCES
     render/test_nerd_glyph_matrix.cpp
     terminal/test_ansi_terminal.cpp
     widgets/test_label.cpp
+    widgets/test_markdown_view.cpp
+    widgets/test_asciidoc_view.cpp
+    widgets/test_video_view.cpp
     widgets/test_list_view.cpp
     widgets/test_controls.cpp
     widgets/test_checkbox.cpp
@@ -53,6 +62,7 @@ target_link_libraries(tuinator-tests PRIVATE tuinator::tuinator)
 target_include_directories(tuinator-tests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/support
+    ${TUINATOR_SOURCE_DIR}/src
 )
 target_compile_definitions(tuinator-tests PRIVATE TUINATOR_DATA_DIR="${TUINATOR_SOURCE_DIR}/data")
 add_test(NAME tuinator-tests COMMAND tuinator-tests)

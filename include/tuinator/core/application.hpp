@@ -70,6 +70,9 @@ class Application {
     void set_alternate_screen(bool enabled);
     void set_clear_on_shutdown(bool enabled);
 
+    /// When true, hover-only mouse motion is delivered to the widget tree (for menus).
+    void set_pointer_hover_tracking(bool enabled);
+
   private:
     struct TimerEntry {
         TimerId id = 0;
@@ -101,6 +104,7 @@ class Application {
     void sync_mouse_cursor_policy();
     void sync_stylesheet();
     void update_hover(Point position);
+    void clear_pointer_focus();
 
     std::unique_ptr<TerminalBackend> backend_;
     std::unique_ptr<Widget> root_;
@@ -111,9 +115,16 @@ class Application {
     TimerId next_timer_id_ = 1;
     std::size_t focus_index_ = 0;
     bool running_ = false;
+    bool pointer_hover_tracking_ = false;
     DirtyRegion dirty_region_;
     bool terminal_ready_ = false;
+    /// Set when the next full frame must hard-clear the screen (first frame,
+    /// resize, shell transition). Routine full redraws go through cell
+    /// diffing instead, keeping kitty placements alive and flicker-free.
+    bool needs_screen_clear_ = true;
+    bool prev_shell_active_ = false;
     Widget* hovered_widget_ = nullptr;
+    Widget* pointer_focus_widget_ = nullptr;
     std::vector<std::string> stylesheet_warnings_;
 };
 

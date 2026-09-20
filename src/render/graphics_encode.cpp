@@ -96,7 +96,7 @@ std::vector<std::uint8_t> build_png(const TerminalImage& image) {
     return png;
 }
 
-std::string kitty_transmit(const TerminalImage& image) {
+std::string kitty_transmit(const TerminalImage& image, std::uint32_t image_id) {
     if (image.empty()) {
         return {};
     }
@@ -117,7 +117,7 @@ std::string kitty_transmit(const TerminalImage& image) {
         had_data = true;
 
         if (offset == 0) {
-            out << "\033_Ga=t,f=100,i=1,q=2,m=1;" << chunk << "\033\\";
+            out << "\033_Ga=t,f=100,i=" << image_id << ",q=2,m=1;" << chunk << "\033\\";
             continue;
         }
 
@@ -131,9 +131,18 @@ std::string kitty_transmit(const TerminalImage& image) {
     return out.str();
 }
 
-std::string kitty_place(int cell_cols, int cell_rows) {
+std::string kitty_place(int cell_cols, int cell_rows, std::uint32_t image_id) {
     std::ostringstream out;
-    out << "\033_Ga=p,i=1,c=" << cell_cols << ",r=" << cell_rows << ",C=1,q=2;\033\\";
+    // Explicit placement id p=1: re-placing the same image id replaces the
+    // previous placement (atomic move on scroll) instead of accumulating
+    // ghost copies at the old position.
+    out << "\033_Ga=p,i=" << image_id << ",p=1,c=" << cell_cols << ",r=" << cell_rows << ",C=1,q=2;\033\\";
+    return out.str();
+}
+
+std::string kitty_delete_image(std::uint32_t image_id) {
+    std::ostringstream out;
+    out << "\033_Ga=d,d=i,i=" << image_id << ",q=2;\033\\";
     return out.str();
 }
 
@@ -184,9 +193,15 @@ std::string encode_sixel(const TerminalImage& image, int cell_x, int cell_y) {
 
 } // namespace
 
-std::string encode_kitty_transmit(const TerminalImage& image) { return kitty_transmit(image); }
+std::string encode_kitty_transmit(const TerminalImage& image, std::uint32_t image_id) {
+    return kitty_transmit(image, image_id);
+}
 
-std::string encode_kitty_place(int cell_cols, int cell_rows) { return kitty_place(cell_cols, cell_rows); }
+std::string encode_kitty_place(int cell_cols, int cell_rows, std::uint32_t image_id) {
+    return kitty_place(cell_cols, cell_rows, image_id);
+}
+
+std::string encode_kitty_delete(std::uint32_t image_id) { return kitty_delete_image(image_id); }
 
 std::uint32_t terminal_image_content_hash(const TerminalImage& image) {
     if (image.empty()) {
@@ -204,7 +219,7 @@ std::string encode_terminal_image(GraphicsProtocol protocol, const TerminalImage
     case GraphicsProtocol::Kitty:
         (void)cell_x;
         (void)cell_y;
-        return kitty_transmit(image);
+        return kitty_transmit(image, 1);
     case GraphicsProtocol::Iterm2: return encode_iterm2(image, cell_x, cell_y, cell_width, cell_height);
     case GraphicsProtocol::Sixel: return encode_sixel(image, cell_x, cell_y);
     case GraphicsProtocol::None: return {};

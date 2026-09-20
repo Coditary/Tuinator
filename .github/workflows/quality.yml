@@ -30,7 +30,6 @@ jobs:
           sudo apt-get install -y \
             clang-tidy \
             clang-tools \
-            libncurses-dev \
             zlib1g-dev
 
       - name: Run clang-tidy
@@ -66,7 +65,7 @@ jobs:
           queries: security-and-quality
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y libncurses-dev zlib1g-dev
+        run: sudo apt-get update && sudo apt-get install -y zlib1g-dev
 
       - name: Build for analysis
         env:

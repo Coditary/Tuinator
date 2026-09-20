@@ -245,6 +245,19 @@ Size SplitPane::preferred_size() const {
     };
 }
 
+Rect SplitPane::inner_bounds() const {
+    if (!options_.outer_border || bounds_.width < 2 || bounds_.height < 2) {
+        return bounds_;
+    }
+
+    return {
+        bounds_.x + 1,
+        bounds_.y + 1,
+        bounds_.width - 2,
+        bounds_.height - 2,
+    };
+}
+
 int SplitPane::divider_position() const {
     if (options_.orientation == SplitOrientation::Horizontal) {
         return first_ ? first_->bounds().width : options_.first_size;
@@ -254,13 +267,14 @@ int SplitPane::divider_position() const {
 }
 
 Rect SplitPane::divider_bounds() const {
+    const Rect inner = inner_bounds();
     const int position = divider_position();
 
     if (options_.orientation == SplitOrientation::Horizontal) {
-        return {bounds_.x + position, bounds_.y, 1, bounds_.height};
+        return {inner.x + position, inner.y, 1, inner.height};
     }
 
-    return {bounds_.x, bounds_.y + position, bounds_.width, 1};
+    return {inner.x, inner.y + position, inner.width, 1};
 }
 
 Rect SplitPane::divider_hit_bounds() const {
@@ -281,9 +295,10 @@ Rect SplitPane::divider_hit_bounds() const {
 bool SplitPane::contains_divider(Point point) const { return divider_hit_bounds().contains(point); }
 
 void SplitPane::update_first_size_from_mouse(Point global_position) {
-    const Point local{global_position.x - bounds_.x, global_position.y - bounds_.y};
+    const Rect inner = inner_bounds();
+    const Point local{global_position.x - inner.x, global_position.y - inner.y};
     const int min_size = std::max(1, options_.min_pane_size);
-    const int total = options_.orientation == SplitOrientation::Horizontal ? bounds_.width : bounds_.height;
+    const int total = options_.orientation == SplitOrientation::Horizontal ? inner.width : inner.height;
     const int max_first = std::max(min_size, total - min_size - 1);
 
     int new_size = options_.orientation == SplitOrientation::Horizontal ? local.x : local.y;
@@ -309,17 +324,18 @@ void SplitPane::end_drag() { dragging_ = false; }
 
 void SplitPane::layout(Rect bounds) {
     bounds_ = bounds;
+    const Rect inner = inner_bounds();
 
     if (options_.orientation == SplitOrientation::Horizontal) {
         const int divider = 1;
-        const int first_width = std::clamp(options_.first_size, 0, std::max(0, bounds.width - divider));
-        const int second_width = std::max(0, bounds.width - first_width - divider);
+        const int first_width = std::clamp(options_.first_size, 0, std::max(0, inner.width - divider));
+        const int second_width = std::max(0, inner.width - first_width - divider);
 
         if (first_) {
-            first_->layout({bounds.x, bounds.y, first_width, bounds.height});
+            first_->layout({inner.x, inner.y, first_width, inner.height});
         }
         if (second_) {
-            second_->layout({bounds.x + first_width + divider, bounds.y, second_width, bounds.height});
+            second_->layout({inner.x + first_width + divider, inner.y, second_width, inner.height});
         }
 
         trim_split_child_borders(first_.get(), options_.orientation, true);
@@ -328,14 +344,14 @@ void SplitPane::layout(Rect bounds) {
     }
 
     const int divider = 1;
-    const int first_height = std::clamp(options_.first_size, 0, std::max(0, bounds.height - divider));
-    const int second_height = std::max(0, bounds.height - first_height - divider);
+    const int first_height = std::clamp(options_.first_size, 0, std::max(0, inner.height - divider));
+    const int second_height = std::max(0, inner.height - first_height - divider);
 
     if (first_) {
-        first_->layout({bounds.x, bounds.y, bounds.width, first_height});
+        first_->layout({inner.x, inner.y, inner.width, first_height});
     }
     if (second_) {
-        second_->layout({bounds.x, bounds.y + first_height + divider, bounds.width, second_height});
+        second_->layout({inner.x, inner.y + first_height + divider, inner.width, second_height});
     }
 
     trim_split_child_borders(first_.get(), options_.orientation, true);
@@ -348,12 +364,12 @@ void SplitPane::append_divider_line(std::vector<SplitDividerLine>& lines) const 
     }
 
     if (options_.orientation == SplitOrientation::Horizontal) {
-        const int x = bounds_.x + divider_position();
+        const int x = first_ != nullptr ? first_->bounds().right() : inner_bounds().x + divider_position();
         lines.push_back(SplitDividerLine{true, x, bounds_.y, bounds_.y + bounds_.height - 1});
         return;
     }
 
-    const int y = bounds_.y + divider_position();
+    const int y = first_ != nullptr ? first_->bounds().bottom() : inner_bounds().y + divider_position();
     lines.push_back(SplitDividerLine{false, y, bounds_.x, bounds_.x + bounds_.width - 1});
 }
 
@@ -513,11 +529,7 @@ Widget* SplitPane::hit_test(Point point) {
         return nullptr;
     }
 
-    if (contains_divider(point)) {
-        return this;
-    }
-
-    for (Widget* pane : {second_.get(), first_.get()}) {
+    for (Widget* pane : {first_.get(), second_.get()}) {
         if (pane == nullptr) {
             continue;
         }
@@ -527,7 +539,29 @@ Widget* SplitPane::hit_test(Point point) {
         }
     }
 
+    if (contains_divider(point)) {
+        return this;
+    }
+
     return this;
+}
+
+bool SplitPane::route_mouse_to_child(const MouseEvent& mouse) {
+    if (!bounds_.contains(mouse.position)) {
+        return false;
+    }
+
+    for (Widget* pane : {first_.get(), second_.get()}) {
+        if (pane == nullptr || !pane->bounds().contains(mouse.position)) {
+            continue;
+        }
+
+        if (Widget* hit = pane->hit_test(mouse.position)) {
+            return hit->handle_event(mouse);
+        }
+    }
+
+    return false;
 }
 
 bool SplitPane::handle_event(const Event& event) {
@@ -542,6 +576,10 @@ bool SplitPane::handle_event(const Event& event) {
                 update_first_size_from_mouse(mouse->position);
                 return true;
             }
+        }
+
+        if (!dragging_ && route_mouse_to_child(*mouse)) {
+            return true;
         }
 
         const bool drag_motion = mouse->action == MouseAction::Move && mouse->left_pressed;
@@ -568,19 +606,7 @@ bool SplitPane::handle_event(const Event& event) {
     }
 
     if (const auto* mouse = std::get_if<MouseEvent>(&event)) {
-        if (!bounds_.contains(mouse->position)) {
-            return false;
-        }
-
-        for (Widget* pane : {first_.get(), second_.get()}) {
-            if (pane == nullptr) {
-                continue;
-            }
-
-            if (Widget* hit = pane->hit_test(mouse->position)) {
-                return hit->handle_event(event);
-            }
-        }
+        return route_mouse_to_child(*mouse);
     }
 
     return false;

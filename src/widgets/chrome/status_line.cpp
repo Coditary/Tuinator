@@ -1,3 +1,5 @@
+#include <tuinator/core/event.hpp>
+#include <tuinator/platform/clipboard.hpp>
 #include <tuinator/render/file_icon.hpp>
 #include <tuinator/render/line_icon.hpp>
 #include <tuinator/render/text.hpp>
@@ -6,6 +8,7 @@
 
 #include <algorithm>
 #include <string>
+#include <variant>
 
 namespace tuinator {
 
@@ -181,6 +184,62 @@ void StatusLine::paint(PaintContext& ctx) const {
     if (!right_.empty() && right_width > 0) {
         const int right_x = std::max(left_end + 1, width - right_width);
         paint_segments(canvas, right_x, 0, right_);
+    }
+}
+
+namespace {
+
+void append_segment_text(std::string& out, const StatusSegment& segment) {
+    if (segment.kind == StatusSegmentKind::Separator || segment.text.empty()) {
+        return;
+    }
+    if (!out.empty()) {
+        out += ' ';
+    }
+    out += segment.text;
+}
+
+void append_segments_text(std::string& out, const std::vector<StatusSegment>& segments) {
+    for (const StatusSegment& segment : segments) {
+        append_segment_text(out, segment);
+    }
+}
+
+} // namespace
+
+std::string StatusLine::flattened_text() const {
+    std::string out;
+    append_segments_text(out, left_);
+    append_segments_text(out, center_);
+    append_segments_text(out, right_);
+    return out;
+}
+
+Widget* StatusLine::hit_test_focusable(Point point) {
+    if (!selectable_ || !bounds_.contains(point)) {
+        return nullptr;
+    }
+    return this;
+}
+
+bool StatusLine::handle_event(const Event& event) {
+    if (!selectable_) {
+        return false;
+    }
+
+    const auto* key = std::get_if<KeyPress>(&event);
+    if (!key || !is_focused() || !is_ctrl_copy(*key)) {
+        return false;
+    }
+
+    copy_text();
+    return true;
+}
+
+void StatusLine::copy_text() {
+    const std::string text = flattened_text();
+    if (!text.empty()) {
+        clipboard::set(text);
     }
 }
 

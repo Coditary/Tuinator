@@ -1,8 +1,10 @@
 #include <tuinator/core/event.hpp>
+#include <tuinator/platform/clipboard.hpp>
 #include <tuinator/render/text.hpp>
 #include <tuinator/widgets/views/table.hpp>
 
 #include <algorithm>
+#include <sstream>
 #include <variant>
 
 namespace tuinator {
@@ -192,7 +194,28 @@ bool Table::handle_event(const Event& event) {
     default: break;
     }
 
+    if (copyable_ && is_ctrl_copy(*key)) {
+        copy_selected_row();
+        return true;
+    }
+
     return false;
+}
+
+void Table::copy_selected_row() {
+    if (rows_.empty() || selected_row_ < 0 || selected_row_ >= static_cast<int>(rows_.size())) {
+        return;
+    }
+
+    const std::vector<std::string>& cells = rows_[static_cast<std::size_t>(selected_row_)];
+    std::ostringstream out;
+    for (std::size_t i = 0; i < cells.size(); ++i) {
+        if (i > 0) {
+            out << '\t';
+        }
+        out << cells[i];
+    }
+    clipboard::set(out.str());
 }
 
 void Table::clamp_selection() {

@@ -1,5 +1,14 @@
+if(TUINATOR_USE_CURSES)
+    set(TUINATOR_BACKEND_IMPL_SOURCES src/backend/curses_backend.cpp)
+else()
+    set(TUINATOR_BACKEND_IMPL_SOURCES
+        src/backend/ansi_backend.cpp
+        src/backend/terminal_input.cpp
+    )
+endif()
+
 set(TUINATOR_BACKEND_SOURCES
-    src/backend/curses_backend.cpp
+    ${TUINATOR_BACKEND_IMPL_SOURCES}
     src/backend/inline_backend.cpp
     src/backend/memory_backend.cpp
     src/backend/terminal_backend.cpp
@@ -43,6 +52,11 @@ set(TUINATOR_CORE_SOURCES
     src/render/scrollbar/scrollbar.cpp
     src/render/terminal_image.cpp
     src/render/text.cpp
+    src/render/text_edit.cpp
+    src/render/markdown.cpp
+    src/render/asciidoc.cpp
+    src/render/animated_image.cpp
+    src/platform/clipboard.cpp
     src/render/tty_overlay.cpp
     src/render/theme.cpp
     src/render/stylesheet.cpp
@@ -63,6 +77,8 @@ set(TUINATOR_CORE_SOURCES
     src/widgets/display/image_view.cpp
     src/widgets/display/custom_paint.cpp
     src/widgets/display/label.cpp
+    src/widgets/display/markdown_view.cpp
+    src/widgets/display/video_view.cpp
     src/widgets/display/nerd_icon_catalog_gallery.cpp
     src/widgets/display/nerd_glyph_matrix_gallery.cpp
     src/widgets/display/progress_bar.cpp

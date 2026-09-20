@@ -14,6 +14,10 @@
 
 namespace tuinator {
 
+namespace detail {
+class TerminalInput;
+}
+
 /// Options for rendering a Tuinator UI inline in the terminal scrollback
 /// (below the shell prompt), similar to ESLint's live progress reporter.
 struct InlineBackendOptions {
@@ -116,6 +120,7 @@ class InlineTerminalBackend : public TerminalBackend {
 #endif
     std::vector<std::vector<Cell>> cells_;
     std::vector<std::vector<Cell>> previous_cells_;
+    std::unique_ptr<detail::TerminalInput> input_;
 };
 
 } // namespace tuinator

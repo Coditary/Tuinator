@@ -46,6 +46,9 @@ struct Style {
     bool bold = false;
     bool dim = false;
     bool reverse = false;
+    bool italic = false;
+    bool underline = false;
+    bool strikethrough = false;
 };
 
 constexpr Rgb rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b) { return Rgb{r, g, b}; }

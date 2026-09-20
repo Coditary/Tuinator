@@ -152,12 +152,20 @@ void Canvas::draw_image(Point position, Size cell_size, const TerminalImage& ima
     }
 
     const Point terminal = to_terminal(position);
-    const Rect visible = intersect(clip_, Rect{terminal, cell_size});
+    const Rect placement{terminal, cell_size};
+    const Rect visible = intersect(clip_, placement);
     if (visible.width <= 0 || visible.height <= 0) {
         return;
     }
 
-    backend_.draw_image(visible.x, visible.y, visible.size(), image);
+    // Kitty/Sixel place the whole bitmap into the given cell rectangle. Drawing
+    // into a clipped sub-rectangle squashes the image (e.g. while scrolling).
+    if (visible.x != placement.x || visible.y != placement.y || visible.width != placement.width ||
+        visible.height != placement.height) {
+        return;
+    }
+
+    backend_.draw_image(terminal.x, terminal.y, cell_size, image);
 }
 
 void Canvas::invalidate_graphics() { backend_.invalidate_graphics(); }

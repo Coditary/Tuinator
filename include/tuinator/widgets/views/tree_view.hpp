@@ -28,6 +28,9 @@ class TreeView : public Widget, public SelectableList {
     void set_selected_index(int index) override;
     void set_on_select(std::function<void(const std::string& path)> callback);
 
+    bool copyable() const { return copyable_; }
+    void set_copyable(bool copyable) { copyable_ = copyable; }
+
     std::string_view widget_type_name() const override { return "TreeView"; }
     bool wants_hover() const override { return true; }
     void apply_stylesheet(const StyleResolver& styles) override;
@@ -48,6 +51,7 @@ class TreeView : public Widget, public SelectableList {
     void rebuild_visible();
     void append_visible(TreeNode& node, const std::string& path, int depth);
     void toggle_selected();
+    void copy_selected_label();
 
     TreeNode root_;
     std::vector<VisibleNode> visible_;
@@ -56,6 +60,7 @@ class TreeView : public Widget, public SelectableList {
     Style item_style_;
     Style selected_style_;
     std::function<void(const std::string&)> on_select_;
+    bool copyable_ = true;
 };
 
 } // namespace tuinator

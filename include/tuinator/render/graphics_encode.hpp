@@ -10,10 +10,13 @@
 namespace tuinator {
 
 /// Upload image bytes to the terminal (Kitty a=t). Does not display.
-std::string encode_kitty_transmit(const TerminalImage& image);
+std::string encode_kitty_transmit(const TerminalImage& image, std::uint32_t image_id = 1);
 
 /// Re-display a previously transmitted Kitty image at the current cursor.
-std::string encode_kitty_place(int cell_cols, int cell_rows);
+std::string encode_kitty_place(int cell_cols, int cell_rows, std::uint32_t image_id = 1);
+
+/// Delete a Kitty image (data + placements) by id.
+std::string encode_kitty_delete(std::uint32_t image_id);
 
 std::uint32_t terminal_image_content_hash(const TerminalImage& image);
 

@@ -1,3 +1,4 @@
+#include <tuinator/platform/clipboard.hpp>
 #include <tuinator/render/theme.hpp>
 #include <tuinator/widgets/capabilities.hpp>
 #include <tuinator/widgets/controls/combo_box.hpp>
@@ -6,6 +7,7 @@
 #include <tuinator/widgets/display/progress_bar.hpp>
 #include <tuinator/widgets/display/spinner.hpp>
 #include <tuinator/widgets/menu/menu_bar.hpp>
+#include <tuinator/widgets/views/table.hpp>
 #include <tuinator/widgets/views/tree_view.hpp>
 
 #include "render_helper.hpp"
@@ -259,6 +261,36 @@ TUINATOR_TEST(combo_box_selects_item) {
     TUINATOR_CHECK_EQ(combo.selected_index(), 1);
 }
 
+TUINATOR_TEST(tree_view_ctrl_c_copies_selected_label) {
+    tuinator::TreeView tree(tuinator::Theme{}.label, tuinator::Theme{}.button_focused);
+    tree.set_root({
+        "root",
+        {
+            {"child", {{"leaf"}}},
+        },
+    });
+    tree.layout({0, 0, 20, 5});
+    tree.set_focused(true);
+    tree.set_selected_index(2);
+
+    tuinator::clipboard::set("");
+    TUINATOR_CHECK(tree.handle_event(tuinator::KeyPress{.character = 'c', .ctrl = true}));
+    TUINATOR_CHECK_EQ(tuinator::clipboard::get(), "leaf");
+}
+
+TUINATOR_TEST(table_ctrl_c_copies_selected_row) {
+    tuinator::Table table;
+    table.set_columns({{"Name", 8}, {"Value", 6}});
+    table.set_rows({{"alpha", "1"}, {"beta", "2"}});
+    table.layout({0, 0, 20, 5});
+    table.set_focused(true);
+    table.set_selected_row(1);
+
+    tuinator::clipboard::set("");
+    TUINATOR_CHECK(table.handle_event(tuinator::KeyPress{.character = 'c', .ctrl = true}));
+    TUINATOR_CHECK_EQ(tuinator::clipboard::get(), "beta\t2");
+}
+
 TUINATOR_TEST(tree_view_expands_node) {
     tuinator::TreeView tree(tuinator::Theme{}.label, tuinator::Theme{}.button_focused);
     tree.set_root({
@@ -309,7 +341,8 @@ TUINATOR_TEST(text_input_scrolls_to_show_cursor) {
 
     TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 1, 0), 'd');
     TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 7, 0), 'j');
-    TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 8, 0), '_');
+    TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 8, 0), ' ');
+    TUINATOR_CHECK(!tuinator::test::row_contains(backend, 0, "_"));
 }
 
 TUINATOR_TEST(text_input_accepts_text_beyond_min_width) {
@@ -322,6 +355,176 @@ TUINATOR_TEST(text_input_accepts_text_beyond_min_width) {
     }
 
     TUINATOR_CHECK_EQ(input.value(), "abcdefgh");
+}
+
+TUINATOR_TEST(text_input_password_masks_value) {
+    tuinator::MemoryTerminalBackend backend({12, 1});
+    backend.init();
+
+    tuinator::TextInput input({.min_width = 8, .password = true});
+    input.set_value("secret");
+    input.layout({0, 0, 12, 1});
+
+    tuinator::Canvas canvas(backend);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    input.paint(ctx);
+
+    TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 1, 0), '*');
+    TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 6, 0), '*');
+    TUINATOR_CHECK(!tuinator::test::row_contains(backend, 0, "secret"));
+    TUINATOR_CHECK_EQ(input.value(), "secret");
+}
+
+TUINATOR_TEST(text_input_ctrl_a_selects_all) {
+    tuinator::TextInput input;
+    input.set_value("hello");
+    input.set_focused(true);
+
+    TUINATOR_CHECK(input.handle_event(tuinator::KeyPress{.character = 'a', .ctrl = true}));
+    TUINATOR_CHECK(input.handle_event(tuinator::KeyPress{.character = 'c', .ctrl = true}));
+    TUINATOR_CHECK_EQ(tuinator::clipboard::get(), "hello");
+}
+
+TUINATOR_TEST(text_input_bracketed_paste_inserts_text) {
+    tuinator::TextInput input;
+    input.set_focused(true);
+
+    TUINATOR_CHECK(input.handle_event(tuinator::ClipboardPaste{"world"}));
+    TUINATOR_CHECK_EQ(input.value(), "world");
+}
+
+TUINATOR_TEST(text_input_ctrl_v_does_not_double_paste_with_bracketed_paste) {
+    tuinator::TextInput input;
+    input.set_focused(true);
+
+    TUINATOR_CHECK(input.handle_event(tuinator::ClipboardPaste{"type to edit"}));
+    TUINATOR_CHECK(input.handle_event(tuinator::KeyPress{.character = 'v', .ctrl = true}));
+    TUINATOR_CHECK_EQ(input.value(), "type to edit");
+}
+
+TUINATOR_TEST(text_input_mouse_drag_selects_text) {
+    tuinator::TextInput input;
+    input.set_value("hello world");
+    input.layout({2, 1, 15, 1});
+    input.set_focused(true);
+
+    const auto at = [](int x, int y) { return tuinator::Point{x, y}; };
+    TUINATOR_CHECK(input.handle_event(
+        tuinator::MouseEvent{at(3, 1), tuinator::MouseButton::Left, tuinator::MouseAction::Press, true}));
+    TUINATOR_CHECK(input.handle_event(
+        tuinator::MouseEvent{at(7, 1), tuinator::MouseButton::Left, tuinator::MouseAction::Move, true}));
+    TUINATOR_CHECK(input.handle_event(
+        tuinator::MouseEvent{at(7, 1), tuinator::MouseButton::Left, tuinator::MouseAction::Release, false}));
+
+    tuinator::clipboard::set("");
+    TUINATOR_CHECK(input.handle_event(tuinator::KeyPress{.character = 'c', .ctrl = true}));
+    TUINATOR_CHECK_EQ(tuinator::clipboard::get(), "hello");
+}
+
+TUINATOR_TEST(text_input_inserts_unicode_text) {
+    tuinator::TextInput input;
+    input.set_focused(true);
+
+    tuinator::KeyPress key{};
+    key.text = "\xE2\x82\xAC";
+    TUINATOR_CHECK(input.handle_event(key));
+    TUINATOR_CHECK_EQ(input.value(), "\xE2\x82\xAC");
+}
+
+TUINATOR_TEST(text_input_inserts_unicode_with_altgr_modifiers) {
+    tuinator::TextInput input;
+    input.set_focused(true);
+
+    tuinator::KeyPress key{};
+    key.text = "\xE2\x82\xAC";
+    key.alt = true;
+    key.ctrl = true;
+    TUINATOR_CHECK(input.handle_event(key));
+    TUINATOR_CHECK_EQ(input.value(), "\xE2\x82\xAC");
+}
+
+TUINATOR_TEST(text_input_falls_back_to_character_when_text_is_control_chars) {
+    tuinator::TextInput input;
+    input.set_focused(true);
+
+    tuinator::KeyPress key{};
+    key.text = "\x01\x01";
+    key.character = 'a';
+    TUINATOR_CHECK(input.handle_event(key));
+    TUINATOR_CHECK_EQ(input.value(), "a");
+}
+
+TUINATOR_TEST(text_input_mouse_click_without_drag_does_not_select) {
+    tuinator::TextInput input;
+    input.set_value("hello world");
+    input.layout({2, 1, 15, 1});
+    input.set_focused(true);
+
+    const auto at = [](int x, int y) { return tuinator::Point{x, y}; };
+    TUINATOR_CHECK(input.handle_event(
+        tuinator::MouseEvent{at(3, 1), tuinator::MouseButton::Left, tuinator::MouseAction::Press, true}));
+    TUINATOR_CHECK(input.handle_event(
+        tuinator::MouseEvent{at(3, 1), tuinator::MouseButton::Left, tuinator::MouseAction::Release, false}));
+
+    tuinator::clipboard::set("unchanged");
+    TUINATOR_CHECK(!input.handle_event(tuinator::KeyPress{.character = 'c', .ctrl = true}));
+    TUINATOR_CHECK_EQ(tuinator::clipboard::get(), "unchanged");
+}
+
+TUINATOR_TEST(text_input_mouse_press_release_selects_text_without_motion_events) {
+    tuinator::TextInput input;
+    input.set_value("hello world");
+    input.layout({2, 1, 15, 1});
+    input.set_focused(true);
+
+    const auto at = [](int x, int y) { return tuinator::Point{x, y}; };
+    TUINATOR_CHECK(input.handle_event(
+        tuinator::MouseEvent{at(3, 1), tuinator::MouseButton::Left, tuinator::MouseAction::Press, true}));
+    TUINATOR_CHECK(input.handle_event(
+        tuinator::MouseEvent{at(9, 1), tuinator::MouseButton::Left, tuinator::MouseAction::Release, false}));
+
+    tuinator::clipboard::set("");
+    TUINATOR_CHECK(input.handle_event(tuinator::KeyPress{.character = 'c', .ctrl = true}));
+    TUINATOR_CHECK_EQ(tuinator::clipboard::get(), "hello w");
+}
+
+TUINATOR_TEST(text_input_ctrl_delete_removes_next_word) {
+    tuinator::TextInput input;
+    input.set_value("one two three");
+    input.set_focused(true);
+    input.handle_event(tuinator::KeyPress{.key = tuinator::Key::Home});
+
+    TUINATOR_CHECK(input.handle_event(tuinator::KeyPress{.key = tuinator::Key::Delete, .ctrl = true}));
+    TUINATOR_CHECK_EQ(input.value(), " two three");
+}
+
+TUINATOR_TEST(text_input_ctrl_backspace_removes_previous_word) {
+    tuinator::TextInput input;
+    input.set_value("one two");
+    input.set_focused(true);
+
+    TUINATOR_CHECK(input.handle_event(tuinator::KeyPress{.key = tuinator::Key::Backspace, .ctrl = true}));
+    TUINATOR_CHECK_EQ(input.value(), "one ");
+}
+
+TUINATOR_TEST(text_input_password_uses_block_cursor_at_end) {
+    tuinator::MemoryTerminalBackend backend({10, 1});
+    backend.init();
+
+    tuinator::TextInput input({.min_width = 6, .password = true});
+    input.set_value("ab");
+    input.set_focused(true);
+    input.layout({0, 0, 10, 1});
+
+    tuinator::Canvas canvas(backend);
+    tuinator::PaintContext ctx = tuinator::test::make_paint_context(canvas);
+    input.paint(ctx);
+
+    TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 1, 0), '*');
+    TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 2, 0), '*');
+    TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 3, 0), '*');
+    TUINATOR_CHECK(backend.cells()[0][3].style.background_rgb.has_value());
+    TUINATOR_CHECK(!tuinator::test::row_contains(backend, 0, "_"));
 }
 
 TUINATOR_TEST(text_input_escape_clears_selection) {

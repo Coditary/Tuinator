@@ -19,6 +19,8 @@
 #include <unistd.h>
 #endif
 
+#include "backend/terminal_input.hpp"
+
 namespace tuinator {
 
 namespace {
@@ -43,36 +45,11 @@ bool uses_relative_draw(const InlineBackendOptions& options) {
     return options.anchor_row <= 0 && !options.pin_to_bottom;
 }
 
-#if TUINATOR_PLATFORM_POSIX
-
-std::optional<KeyPress> decode_key_byte(unsigned char byte) {
-    if (byte == '\r' || byte == '\n') {
-        return KeyPress{Key::Enter, '\0'};
-    }
-    if (byte == 127 || byte == 8) {
-        return KeyPress{Key::Backspace, '\0'};
-    }
-    if (byte == 27) {
-        return KeyPress{Key::Escape, '\0'};
-    }
-    if (byte >= 1 && byte <= 26) {
-        KeyPress press{};
-        press.ctrl = true;
-        press.character = static_cast<char>('a' + byte - 1);
-        return press;
-    }
-    if (byte >= 32 && byte <= 126) {
-        return KeyPress{Key::Unknown, static_cast<char>(byte)};
-    }
-    return std::nullopt;
-}
-
-#endif
-
 } // namespace
 
 InlineTerminalBackend::InlineTerminalBackend(InlineBackendOptions options)
-    : options_(std::move(options)), relative_draw_(uses_relative_draw(options_)), true_color_(options_.true_color) {
+    : options_(std::move(options)), relative_draw_(uses_relative_draw(options_)), true_color_(options_.true_color),
+      input_(std::make_unique<detail::TerminalInput>()) {
     if (options_.output != nullptr) {
         output_ = options_.output;
     }
@@ -332,28 +309,33 @@ std::optional<Event> InlineTerminalBackend::read_stdin_event(bool allow_block) {
         return std::nullopt;
     }
 
-    unsigned char byte = 0;
-    const ssize_t bytes = read(STDIN_FILENO, &byte, 1);
-    if (bytes < 0) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+    // Drain every immediately available byte so multi-byte sequences (escape
+    // sequences, UTF-8 scalars) are decoded as a unit.
+    for (int reads = 0; reads < 256; ++reads) {
+        unsigned char byte = 0;
+        const ssize_t bytes = read(STDIN_FILENO, &byte, 1);
+        if (bytes < 0) {
+            break;
+        }
+        if (bytes == 0) {
+            if (reads == 0 && allow_block && poll_timeout_ms_ > 0) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(poll_timeout_ms_));
+                continue;
+            }
+            break;
+        }
+
+        if (!options_.keyboard_input) {
             return std::nullopt;
         }
-        return std::nullopt;
-    }
-    if (bytes == 0) {
-        if (!allow_block || poll_timeout_ms_ <= 0) {
-            return std::nullopt;
+
+        if (std::optional<Event> event = input_->feed(byte)) {
+            return event;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(poll_timeout_ms_));
-        return std::nullopt;
     }
 
-    if (!options_.keyboard_input) {
-        return std::nullopt;
-    }
-
-    if (const std::optional<KeyPress> key = decode_key_byte(byte)) {
-        return *key;
+    if (options_.keyboard_input && input_->has_pending_escape()) {
+        return input_->flush_escape();
     }
 #else
     (void)allow_block;
@@ -439,7 +421,8 @@ void InlineTerminalBackend::begin_frame(BeginFrameOptions options) {
 
 bool InlineTerminalBackend::style_equal(const Style& a, const Style& b) const {
     return a.foreground == b.foreground && a.background == b.background && a.foreground_rgb == b.foreground_rgb &&
-           a.background_rgb == b.background_rgb && a.bold == b.bold && a.dim == b.dim && a.reverse == b.reverse;
+           a.background_rgb == b.background_rgb && a.bold == b.bold && a.dim == b.dim && a.reverse == b.reverse &&
+           a.italic == b.italic && a.underline == b.underline && a.strikethrough == b.strikethrough;
 }
 
 bool InlineTerminalBackend::cell_equal(const Cell& a, const Cell& b) const {
@@ -510,8 +493,17 @@ void InlineTerminalBackend::append_style(std::string& out, const Style& style) c
     if (style.dim) {
         out += "\033[2m";
     }
+    if (style.italic) {
+        out += "\033[3m";
+    }
+    if (style.underline) {
+        out += "\033[4m";
+    }
     if (style.reverse) {
         out += "\033[7m";
+    }
+    if (style.strikethrough) {
+        out += "\033[9m";
     }
 }
 
@@ -526,7 +518,8 @@ int InlineTerminalBackend::last_nonempty_column(int y) const {
         }
         if (cell.style.foreground != Color::Default || cell.style.background != Color::Default ||
             cell.style.foreground_rgb.has_value() || cell.style.background_rgb.has_value() || cell.style.bold ||
-            cell.style.dim || cell.style.reverse) {
+            cell.style.dim || cell.style.reverse || cell.style.italic || cell.style.underline ||
+            cell.style.strikethrough) {
             return x;
         }
     }
