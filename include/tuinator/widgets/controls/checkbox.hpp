@@ -61,6 +61,9 @@ class Checkbox : public Widget, public ToggleControl {
     void set_checked(bool checked) override;
     void set_options(CheckboxOptions options);
     void set_glyphs(CheckboxGlyphs glyphs);
+    /// Fired only on Enter (not Space), after toggling. Useful for form-style
+    /// "confirm and advance" flows.
+    void set_on_submit(std::function<void()> on_submit) { on_submit_ = std::move(on_submit); }
 
     std::string_view widget_type_name() const override { return "Checkbox"; }
     bool wants_hover() const override { return true; }
@@ -77,6 +80,7 @@ class Checkbox : public Widget, public ToggleControl {
     bool checked_;
     CheckboxOptions options_;
     std::function<void(bool)> on_change_;
+    std::function<void()> on_submit_;
 };
 
 } // namespace tuinator

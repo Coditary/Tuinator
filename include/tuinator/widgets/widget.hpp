@@ -12,6 +12,10 @@
 
 namespace tuinator {
 
+#ifndef TUINATOR_ENABLE_TEST_IDS
+#define TUINATOR_ENABLE_TEST_IDS 1
+#endif
+
 class StyleResolver;
 
 class Widget {
@@ -79,6 +83,17 @@ class Widget {
     void set_widget_id(std::string id);
     const std::string& widget_id() const { return widget_id_; }
 
+    /// Stable selector for automated tests (like HTML `data-testid`). When empty,
+    /// queries fall back to `widget_id()`. No-op with no storage when
+    /// `TUINATOR_ENABLE_TEST_IDS` is 0 (default in Release builds).
+#if TUINATOR_ENABLE_TEST_IDS
+    void set_test_id(std::string id);
+    const std::string& test_id() const { return test_id_; }
+#else
+    void set_test_id(std::string) {}
+    const std::string& test_id() const;
+#endif
+
     void add_widget_class(std::string class_name);
     void clear_widget_classes();
     bool has_widget_class(std::string_view class_name) const;
@@ -99,6 +114,9 @@ class Widget {
     std::vector<std::unique_ptr<Widget>> children_;
     Widget* parent_ = nullptr;
     std::string widget_id_;
+#if TUINATOR_ENABLE_TEST_IDS
+    std::string test_id_;
+#endif
     std::vector<std::string> widget_classes_;
 };
 

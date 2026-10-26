@@ -52,11 +52,24 @@ class TerminalBackend {
     virtual void draw_text(int x, int y, std::string_view text, Style style) = 0;
     virtual void draw_image(int x, int y, Size cell_size, const TerminalImage& image);
 
+    /// Darken already-queued text in {@code region} except {@code exclude} (terminal coordinates).
+    virtual void apply_dimming_scrim(Rect region, Rect exclude, float factor = 0.78f) {
+        (void)region;
+        (void)exclude;
+        (void)factor;
+    }
+
     /// True when the backend will emit 24-bit RGB (SGR 38;2 / 48;2).
     virtual bool true_color() const { return false; }
 
     /// True while a mouse button is held (used for smoother drag polling).
     virtual bool pointer_active() const { return false; }
+
+    /// Last reported pointer position in terminal coordinates (if known).
+    virtual std::optional<Point> last_pointer_position() const { return std::nullopt; }
+
+    /// When true, report pointer motion without a pressed button (xterm mode 1003).
+    virtual void set_pointer_motion_reporting(bool all_motion) { (void)all_motion; }
 
     /// Set getch timeout in ms (-1 = blocking, 0 = non-blocking).
     virtual void set_poll_timeout_ms(int timeout_ms) { (void)timeout_ms; }

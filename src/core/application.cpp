@@ -1,4 +1,5 @@
 #include <tuinator/backend/inline_backend.hpp>
+#include <tuinator/backend/memory_backend.hpp>
 #include <tuinator/core/application.hpp>
 #include <tuinator/debug/debug_paint.hpp>
 #include <tuinator/debug/startup_profiler.hpp>
@@ -300,6 +301,8 @@ void Application::refresh_focus() {
     update_focus();
 }
 
+void Application::advance_focus() { focus_next(); }
+
 void Application::request_redraw() { dirty_region_.mark_full(); }
 
 void Application::request_redraw(Rect region) {
@@ -450,6 +453,10 @@ bool Application::should_run_headless() const {
         return false;
     }
 
+    if (dynamic_cast<const MemoryTerminalBackend*>(backend_.get()) != nullptr) {
+        return false;
+    }
+
     if (!isatty(STDIN_FILENO)) {
         return true;
     }
@@ -519,6 +526,33 @@ void Application::present() {
     render();
 }
 
+void Application::dispatch_event(const Event& event) {
+    if (should_run_headless()) {
+        return;
+    }
+
+    ensure_terminal();
+    handle_event(event);
+    render();
+}
+
+void Application::step_frame() {
+    if (should_run_headless()) {
+        return;
+    }
+
+    ensure_terminal();
+
+    while (const auto event = backend_->poll_event_nonblocking()) {
+        handle_event(*event);
+    }
+
+    process_timers();
+    poll_idle();
+    sync_mouse_cursor_policy();
+    render();
+}
+
 void Application::repaint_all() {
     if (should_run_headless()) {
         return;
@@ -554,7 +588,19 @@ void Application::set_clear_on_shutdown(bool enabled) {
     }
 }
 
-void Application::set_pointer_hover_tracking(bool enabled) { pointer_hover_tracking_ = enabled; }
+void Application::set_pointer_hover_tracking(bool enabled) {
+    pointer_hover_tracking_ = enabled;
+    if (backend_ != nullptr) {
+        backend_->set_pointer_motion_reporting(enabled);
+    }
+}
+
+std::optional<Point> Application::pointer_position() const {
+    if (backend_ == nullptr) {
+        return std::nullopt;
+    }
+    return backend_->last_pointer_position();
+}
 
 void Application::focus_widget(Widget* widget) {
     if (!widget) {
@@ -606,6 +652,9 @@ void Application::handle_event(const Event& event) {
         if (Widget* capture = find_pointer_active_widget(root_.get())) {
             const MouseEvent adjusted = adjust_mouse_for_widget(root_.get(), capture, *mouse);
             handled = capture->handle_event(adjusted);
+            if (pointer_hover_tracking_ && mouse->action == MouseAction::Move && root_ != nullptr) {
+                root_->handle_event(event);
+            }
         } else if (root_ && (mouse->action != MouseAction::Move || mouse->left_pressed || pointer_hover_tracking_)) {
             // Mode 1003 reports hover motion; ignore it unless a button is held or hover tracking is on.
             handled = root_->handle_event(event);
@@ -724,6 +773,15 @@ void Application::handle_event(const Event& event) {
                     any_scroll->scroll_by(0, delta);
                     return;
                 }
+
+                // No scrollable involved: fall back to moving focus, so arrow keys
+                // navigate forms the same way Tab/BackTab do.
+                if (delta > 0) {
+                    focus_next();
+                } else {
+                    focus_prev();
+                }
+                return;
             }
 
             if (is_viewport_scroll_key(*key)) {

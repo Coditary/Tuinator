@@ -585,7 +585,22 @@ void CursesBackend::disable_mouse() {
     }
 }
 
+void CursesBackend::set_pointer_motion_reporting(bool all_motion) {
+    if (pointer_motion_all_ == all_motion) {
+        return;
+    }
+    pointer_motion_all_ = all_motion;
+    if (!mouse_enabled_) {
+        return;
+    }
+    disable_mouse();
+    enable_mouse();
+}
+
 int CursesBackend::mouse_tracking_mode() const {
+    if (pointer_motion_all_) {
+        return 1003;
+    }
     const char* mode = std::getenv("TUINATOR_MOUSE_TRACK");
     if (mode == nullptr || mode[0] == '\0') {
         return 1002;

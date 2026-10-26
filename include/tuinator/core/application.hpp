@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tuinator/backend/terminal_backend.hpp>
+#include <tuinator/core/event.hpp>
 #include <tuinator/core/geometry.hpp>
 #include <tuinator/render/canvas.hpp>
 #include <tuinator/render/dirty_region.hpp>
@@ -44,8 +45,15 @@ class Application {
     const TerminalBackend& backend() const { return *backend_; }
 
     Size terminal_size() const;
+    /// Initialize the terminal backend before run() so terminal_size() returns
+    /// the real dimensions while building the widget tree. Idempotent.
+    void ensure_terminal();
     void quit();
     void refresh_focus();
+    /// Move keyboard focus to a widget in the tab order (e.g. after opening a composer overlay).
+    void focus_widget(Widget* widget);
+    /// Move focus to the next focusable widget (same as pressing Tab).
+    void advance_focus();
     int run();
 
     TimerId set_interval(int interval_ms, std::function<void()> callback);
@@ -54,6 +62,12 @@ class Application {
 
     // Draw one frame immediately (useful for profiling and tests).
     void present();
+
+    /// Deliver one input event through the normal dispatch path and render.
+    void dispatch_event(const Event& event);
+
+    /// One non-blocking event-loop iteration: pending events, timers, idle, render.
+    void step_frame();
 
     /// Re-layout and repaint the whole screen on the next render pass. Unlike
     /// present(), the frame goes through the partial-render path without a
@@ -73,6 +87,9 @@ class Application {
     /// When true, hover-only mouse motion is delivered to the widget tree (for menus).
     void set_pointer_hover_tracking(bool enabled);
 
+    /// Last pointer position from the terminal backend (terminal coordinates).
+    std::optional<Point> pointer_position() const;
+
   private:
     struct TimerEntry {
         TimerId id = 0;
@@ -83,7 +100,6 @@ class Application {
         std::chrono::steady_clock::time_point next_fire{};
     };
 
-    void ensure_terminal();
     void request_redraw();
     void request_redraw(Rect region);
     int run_headless();
@@ -93,7 +109,6 @@ class Application {
     void update_focus();
     void focus_next();
     void focus_prev();
-    void focus_widget(Widget* widget);
     void handle_event(const Event& event);
     void render();
     void process_timers();

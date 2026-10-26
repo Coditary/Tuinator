@@ -9,6 +9,7 @@ set(TUINATOR_TEST_SOURCES
     core/test_dirty_region.cpp
     core/test_screen.cpp
     core/test_debug_paint.cpp
+    core/test_testing_driver.cpp
     render/test_glyphs.cpp
     render/test_border_style.cpp
     render/test_block_element.cpp

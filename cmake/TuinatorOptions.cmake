@@ -14,3 +14,13 @@ if(TUINATOR_BUILD_SHARED_LIBS)
 else()
     set(TUINATOR_LIBRARY_TYPE STATIC)
 endif()
+
+# Test IDs are stored on widgets for AppDriver/CI. Stripped in Release by default.
+set(_TUINATOR_TEST_IDS_DEFAULT ON)
+if(CMAKE_BUILD_TYPE MATCHES "^(Release|MinSizeRel)$")
+    set(_TUINATOR_TEST_IDS_DEFAULT OFF)
+endif()
+if(TUINATOR_BUILD_TESTS)
+    set(_TUINATOR_TEST_IDS_DEFAULT ON)
+endif()
+option(TUINATOR_ENABLE_TEST_IDS "Store widget test IDs (set_test_id)" ${_TUINATOR_TEST_IDS_DEFAULT})

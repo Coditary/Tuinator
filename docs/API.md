@@ -236,6 +236,8 @@ Common keys: `Tab`, `BackTab`, `Enter`, `Escape`, arrows, `PageUp`/`PageDown`, `
 
 ## Testing
 
+Full guide: **[testing.md](testing.md)** (test IDs, `AppDriver`, colors, JSON agent protocol).
+
 Headless rendering with `MemoryTerminalBackend`:
 
 ```cpp

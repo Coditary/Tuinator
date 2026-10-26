@@ -9,6 +9,7 @@ set(TUINATOR_DEMOS
     markdown-gif
     video
     asciidoc
+    testing-agent
 )
 
 foreach(demo IN LISTS TUINATOR_DEMOS)

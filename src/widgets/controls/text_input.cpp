@@ -26,9 +26,12 @@ Style with_field_background(const Style& base, const Style& field) {
 
 Style make_selection_style(const Style& base, const Style& field) {
     Style style = with_field_background(base, field);
-    style.reverse = false;
-    style.foreground_rgb = rgb(255, 255, 255);
-    style.background_rgb = rgb(88, 78, 128);
+    style.reverse = true;
+    if (field.foreground_rgb.has_value() && field.background_rgb.has_value()) {
+        style.reverse = false;
+        style.foreground_rgb = field.background_rgb;
+        style.background_rgb = field.foreground_rgb;
+    }
     return style;
 }
 
@@ -37,8 +40,12 @@ Style make_cursor_style(const Style& base, const Style& field) {
     style.reverse = false;
     style.bold = false;
     style.dim = false;
-    style.foreground_rgb = rgb(28, 24, 40);
-    style.background_rgb = rgb(196, 178, 255);
+    if (field.foreground_rgb.has_value() && field.background_rgb.has_value()) {
+        style.foreground_rgb = field.background_rgb;
+        style.background_rgb = field.foreground_rgb;
+    } else {
+        style.reverse = true;
+    }
     return style;
 }
 
@@ -96,13 +103,138 @@ std::size_t byte_index_at_line_col(std::string_view text, int line, int col) {
     return start + std::min(offset, end - start);
 }
 
+std::size_t extend_through_trailing_spaces(std::string_view text, std::size_t line_begin, std::size_t line_end,
+                                            std::size_t limit, int width) {
+    if (width <= 0) {
+        return line_end;
+    }
+    while (line_end < limit && text[line_end] == ' ') {
+        const std::size_t next = line_end + 1;
+        if (text_display_width(text.substr(line_begin, next - line_begin)) > width) {
+            break;
+        }
+        line_end = next;
+    }
+    return line_end;
+}
+
+void wrap_plain_segment(std::string_view text, std::size_t seg_start, std::size_t seg_end, int width,
+                        std::vector<WrappedLine>& out) {
+    if (seg_start >= seg_end) {
+        out.push_back({seg_start, seg_start});
+        return;
+    }
+    if (width <= 0) {
+        out.push_back({seg_start, seg_end});
+        return;
+    }
+
+    std::size_t line_begin = seg_start;
+    std::size_t pos = seg_start;
+    while (pos < seg_end) {
+        while (pos < seg_end && text[pos] == ' ') {
+            ++pos;
+        }
+        if (pos >= seg_end) {
+            out.push_back({line_begin, seg_end});
+            return;
+        }
+
+        int used = 0;
+        std::size_t line_end = pos;
+        while (pos < seg_end) {
+            while (pos < seg_end && text[pos] == ' ') {
+                ++pos;
+            }
+            if (pos >= seg_end) {
+                break;
+            }
+
+            const std::size_t word_start = pos;
+            while (pos < seg_end && text[pos] != ' ') {
+                ++pos;
+            }
+            const std::string_view word = text.substr(word_start, pos - word_start);
+            const int word_w = text_display_width(word);
+            const int gap = line_end == line_begin ? 0 : 1;
+
+            if (word_w > width) {
+                if (used > 0) {
+                    out.push_back({line_begin, extend_through_trailing_spaces(text, line_begin, line_end, seg_end, width)});
+                    line_begin = word_start;
+                    used = 0;
+                    pos = word_start;
+                    break;
+                }
+                const std::size_t chunk = text_byte_length_for_width(word, width);
+                const std::size_t chunk_end = word_start + std::max<std::size_t>(1, chunk);
+                out.push_back({word_start, std::min(chunk_end, seg_end)});
+                line_begin = std::min(chunk_end, seg_end);
+                pos = line_begin;
+                used = 0;
+                break;
+            }
+
+            if (used > 0 && used + gap + word_w > width) {
+                out.push_back({line_begin, extend_through_trailing_spaces(text, line_begin, line_end, seg_end, width)});
+                line_begin = word_start;
+                used = word_w;
+                line_end = pos;
+                continue;
+            }
+
+            used += (used > 0 ? gap : 0) + word_w;
+            line_end = pos;
+        }
+
+        if (line_end > line_begin) {
+            const std::size_t push_end = extend_through_trailing_spaces(text, line_begin, line_end, seg_end, width);
+            out.push_back({line_begin, push_end});
+            line_begin = push_end;
+            pos = line_begin;
+            continue;
+        }
+        break;
+    }
+}
+
+std::vector<WrappedLine> build_wrapped_lines(std::string_view value, int width) {
+    std::vector<WrappedLine> out;
+    if (value.empty()) {
+        out.push_back({0, 0});
+        return out;
+    }
+
+    std::size_t at = 0;
+    while (at <= value.size()) {
+        std::size_t para_end = value.find('\n', at);
+        if (para_end == std::string::npos) {
+            para_end = value.size();
+        }
+        wrap_plain_segment(value, at, para_end, width, out);
+        if (para_end >= value.size()) {
+            break;
+        }
+        at = para_end + 1;
+    }
+    if (out.empty()) {
+        out.push_back({0, 0});
+    }
+    return out;
+}
+
 } // namespace
 
 TextInput::TextInput(TextInputOptions options, Style style, Style focused_style)
     : placeholder_(std::move(options.placeholder)), min_width_(std::max(1, options.min_width)),
       password_(options.password), chrome_(options.chrome), min_content_lines_(std::max(1, options.min_content_lines)),
       max_content_lines_(std::max(min_content_lines_, options.max_content_lines)), prompt_(std::move(options.prompt)),
-      style_(style), focused_style_(focused_style) {}
+      border_label_(std::move(options.border_label)),
+      framed_border_style_(options.framed_border_style),
+      framed_border_glyphs_(options.framed_border_glyphs),
+      framed_show_border_(options.framed_show_border), soft_wrap_(options.soft_wrap),
+      content_pad_left_(std::max(0, options.content_pad_left)),
+      content_pad_right_(std::max(0, options.content_pad_right)), style_(style), focused_style_(focused_style) {}
 
 void TextInput::set_options(TextInputOptions options) {
     min_width_ = std::max(1, options.min_width);
@@ -112,8 +244,21 @@ void TextInput::set_options(TextInputOptions options) {
     min_content_lines_ = std::max(1, options.min_content_lines);
     max_content_lines_ = std::max(min_content_lines_, options.max_content_lines);
     prompt_ = std::move(options.prompt);
+    border_label_ = std::move(options.border_label);
+    framed_border_style_ = options.framed_border_style;
+    framed_border_glyphs_ = options.framed_border_glyphs;
+    framed_show_border_ = options.framed_show_border;
+    soft_wrap_ = options.soft_wrap;
+    content_pad_left_ = std::max(0, options.content_pad_left);
+    content_pad_right_ = std::max(0, options.content_pad_right);
     mark_dirty();
     update_layout_for_lines();
+}
+
+void TextInput::set_field_styles(Style normal, Style focused) {
+    style_ = std::move(normal);
+    focused_style_ = std::move(focused);
+    mark_dirty();
 }
 
 void TextInput::apply_stylesheet(const StyleResolver& styles) { apply_text_input_stylesheet(*this, *this, styles); }
@@ -135,8 +280,56 @@ void TextInput::set_on_change(std::function<void(const std::string&)> callback) 
 
 void TextInput::set_on_submit(std::function<void(const std::string&)> callback) { on_submit_ = std::move(callback); }
 
+bool TextInput::use_soft_wrap() const {
+    return soft_wrap_ && max_content_lines_ > 1 && chrome_ == TextInputChrome::Framed;
+}
+
+int TextInput::wrap_width_for_layout() const {
+    const int w = inner_width();
+    if (w > 0) {
+        return w;
+    }
+    if (last_wrap_width_ > 0) {
+        return last_wrap_width_;
+    }
+    return std::max(1, min_width_);
+}
+
+std::vector<WrappedLine> TextInput::wrapped_lines() const {
+    if (!use_soft_wrap()) {
+        return {};
+    }
+    return build_wrapped_lines(value_, wrap_width_for_layout());
+}
+
+int TextInput::wrapped_line_count() const {
+    if (!use_soft_wrap()) {
+        return count_lines(value_);
+    }
+    return static_cast<int>(wrapped_lines().size());
+}
+
+int TextInput::cursor_wrapped_row() const {
+    const auto lines = wrapped_lines();
+    if (lines.empty()) {
+        return 0;
+    }
+    // Segments are ordered [start, end) byte ranges; the caret at a boundary belongs
+    // to the later visual row (e.g. after a space that starts the next wrapped line).
+    int row = 0;
+    for (int i = 0; i < static_cast<int>(lines.size()); ++i) {
+        if (cursor_ >= lines[static_cast<std::size_t>(i)].start) {
+            row = i;
+        } else {
+            break;
+        }
+    }
+    return row;
+}
+
 int TextInput::content_line_count() const {
-    return std::clamp(count_lines(value_), min_content_lines_, max_content_lines_);
+    const int lines = use_soft_wrap() ? wrapped_line_count() : count_lines(value_);
+    return std::clamp(lines, min_content_lines_, max_content_lines_);
 }
 
 int TextInput::framed_height_for_lines(int lines) const { return std::max(3, lines + 2); }
@@ -144,7 +337,12 @@ int TextInput::framed_height_for_lines(int lines) const { return std::max(3, lin
 Size TextInput::preferred_size() const {
     if (chrome_ == TextInputChrome::Framed) {
         const int prompt_cols = text_display_width(prompt_);
-        return {min_width_ + 4 + prompt_cols, framed_height_for_lines(content_line_count())};
+        int width = min_width_ + 4 + prompt_cols;
+        if (!border_label_.empty()) {
+            // "─ " + label + " ─" plus both corners.
+            width = std::max(width, text_display_width(border_label_) + 6);
+        }
+        return {width, framed_height_for_lines(content_line_count())};
     }
     return {min_width_ + 2, 1};
 }
@@ -164,6 +362,10 @@ void TextInput::update_layout_for_lines() {
 
 void TextInput::layout(Rect bounds) {
     bounds_ = bounds;
+    const int w = inner_width();
+    if (w > 0) {
+        last_wrap_width_ = w;
+    }
     ensure_cursor_visible();
 }
 
@@ -171,14 +373,14 @@ int TextInput::text_row() const { return chrome_ == TextInputChrome::Framed ? 1 
 
 int TextInput::text_col_start() const {
     if (chrome_ == TextInputChrome::Framed) {
-        return 2 + text_display_width(prompt_);
+        return 2 + text_display_width(prompt_) + content_pad_left_;
     }
     return 1;
 }
 
 int TextInput::inner_width() const {
     if (chrome_ == TextInputChrome::Framed) {
-        return std::max(0, bounds_.width - 4 - text_display_width(prompt_));
+        return std::max(0, bounds_.width - 4 - text_display_width(prompt_) - content_pad_left_ - content_pad_right_);
     }
     return std::max(0, bounds_.width - 2);
 }
@@ -186,6 +388,15 @@ int TextInput::inner_width() const {
 int TextInput::display_column_at_local(int local_x) const {
     const int inner = inner_width();
     const int start_col = text_col_start();
+    if (use_soft_wrap()) {
+        if (local_x <= start_col) {
+            return 0;
+        }
+        if (local_x >= start_col + inner) {
+            return inner;
+        }
+        return local_x - start_col;
+    }
     if (local_x <= start_col) {
         return scroll_x_;
     }
@@ -207,6 +418,22 @@ std::size_t TextInput::byte_index_at_local(int local_x, int local_y, CaretAffini
         return line_start_pos + text_caret_index_at_column(line_text, display_col, affinity);
     }
 
+    if (use_soft_wrap()) {
+        const std::vector<WrappedLine> lines = wrapped_lines();
+        if (lines.empty()) {
+            return 0;
+        }
+        const int row = std::max(0, local_y - text_row());
+        int wrap_row = scroll_y_ + row;
+        wrap_row = std::clamp(wrap_row, 0, static_cast<int>(lines.size()) - 1);
+        const WrappedLine& wrapped = lines[static_cast<std::size_t>(wrap_row)];
+        const std::string line_text = value_.substr(wrapped.start, wrapped.end - wrapped.start);
+        if (display_col >= text_display_width(line_text)) {
+            return wrapped.end;
+        }
+        return wrapped.start + text_caret_index_at_column(line_text, display_col, affinity);
+    }
+
     const int row = std::max(0, local_y - text_row());
     int line = scroll_y_ + row;
     const int lines = count_lines(value_);
@@ -215,6 +442,27 @@ std::size_t TextInput::byte_index_at_local(int local_x, int local_y, CaretAffini
 }
 
 bool TextInput::handle_mouse(const MouseEvent& mouse) {
+    if (mouse.action == MouseAction::WheelUp || mouse.action == MouseAction::WheelDown) {
+        if (!contains_point(mouse.position) || max_content_lines_ <= 1) {
+            return false;
+        }
+
+        const int visible_lines = inner_height();
+        const int total_lines = use_soft_wrap() ? wrapped_line_count() : count_lines(value_);
+        const int max_scroll_y = std::max(0, total_lines - visible_lines);
+        if (max_scroll_y <= 0) {
+            return false;
+        }
+
+        if (mouse.action == MouseAction::WheelUp) {
+            scroll_y_ = std::max(0, scroll_y_ - 1);
+        } else {
+            scroll_y_ = std::min(max_scroll_y, scroll_y_ + 1);
+        }
+        mark_dirty();
+        return true;
+    }
+
     if (mouse.action == MouseAction::Release) {
         if (selecting_with_mouse_) {
             const Point local{mouse.position.x - bounds_.x, mouse.position.y - bounds_.y};
@@ -266,6 +514,25 @@ void TextInput::ensure_cursor_visible() {
         return;
     }
 
+    if (use_soft_wrap()) {
+        const int line = cursor_wrapped_row();
+        scroll_x_ = 0;
+        if (max_content_lines_ > 1) {
+            const int visible_lines = inner_height();
+            if (line < scroll_y_) {
+                scroll_y_ = line;
+            }
+            if (line >= scroll_y_ + visible_lines) {
+                scroll_y_ = line - visible_lines + 1;
+            }
+            const int max_scroll_y = std::max(0, wrapped_line_count() - visible_lines);
+            scroll_y_ = std::clamp(scroll_y_, 0, max_scroll_y);
+        } else {
+            scroll_y_ = 0;
+        }
+        return;
+    }
+
     const int line = cursor_line(value_, cursor_);
     if (max_content_lines_ > 1) {
         const int visible_lines = inner_height();
@@ -300,6 +567,47 @@ void TextInput::ensure_cursor_visible() {
     scroll_x_ = std::clamp(scroll_x_, 0, max_scroll);
 }
 
+std::optional<Point> TextInput::caret_local_cell() const {
+    if (!is_focused() || has_selection()) {
+        return std::nullopt;
+    }
+
+    const int row_base = text_row();
+    const int col_start = text_col_start();
+    const int width = inner_width();
+
+    if (value_.empty()) {
+        return Point{col_start, row_base};
+    }
+
+    int cursor_line_idx = cursor_line(value_, cursor_);
+    std::size_t line_start_pos = line_start(value_, cursor_line_idx);
+    std::size_t line_end_pos = line_end(value_, cursor_line_idx);
+    int line_scroll = scroll_x_;
+    if (use_soft_wrap()) {
+        cursor_line_idx = cursor_wrapped_row();
+        const std::vector<WrappedLine> lines = wrapped_lines();
+        if (lines.empty()) {
+            return Point{col_start, row_base};
+        }
+        const WrappedLine& wrapped = lines[static_cast<std::size_t>(cursor_line_idx)];
+        line_start_pos = wrapped.start;
+        line_end_pos = wrapped.end;
+        line_scroll = 0;
+    }
+    const int paint_row = row_base + (cursor_line_idx - scroll_y_);
+    if (paint_row < row_base || paint_row >= bounds_.height) {
+        return std::nullopt;
+    }
+
+    const std::string line_text = value_.substr(line_start_pos, line_end_pos - line_start_pos);
+    const int col = col_start + display_width_before(line_text, cursor_ - line_start_pos) - line_scroll;
+    if (col < col_start || col >= col_start + width) {
+        return std::nullopt;
+    }
+    return Point{col, paint_row};
+}
+
 void TextInput::paint(PaintContext& ctx) const {
     Canvas& canvas = ctx.canvas;
     if (bounds_.width <= 0 || bounds_.height <= 0) {
@@ -324,36 +632,65 @@ void TextInput::paint(PaintContext& ctx) const {
     const int col_start = text_col_start();
     Style fill_style = text_style;
     if (chrome_ == TextInputChrome::Framed) {
-        if (fill_style.background == Color::Default) {
-            fill_style.background_rgb = rgb(42, 38, 58);
+        if (!fill_style.background_rgb.has_value()) {
+            const Style field = styles.text(*this, style_);
+            fill_style.background_rgb = field.background_rgb;
         }
         placeholder_style.background = fill_style.background;
         placeholder_style.background_rgb = fill_style.background_rgb;
         text_style.background = fill_style.background;
         text_style.background_rgb = fill_style.background_rgb;
-        placeholder_style.foreground_rgb = rgb(120, 115, 140);
+        placeholder_style.foreground_rgb = text_style.foreground_rgb;
+        placeholder_style.dim = true;
     }
 
     if (chrome_ == TextInputChrome::Framed) {
         Style border_style = text_style;
-        if (focused) {
-            border_style.foreground_rgb = rgb(150, 130, 220);
-        } else {
-            border_style.foreground_rgb = rgb(90, 82, 118);
-            border_style.dim = true;
-        }
+        border_style.dim = false;
         border_style.background = fill_style.background;
         border_style.background_rgb = fill_style.background_rgb;
+        const Style resolved_border = styles.border(*this, text_style);
+        if (resolved_border.foreground_rgb.has_value()) {
+            border_style.foreground_rgb = resolved_border.foreground_rgb;
+        } else if (text_style.foreground_rgb.has_value()) {
+            border_style.foreground_rgb = text_style.foreground_rgb;
+        }
 
+        const BorderGlyphs glyphs =
+            framed_border_glyphs_.has_value() ? *framed_border_glyphs_ : border_glyphs_for(framed_border_style_);
         if (bounds_.width >= 2 && bounds_.height >= 2) {
-            canvas.fill_rect({1, 1, bounds_.width - 2, bounds_.height - 2}, ' ', fill_style);
-            canvas.draw_box({0, 0, bounds_.width, bounds_.height}, border_style, unicode_rounded_border_glyphs());
+            if (framed_show_border_) {
+                canvas.fill_rect({1, 1, bounds_.width - 2, bounds_.height - 2}, ' ', fill_style);
+                canvas.draw_box({0, 0, bounds_.width, bounds_.height}, border_style, glyphs);
+            } else {
+                canvas.fill_rect({0, 0, bounds_.width, bounds_.height}, ' ', fill_style);
+            }
+        }
+
+        if (!border_label_.empty() && bounds_.width > 4 && framed_show_border_) {
+            // Embed the label into the top border; border glyphs use the same style as the frame.
+            const std::string prefix = glyphs.horizontal + " ";
+            const std::string suffix = " " + glyphs.horizontal;
+            const int inner_width = bounds_.width - 2;
+            const int prefix_width = text_display_width(prefix);
+            const int suffix_width = text_display_width(suffix);
+            const int label_max = std::max(0, inner_width - prefix_width - suffix_width);
+            const std::size_t label_bytes = text_byte_length_for_width(border_label_, label_max);
+            const std::string label_text = border_label_.substr(0, label_bytes);
+
+            canvas.draw_text({1, 0}, prefix, border_style);
+            Style label_text_style = border_style;
+            label_text_style.bold = true;
+            canvas.draw_text({1 + prefix_width, 0}, label_text, label_text_style);
+            if (!label_text.empty() || suffix_width <= inner_width - prefix_width) {
+                canvas.draw_text({1 + prefix_width + text_display_width(label_text), 0}, suffix, border_style);
+            }
         }
 
         if (!prompt_.empty() && row < bounds_.height) {
             Style prompt_style = text_style;
             prompt_style.bold = true;
-            prompt_style.foreground_rgb = focused ? rgb(180, 160, 255) : rgb(130, 120, 170);
+            prompt_style.foreground_rgb = border_style.foreground_rgb;
             prompt_style.background = fill_style.background;
             prompt_style.background_rgb = fill_style.background_rgb;
             canvas.draw_text({2, row}, prompt_, prompt_style);
@@ -373,20 +710,32 @@ void TextInput::paint(PaintContext& ctx) const {
         Style cursor_style = make_cursor_style(text_style, text_style);
         canvas.draw_char({col_start, row}, cursor_block_char(password_), cursor_style);
     } else {
+        const std::vector<WrappedLine> wrapped = use_soft_wrap() ? wrapped_lines() : std::vector<WrappedLine>{};
+        const int active_cursor_row = use_soft_wrap() ? cursor_wrapped_row() : cursor_line_idx;
         for (int visible_row = 0; visible_row < visible_lines; ++visible_row) {
             const int line_idx = scroll_y_ + visible_row;
             const int paint_row = row + visible_row;
             if (paint_row >= bounds_.height) {
                 break;
             }
-            if (line_idx >= count_lines(value_)) {
-                break;
+            std::size_t line_start_pos = 0;
+            std::size_t line_end_pos = 0;
+            int line_scroll = 0;
+            if (use_soft_wrap()) {
+                if (line_idx >= static_cast<int>(wrapped.size())) {
+                    break;
+                }
+                line_start_pos = wrapped[static_cast<std::size_t>(line_idx)].start;
+                line_end_pos = wrapped[static_cast<std::size_t>(line_idx)].end;
+            } else {
+                if (line_idx >= count_lines(value_)) {
+                    break;
+                }
+                line_start_pos = line_start(value_, line_idx);
+                line_end_pos = line_end(value_, line_idx);
+                line_scroll = (line_idx == active_cursor_row) ? scroll_x_ : 0;
             }
-
-            const std::size_t line_start_pos = line_start(value_, line_idx);
-            const std::size_t line_end_pos = line_end(value_, line_idx);
             const std::string line_text = value_.substr(line_start_pos, line_end_pos - line_start_pos);
-            const int line_scroll = (line_idx == cursor_line_idx) ? scroll_x_ : 0;
             const std::size_t start_byte =
                 line_start_pos + text_caret_index_at_column(line_text, line_scroll, CaretAffinity::Before);
             const std::size_t visible_bytes =
@@ -423,10 +772,15 @@ void TextInput::paint(PaintContext& ctx) const {
             }
 
             if (focused && cursor_ == line_end_pos && !has_selection()) {
-                const int col = col_start + display_width_before(line_text, cursor_ - line_start_pos) - line_scroll;
-                if (col >= col_start && col < col_start + width) {
-                    Style cursor_style = make_cursor_style(text_style, text_style);
-                    canvas.draw_char({col, paint_row}, cursor_block_char(password_), cursor_style);
+                const bool draw_end_cursor =
+                    !use_soft_wrap() || cursor_wrapped_row() == line_idx;
+                if (draw_end_cursor) {
+                    const int col =
+                        col_start + display_width_before(line_text, cursor_ - line_start_pos) - line_scroll;
+                    if (col >= col_start && col < col_start + width) {
+                        Style cursor_style = make_cursor_style(text_style, text_style);
+                        canvas.draw_char({col, paint_row}, cursor_block_char(password_), cursor_style);
+                    }
                 }
             }
         }
@@ -787,6 +1141,23 @@ std::string TextInput::selected_text() const {
 
 void TextInput::move_cursor_vertical(int delta, bool extend_selection) {
     if (delta == 0) {
+        return;
+    }
+
+    if (use_soft_wrap()) {
+        const std::vector<WrappedLine> lines = wrapped_lines();
+        if (lines.empty()) {
+            return;
+        }
+        const int current_row = cursor_wrapped_row();
+        const WrappedLine& current = lines[static_cast<std::size_t>(current_row)];
+        const int col = text_display_width(value_.substr(current.start, cursor_ - current.start));
+        const int new_row = std::clamp(current_row + delta, 0, static_cast<int>(lines.size()) - 1);
+        const WrappedLine& target = lines[static_cast<std::size_t>(new_row)];
+        const std::string target_text = value_.substr(target.start, target.end - target.start);
+        const int target_col = std::min(col, text_display_width(target_text));
+        set_cursor(target.start + text_caret_index_at_column(target_text, target_col, CaretAffinity::Before),
+                   extend_selection);
         return;
     }
 

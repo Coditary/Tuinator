@@ -75,6 +75,43 @@ bool ansi_style_equal(const Style& a, const Style& b) {
            a.italic == b.italic && a.underline == b.underline && a.strikethrough == b.strikethrough;
 }
 
+Rgb resolve_foreground_rgb(const Style& style) {
+    if (style.foreground_rgb.has_value()) {
+        return *style.foreground_rgb;
+    }
+    if (style.foreground != Color::Default) {
+        return palette_to_rgb(style.foreground);
+    }
+    return {210, 205, 220};
+}
+
+Rgb resolve_background_rgb(const Style& style) {
+    if (style.background_rgb.has_value()) {
+        return *style.background_rgb;
+    }
+    if (style.background != Color::Default) {
+        return palette_to_rgb(style.background);
+    }
+    return {32, 30, 38};
+}
+
+Rgb scale_rgb(Rgb color, float factor) {
+    const auto scale = [factor](std::uint8_t channel) {
+        return static_cast<std::uint8_t>(std::min(255, static_cast<int>(channel * factor)));
+    };
+    return {scale(color.r), scale(color.g), scale(color.b)};
+}
+
+Style dimmed_cell_style(const Style& style, float factor) {
+    Style out = style;
+    out.dim = false;
+    out.foreground = Color::Default;
+    out.background = Color::Default;
+    out.foreground_rgb = scale_rgb(resolve_foreground_rgb(style), factor);
+    out.background_rgb = scale_rgb(resolve_background_rgb(style), factor);
+    return out;
+}
+
 FILE* open_tty_output() { return std::fopen("/dev/tty", "we"); }
 
 void reset_tty_attributes() {
@@ -374,7 +411,22 @@ void AnsiBackend::disable_mouse() {
     }
 }
 
+void AnsiBackend::set_pointer_motion_reporting(bool all_motion) {
+    if (pointer_motion_all_ == all_motion) {
+        return;
+    }
+    pointer_motion_all_ = all_motion;
+    if (!mouse_enabled_) {
+        return;
+    }
+    disable_mouse();
+    enable_mouse();
+}
+
 int AnsiBackend::mouse_tracking_mode() const {
+    if (pointer_motion_all_) {
+        return 1003;
+    }
     const char* mode = std::getenv("TUINATOR_MOUSE_TRACK");
     if (mode == nullptr || mode[0] == '\0') {
         return 1002;
@@ -862,6 +914,105 @@ void AnsiBackend::emit_ansi_run(FILE* output, int x, int y, std::string_view tex
 void AnsiBackend::invalidate_ansi_cells() {
     for (AnsiCell& cell : ansi_cells_) {
         cell.known = false;
+    }
+}
+
+std::vector<AnsiBackend::AnsiCell> AnsiBackend::compose_row(int row_y) {
+    std::vector<AnsiCell> row;
+    if (ansi_cells_width_ <= 0 || row_y < 0 || row_y >= ansi_cells_height_) {
+        return row;
+    }
+
+    row.resize(static_cast<std::size_t>(ansi_cells_width_));
+    const std::size_t row_base = static_cast<std::size_t>(row_y) * static_cast<std::size_t>(ansi_cells_width_);
+    for (int x = 0; x < ansi_cells_width_; ++x) {
+        row[static_cast<std::size_t>(x)] = ansi_cells_[row_base + static_cast<std::size_t>(x)];
+    }
+
+    for (const AnsiDraw& draw : pending_ansi_draws_) {
+        if (draw.y != row_y) {
+            continue;
+        }
+
+        int cx = draw.x;
+        for (const TextGlyph& glyph : text_glyph_breaks(draw.text)) {
+            const int gw = glyph.width;
+            if (cx >= ansi_cells_width_) {
+                break;
+            }
+            if (cx < 0) {
+                cx += gw;
+                continue;
+            }
+
+            AnsiCell& cell = row[static_cast<std::size_t>(cx)];
+            if (cell.width == 0 && cx > 0) {
+                AnsiCell& owner = row[static_cast<std::size_t>(cx - 1)];
+                owner.glyph = " ";
+                owner.style = Style{};
+                owner.width = 1;
+            }
+            if (cell.width == 2 && cx + 1 < ansi_cells_width_) {
+                AnsiCell& tail = row[static_cast<std::size_t>(cx + 1)];
+                tail.glyph = " ";
+                tail.style = Style{};
+                tail.width = 1;
+            }
+
+            cell.glyph = draw.text.substr(glyph.offset, glyph.length);
+            cell.style = draw.style;
+            cell.width = static_cast<std::uint8_t>(gw);
+
+            if (gw == 2) {
+                AnsiCell& cont = row[static_cast<std::size_t>(cx + 1)];
+                if (cont.width == 2 && cx + 2 < ansi_cells_width_) {
+                    AnsiCell& tail = row[static_cast<std::size_t>(cx + 2)];
+                    tail.glyph = " ";
+                    tail.style = Style{};
+                    tail.width = 1;
+                }
+                cont.glyph.clear();
+                cont.style = draw.style;
+                cont.width = 0;
+            }
+
+            cx += gw;
+        }
+    }
+
+    return row;
+}
+
+void AnsiBackend::apply_dimming_scrim(Rect region, Rect exclude, float factor) {
+    const Size term = terminal_size();
+    region = intersect(region, {{0, 0}, term});
+    if (region.width <= 0 || region.height <= 0) {
+        return;
+    }
+
+    const float clamped = std::min(1.0f, std::max(0.1f, factor));
+
+    for (int y = region.y; y < region.bottom(); ++y) {
+        const std::vector<AnsiCell> row = compose_row(y);
+        if (row.empty()) {
+            continue;
+        }
+
+        for (int x = region.x; x < region.right(); ++x) {
+            if (exclude.width > 0 && exclude.height > 0 && exclude.contains({x, y})) {
+                continue;
+            }
+            if (x < 0 || x >= ansi_cells_width_) {
+                continue;
+            }
+
+            const AnsiCell& cell = row[static_cast<std::size_t>(x)];
+            if (cell.width == 0 || cell.glyph.empty()) {
+                continue;
+            }
+
+            queue_ansi_draw(x, y, cell.glyph, dimmed_cell_style(cell.style, clamped));
+        }
     }
 }
 

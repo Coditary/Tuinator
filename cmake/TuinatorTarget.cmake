@@ -39,6 +39,7 @@ endif()
 target_compile_definitions(tuinator
     PUBLIC
         $<$<BOOL:${WIN32}>:TUINATOR_PLATFORM_WINDOWS=1>
+        TUINATOR_ENABLE_TEST_IDS=$<IF:$<BOOL:${TUINATOR_ENABLE_TEST_IDS}>,1,0>
     PRIVATE
         ${TUINATOR_BACKEND_DEF}
 )

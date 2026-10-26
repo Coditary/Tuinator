@@ -133,6 +133,18 @@ void Widget::set_widget_id(std::string id) {
     mark_dirty();
 }
 
+#if TUINATOR_ENABLE_TEST_IDS
+void Widget::set_test_id(std::string id) {
+    test_id_ = std::move(id);
+    mark_dirty();
+}
+#else
+const std::string& Widget::test_id() const {
+    static const std::string kEmpty;
+    return kEmpty;
+}
+#endif
+
 void Widget::add_widget_class(std::string class_name) {
     if (has_widget_class(class_name)) {
         return;

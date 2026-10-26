@@ -19,6 +19,12 @@ set(TUINATOR_CORE_SOURCES
     src/core/application.cpp
     src/core/inline_view.cpp
     src/core/screen.cpp
+    src/testing/widget_query.cpp
+    src/testing/cell_styles.cpp
+    src/testing/ui_tree.cpp
+    src/testing/terminal_snapshot.cpp
+    src/testing/app_driver.cpp
+    src/testing/json_protocol.cpp
     src/debug/debug_paint.cpp
     src/debug/startup_profiler.cpp
     src/layout/box.cpp

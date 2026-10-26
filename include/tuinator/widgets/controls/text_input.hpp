@@ -1,15 +1,25 @@
 #pragma once
 
+#include <tuinator/core/geometry.hpp>
+#include <tuinator/render/border_style.hpp>
+#include <tuinator/render/glyphs.hpp>
 #include <tuinator/render/style.hpp>
 #include <tuinator/render/style_resolver.hpp>
 #include <tuinator/render/text.hpp>
 #include <tuinator/widgets/capabilities/widget_roles.hpp>
 #include <tuinator/widgets/widget.hpp>
 
+#include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace tuinator {
+
+struct WrappedLine {
+    std::size_t start = 0;
+    std::size_t end = 0;
+};
 
 enum class TextInputChrome {
     Brackets,
@@ -27,6 +37,19 @@ struct TextInputOptions {
     /// Framed mode: grow inner text rows with content, up to this limit.
     int max_content_lines = 1;
     std::string prompt;
+    /// Framed mode: label embedded into the top border, "─ Label ─" style.
+    std::string border_label;
+    /// Framed mode: border glyph set (default heavy box corners).
+    BorderStyle framed_border_style = BorderStyle::Heavy;
+    /// When set, overrides glyphs derived from framed_border_style.
+    std::optional<BorderGlyphs> framed_border_glyphs;
+    /// Framed mode: when false, only the fill chrome is drawn (no box outline).
+    bool framed_show_border = true;
+    /// Framed multiline: wrap at word boundaries instead of horizontal scroll.
+    bool soft_wrap = false;
+    /// Extra inner padding (terminal columns) inside the framed field.
+    int content_pad_left = 0;
+    int content_pad_right = 0;
 };
 
 class TextInput : public Widget, public TextInputField {
@@ -35,6 +58,8 @@ class TextInput : public Widget, public TextInputField {
 
     const std::string& value() const { return value_; }
     const std::string& placeholder() const { return placeholder_; }
+    const std::string& prompt() const { return prompt_; }
+    const std::string& border_label() const { return border_label_; }
     int min_width() const { return min_width_; }
     bool password() const { return password_; }
     std::string_view field_value() const override { return value_; }
@@ -42,11 +67,14 @@ class TextInput : public Widget, public TextInputField {
 
     [[nodiscard]] std::size_t cursor_position() const { return cursor_; }
     [[nodiscard]] int horizontal_scroll() const { return scroll_x_; }
+    /// Local cell for the focused caret (block or inverted glyph), if visible in the inner field.
+    [[nodiscard]] std::optional<Point> caret_local_cell() const;
     void set_value(std::string value);
     void set_placeholder(std::string placeholder);
     void set_on_change(std::function<void(const std::string&)> callback);
     void set_on_submit(std::function<void(const std::string&)> callback);
     void set_options(TextInputOptions options);
+    void set_field_styles(Style normal, Style focused);
 
     std::string_view widget_type_name() const override { return "TextInput"; }
     void apply_stylesheet(const StyleResolver& styles) override;
@@ -62,6 +90,7 @@ class TextInput : public Widget, public TextInputField {
     int text_row() const;
     int text_col_start() const;
     int inner_width() const;
+    int wrap_width_for_layout() const;
     int inner_height() const;
     int content_line_count() const;
     int framed_height_for_lines(int lines) const;
@@ -69,6 +98,10 @@ class TextInput : public Widget, public TextInputField {
     std::size_t byte_index_at_local(int local_x, int local_y, CaretAffinity affinity) const;
     void move_cursor_vertical(int delta, bool extend_selection);
     void update_layout_for_lines();
+    bool use_soft_wrap() const;
+    std::vector<WrappedLine> wrapped_lines() const;
+    int wrapped_line_count() const;
+    int cursor_wrapped_row() const;
     bool handle_mouse(const MouseEvent& mouse);
     void ensure_cursor_visible();
     void insert_char(char ch);
@@ -102,6 +135,13 @@ class TextInput : public Widget, public TextInputField {
     int min_content_lines_ = 1;
     int max_content_lines_ = 1;
     std::string prompt_;
+    std::string border_label_;
+    BorderStyle framed_border_style_ = BorderStyle::Heavy;
+    std::optional<BorderGlyphs> framed_border_glyphs_;
+    bool framed_show_border_ = true;
+    bool soft_wrap_ = false;
+    int content_pad_left_ = 0;
+    int content_pad_right_ = 0;
     std::size_t cursor_ = 0;
     std::size_t selection_anchor_ = 0;
     bool selecting_with_mouse_ = false;
@@ -109,6 +149,7 @@ class TextInput : public Widget, public TextInputField {
     int mouse_press_display_col_ = 0;
     int scroll_x_ = 0;
     int scroll_y_ = 0;
+    int last_wrap_width_ = 0;
     Style style_;
     Style focused_style_;
     std::function<void(const std::string&)> on_change_;

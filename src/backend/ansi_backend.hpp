@@ -43,8 +43,11 @@ class AnsiBackend final : public TerminalBackend {
 
     void draw_text(int x, int y, std::string_view text, Style style) override;
     void draw_image(int x, int y, Size cell_size, const TerminalImage& image) override;
+    void apply_dimming_scrim(Rect region, Rect exclude, float factor) override;
 
     bool pointer_active() const override { return left_button_down_; }
+    std::optional<Point> last_pointer_position() const override { return last_mouse_position_; }
+    void set_pointer_motion_reporting(bool all_motion) override;
     void set_poll_timeout_ms(int timeout_ms) override;
     bool true_color() const override { return true_color_enabled_; }
 
@@ -89,6 +92,7 @@ class AnsiBackend final : public TerminalBackend {
     };
 
     void queue_ansi_draw(int x, int y, std::string_view text, Style style);
+    std::vector<AnsiCell> compose_row(int row_y);
     void flush_ansi_draws(FILE* output);
     void flush_image_draws(FILE* output);
     void emit_ansi_run(FILE* output, int x, int y, std::string_view text, const Style& style);
@@ -124,6 +128,7 @@ class AnsiBackend final : public TerminalBackend {
     bool mouse_enabled_ = false;
     bool xterm_mouse_enabled_ = false;
     bool left_button_down_ = false;
+    bool pointer_motion_all_ = false;
     bool mouse_cursor_user_enabled_ = false;
     bool mouse_cursor_suppressed_ = false;
     bool mouse_cursor_visible_ = false;

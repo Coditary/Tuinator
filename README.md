@@ -151,6 +151,8 @@ pre-commit install
 
 ## Test everything
 
+See **[docs/testing.md](docs/testing.md)** for test IDs, `AppDriver`, hover/color checks, and the JSON agent protocol (AI / debugger-style loops).
+
 ```bash
 make unit-test   # headless unit tests (MemoryTerminalBackend)
 make test        # smoke-test all demos (auto-quits with q)
@@ -275,7 +277,7 @@ Smooth tracking uses xterm **mode 1003** (all motion events) via `/dev/tty`, lik
 
 - [x] **Unit tests** — headless tests for text metrics, Label, layout, ListView, memory backend
 - [x] **CI Windows** — PDCurses build + unit tests via vcpkg
-- [x] **API docs** — [`docs/API.md`](docs/API.md) overview and testing guide
+- [x] **API docs** — [`docs/API.md`](docs/API.md) overview; [`docs/testing.md`](docs/testing.md) automation & agents
 - [x] **Versioning** — `TUINATOR_VERSION` in `<tuinator/version.hpp>`, [`CHANGELOG.md`](CHANGELOG.md)
 
 ## Border glyphs (ASCII / Unicode)

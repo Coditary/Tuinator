@@ -329,7 +329,15 @@ bool Checkbox::handle_event(const Event& event) {
         return false;
     }
 
-    if (key->key == Key::Enter || key->character == ' ' || key->character == '\r') {
+    if (key->key == Key::Enter || key->character == '\r') {
+        toggle();
+        if (on_submit_) {
+            on_submit_();
+        }
+        return true;
+    }
+
+    if (key->character == ' ') {
         toggle();
         return true;
     }

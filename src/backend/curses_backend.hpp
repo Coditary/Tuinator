@@ -36,6 +36,8 @@ class CursesBackend final : public TerminalBackend {
     void draw_image(int x, int y, Size cell_size, const TerminalImage& image) override;
 
     bool pointer_active() const override { return left_button_down_; }
+    std::optional<Point> last_pointer_position() const override { return last_mouse_position_; }
+    void set_pointer_motion_reporting(bool all_motion) override;
     void set_poll_timeout_ms(int timeout_ms) override;
     bool true_color() const override { return true_color_enabled_; }
 
@@ -116,6 +118,7 @@ class CursesBackend final : public TerminalBackend {
     bool mouse_enabled_ = false;
     bool xterm_mouse_enabled_ = false;
     bool left_button_down_ = false;
+    bool pointer_motion_all_ = false;
     bool mouse_cursor_user_enabled_ = false;
     bool mouse_cursor_suppressed_ = false;
     bool mouse_cursor_visible_ = false;

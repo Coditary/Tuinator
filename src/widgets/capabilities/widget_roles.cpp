@@ -297,7 +297,9 @@ void apply_text_input_stylesheet(TextInputField& field, Widget& widget, const St
     if (auto* input = dynamic_cast<TextInput*>(&widget)) {
         TextInputOptions options{.min_width = input->min_width(),
                                  .placeholder = std::string(field.field_placeholder()),
-                                 .password = input->password()};
+                                 .password = input->password(),
+                                 .prompt = input->prompt(),
+                                 .border_label = input->border_label()};
         const WidgetOptions opts = styles.options(widget);
         if (opts.has("min-width")) {
             options.min_width = opts.int_or("min-width", options.min_width);

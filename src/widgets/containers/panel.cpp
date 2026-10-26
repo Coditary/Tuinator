@@ -70,15 +70,13 @@ Size Panel::preferred_size() const {
         content_size = content_->preferred_size();
     }
 
-    const int title_rows = title_.empty() ? 0 : 1;
     return {
         content_size.width + 2,
-        content_size.height + 2 + title_rows,
+        content_size.height + 2,
     };
 }
 
 Rect Panel::content_bounds() const {
-    const int title_rows = title_.empty() ? 0 : 1;
     const int left_inset = border_edges_.left ? 1 : 0;
     const int right_inset = border_edges_.right ? 1 : 0;
     const int top_inset = border_edges_.top ? 1 : 0;
@@ -86,9 +84,9 @@ Rect Panel::content_bounds() const {
 
     return {
         bounds_.x + left_inset,
-        bounds_.y + top_inset + title_rows,
+        bounds_.y + top_inset,
         std::max(0, bounds_.width - left_inset - right_inset),
-        std::max(0, bounds_.height - top_inset - bottom_inset - title_rows),
+        std::max(0, bounds_.height - top_inset - bottom_inset),
     };
 }
 
@@ -172,12 +170,23 @@ void Panel::paint(PaintContext& ctx) const {
     }
 
     if (!title_.empty()) {
-        const std::string label = " " + title_ + " ";
+        // Embed the title into the top border; border glyphs use the same style as the frame.
+        const std::string prefix = glyphs.horizontal + " ";
+        const std::string suffix = " " + glyphs.horizontal;
         const int title_x = border_edges_.left ? 1 : 0;
         const int title_y = top;
         const int max_width = std::max(0, bounds_.width - title_x);
-        const std::size_t bytes = text_byte_length_for_width(label, max_width);
-        canvas.draw_text({title_x, title_y}, label.substr(0, bytes), title_style);
+        const int prefix_width = text_display_width(prefix);
+        const int suffix_width = text_display_width(suffix);
+        const int title_max = std::max(0, max_width - prefix_width - suffix_width);
+        const std::size_t title_bytes = text_byte_length_for_width(title_, title_max);
+        const std::string title_text = title_.substr(0, title_bytes);
+
+        canvas.draw_text({title_x, title_y}, prefix, border_style);
+        canvas.draw_text({title_x + prefix_width, title_y}, title_text, title_style);
+        if (!title_text.empty() || suffix_width <= max_width - prefix_width) {
+            canvas.draw_text({title_x + prefix_width + text_display_width(title_text), title_y}, suffix, border_style);
+        }
     }
 
     if (!content_) {

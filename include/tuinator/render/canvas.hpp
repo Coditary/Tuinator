@@ -31,6 +31,9 @@ class Canvas {
     void draw_vline(int x, int y, int length, Style style = {});
     void fill_rect(Rect rect, char ch, Style style = {});
     void draw_image(Point position, Size cell_size, const TerminalImage& image);
+
+    /// Darken cells already painted this frame (local coordinates).
+    void apply_dimming_scrim(Rect local_region, Rect local_exclude, float factor = 0.78f);
     void invalidate_graphics();
 
     void set_text_cursor(std::optional<Point> local_position);

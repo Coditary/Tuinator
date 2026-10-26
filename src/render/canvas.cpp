@@ -170,6 +170,14 @@ void Canvas::draw_image(Point position, Size cell_size, const TerminalImage& ima
 
 void Canvas::invalidate_graphics() { backend_.invalidate_graphics(); }
 
+void Canvas::apply_dimming_scrim(Rect local_region, Rect local_exclude, float factor) {
+    const Rect region{origin_.x + local_region.x, origin_.y + local_region.y, local_region.width,
+                      local_region.height};
+    const Rect exclude{origin_.x + local_exclude.x, origin_.y + local_exclude.y, local_exclude.width,
+                       local_exclude.height};
+    backend_.apply_dimming_scrim(region, exclude, factor);
+}
+
 void Canvas::with_clip(Rect rect, const std::function<void(Canvas&)>& draw) const {
     const Point child_origin{origin_.x + rect.x, origin_.y + rect.y};
     const Rect child_clip = intersect(clip_, {child_origin.x, child_origin.y, rect.width, rect.height});
