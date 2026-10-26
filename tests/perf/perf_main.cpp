@@ -1,3 +1,3 @@
 #include "bench_harness.hpp"
 
-int main() { return tuinator::perf::run_all(); }
+int main(int argc, char** argv) { return tuinator::perf::run_all(argc, argv); }

@@ -39,6 +39,7 @@ class AppDriver {
     void hover(std::string_view selector);
     void hover_at(Point position);
     void resize_terminal(Size size);
+    void wheel_at(Point position, bool down = true);
 
     RegionStyleAnalysis analyze_selector(std::string_view selector) const;
     std::string selector_styles_json(std::string_view selector) const;

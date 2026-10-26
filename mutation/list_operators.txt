@@ -1,0 +1,10 @@
+# MuCPP operator subset for Tuinator widget mutation runs (traditional operators).
+# One operator id per line. See https://ucase.uca.es/mucpp/mutationOperators.html
+ROR
+COI
+COD
+LOR
+AIS
+AIU
+ADS
+ASR

@@ -27,6 +27,7 @@ class ListView : public Widget, public SelectableList {
     void set_copyable(bool copyable) { copyable_ = copyable; }
 
     std::string_view widget_type_name() const override { return "ListView"; }
+    bool wants_hover() const override { return true; }
 
     Size preferred_size() const override;
     void layout(Rect bounds) override;
@@ -43,6 +44,7 @@ class ListView : public Widget, public SelectableList {
     std::vector<std::string> items_;
     int selected_index_ = 0;
     int scroll_y_ = 0;
+    int hovered_row_ = -1;
     Style item_style_;
     Style selected_style_;
     std::function<void(int, const std::string&)> on_select_;

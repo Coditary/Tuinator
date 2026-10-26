@@ -288,4 +288,13 @@ void Tabs::for_each_child(const std::function<void(Widget*)>& visitor) {
     }
 }
 
+void Tabs::for_each_descendant(const std::function<void(Widget*)>& visitor) {
+    visitor(this);
+    for (TabEntry& tab : tabs_) {
+        if (tab.content) {
+            tab.content->for_each_descendant(visitor);
+        }
+    }
+}
+
 } // namespace tuinator

@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
+#include <cstring>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <string>
@@ -38,6 +40,32 @@ inline bool report_only() {
     return raw && raw[0] == '1' && raw[1] == '\0';
 }
 
+inline const char* json_report_path() {
+    return std::getenv("TUINATOR_PERF_JSON");
+}
+
+inline bool matches_filter(const char* test_name, const char* filter) {
+    if (filter == nullptr || filter[0] == '\0') {
+        return true;
+    }
+    return std::strstr(test_name, filter) != nullptr;
+}
+
+inline void append_json_sample(const char* name, double median_ms, double budget_ms, bool passed) {
+    const char* path = json_report_path();
+    if (path == nullptr || path[0] == '\0') {
+        return;
+    }
+
+    std::ofstream out(path, std::ios::app);
+    if (!out) {
+        return;
+    }
+
+    out << "{\"name\":\"" << name << "\",\"median_ms\":" << median_ms << ",\"budget_ms\":" << budget_ms
+        << ",\"passed\":" << (passed ? "true" : "false") << "}\n";
+}
+
 inline double measure_median_ms(const std::function<void()>& fn, int warmup, int iterations) {
     for (int i = 0; i < warmup; ++i) {
         fn();
@@ -66,6 +94,8 @@ inline bool check_budget(const char* name, double median_ms, double budget_ms) {
     std::cout << "[perf] " << name << ": " << median_ms << " ms (budget " << effective_budget << " ms) " << status
               << '\n';
 
+    append_json_sample(name, median_ms, effective_budget, within_budget);
+
     if (within_budget) {
         return true;
     }
@@ -90,9 +120,15 @@ template <typename Fn> inline bool bench(const char* name, double budget_ms, int
     static ::tuinator::perf::Registrar tuinator_perf_registrar_##name(#name, tuinator_perf_##name);                    \
     bool tuinator_perf_body_##name()
 
-inline int run_all() {
+inline int run_all(int argc = 0, char** argv = nullptr) {
+    const char* filter = (argc > 1 && argv != nullptr) ? argv[1] : nullptr;
+    if (json_report_path() != nullptr) {
+        std::ofstream truncate(json_report_path(), std::ios::trunc);
+    }
+
     int passed = 0;
     int failed = 0;
+    int skipped = 0;
 
     std::cout << "Tuinator performance tests\n";
     if (report_only()) {
@@ -104,15 +140,28 @@ inline int run_all() {
     if (factor != 1.0) {
         std::cout << "Budget factor: " << factor << " (TUINATOR_PERF_FACTOR)\n";
     }
+    if (filter != nullptr && filter[0] != '\0') {
+        std::cout << "Filter: " << filter << '\n';
+    }
     std::cout << '\n';
 
     for (const Case& test : registry()) {
+        if (!matches_filter(test.name, filter)) {
+            ++skipped;
+            continue;
+        }
+
         if (test.run()) {
             ++passed;
         } else {
             std::cerr << "[perf] " << test.name << " failed\n";
             ++failed;
         }
+    }
+
+    if (filter != nullptr && filter[0] != '\0' && passed == 0 && skipped > 0 && failed == 0) {
+        std::cerr << "No perf tests matched filter: " << filter << '\n';
+        return 1;
     }
 
     std::cout << "\nResult: " << passed << " passed";

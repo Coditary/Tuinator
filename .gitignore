@@ -8,6 +8,13 @@ install-local/
 cmake-build-*/
 .cache/
 compile_commands.json
+reports_analyze/
+tests_output.txt
+tests_output.tmp
+times_output.txt
+times_output.txt
+comparison_results.txt
+/list_operators.txt
 third_party/
 **/_deps/
 **/CMakeFiles/

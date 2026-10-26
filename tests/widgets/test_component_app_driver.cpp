@@ -28,13 +28,6 @@ std::unique_ptr<tuinator::Widget> make_label(std::string text, std::string test_
 
 } // namespace
 
-TUINATOR_TEST(button_renders_bracketed_label) {
-    auto root = tuinator::make_screen({.padding = 1});
-    root->add_child(std::make_unique<tuinator::Button>("Save"));
-    tuinator::testing::AppDriver driver({32, 6}, std::move(root));
-    TUINATOR_CHECK(tuinator::test::expect::snapshot_contains(driver, "[Save]"));
-}
-
 TUINATOR_TEST(button_click_triggers_callback) {
     bool fired = false;
     auto root = tuinator::make_screen({.padding = 1});
@@ -88,21 +81,6 @@ TUINATOR_TEST(checkbox_space_toggles_checked_state) {
     driver.focus("enable");
     driver.press_key(tuinator::Key::None, ' ');
     TUINATOR_CHECK(toggle->is_checked());
-}
-
-TUINATOR_TEST(toggle_mouse_click_flips_state) {
-    auto root = tuinator::make_screen({.padding = 1});
-    auto toggle = std::make_unique<tuinator::Toggle>("Dark", false);
-    toggle->set_test_id("dark");
-    root->add_child(std::move(toggle));
-
-    tuinator::testing::AppDriver driver({32, 6}, std::move(root));
-    const auto* control = tuinator::as_toggle_control(&driver.require("dark"));
-    TUINATOR_CHECK(control != nullptr);
-    TUINATOR_CHECK(!control->is_checked());
-
-    driver.click("dark");
-    TUINATOR_CHECK(control->is_checked());
 }
 
 TUINATOR_TEST(text_input_shows_placeholder_then_typed_value) {

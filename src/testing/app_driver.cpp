@@ -103,6 +103,13 @@ void AppDriver::resize_terminal(Size size) {
     app_.dispatch_event(resize);
 }
 
+void AppDriver::wheel_at(Point position, bool down) {
+    MouseEvent wheel;
+    wheel.position = position;
+    wheel.action = down ? MouseAction::WheelDown : MouseAction::WheelUp;
+    app_.dispatch_event(wheel);
+}
+
 void AppDriver::hover(std::string_view selector) {
     present();
     const Widget& widget = require(selector);

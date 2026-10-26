@@ -89,6 +89,32 @@ TUINATOR_TEST(list_view_ctrl_c_copies_selected_item) {
     TUINATOR_CHECK_EQ(tuinator::clipboard::get(), "Beta");
 }
 
+TUINATOR_TEST(list_view_home_and_end_jump_selection) {
+    const tuinator::Theme theme = tuinator::dark_theme();
+    tuinator::ListView list(theme.label, theme.button_focused);
+    list.set_items({"A", "B", "C", "D"});
+    list.layout({0, 0, 20, 6});
+    list.set_focused(true);
+    list.set_selected_index(2);
+
+    TUINATOR_CHECK(list.handle_event(tuinator::KeyPress{tuinator::Key::Home}));
+    TUINATOR_CHECK_EQ(list.selected_index(), 0);
+
+    TUINATOR_CHECK(list.handle_event(tuinator::KeyPress{tuinator::Key::End}));
+    TUINATOR_CHECK_EQ(list.selected_index(), 3);
+}
+
+TUINATOR_TEST(list_view_selection_clamps_to_item_count) {
+    const tuinator::Theme theme = tuinator::dark_theme();
+    tuinator::ListView list(theme.label, theme.button_focused);
+    list.set_items({"only"});
+    list.layout({0, 0, 12, 3});
+    list.set_focused(true);
+
+    TUINATOR_CHECK(list.handle_event(tuinator::KeyPress{tuinator::Key::Down}));
+    TUINATOR_CHECK_EQ(list.selected_index(), 0);
+}
+
 TUINATOR_TEST(list_view_copy_disabled_ignores_ctrl_c) {
     const tuinator::Theme theme = tuinator::dark_theme();
     tuinator::ListView list(theme.label, theme.button_focused);

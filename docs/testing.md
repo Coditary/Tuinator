@@ -80,7 +80,102 @@ TUINATOR_CHECK(tuinator::test::row_contains(backend, 0, "expected text"));
 Run: `make unit-test` or `ctest --test-dir build`.
 
 Behavior-focused component suites that use fixed terminal sizes, `AppDriver`, clicks, and
-resize live in `tests/widgets/test_component_app_driver.cpp`.
+resize live in:
+
+- `tests/widgets/test_component_app_driver.cpp` — controls and simple layout
+- `tests/widgets/test_panes_app_driver.cpp` — Panel, SplitPane, ScrollView, Grid
+- `tests/integration/test_pane_nesting.cpp` — nested panes, resize, scroll-in-split edge cases
+- `tests/integration/test_widget_nesting.cpp` — cross-widget nesting (tabs, splits, scroll, grid, list/table/combo/input)
+
+Widget **edge-case** suites (`tests/widgets/edge/`): empty data, out-of-range selection, zero-size layout/paint, clamping at min/max, input outside bounds, collapsed tree nodes, scroll past end, split size overflow, etc.
+
+### Parameterized tests (`tests/support/param_test.hpp`)
+
+Add many cases without copy-pasting whole `TUINATOR_TEST` functions:
+
+```cpp
+#include "param_test.hpp"
+
+struct Row { const char* label; int in; int out; };
+constexpr Row kRows[] = {{"neg", -1, 0}, {"big", 99, 2}};
+
+TUINATOR_TEST(param_my_widget_clamp) {
+  TUINATOR_PARAM_TABLE(my_widget, Row, kRows, {
+    Widget w;
+    w.set_index(_tuinator_param_row.in);
+    TUINATOR_CHECK_EQ(w.index(), _tuinator_param_row.out);
+  });
+}
+
+// Dynamic grid (nested loops):
+for (int w = 8; w <= 40; w += 8) {
+  TUINATOR_PARAM_CASE("w" + std::to_string(w), { /* use w */ });
+}
+
+// Each row as its own registry entry (separate line in test output):
+TUINATOR_PARAM_TEST(slider, above_max, {
+  tuinator::Slider s(0, 10, 50);
+  TUINATOR_CHECK_EQ(s.value(), 10);
+});
+```
+
+Failures from `TUINATOR_PARAM_CASE` are prefixed with `[case_name]`. Filter the runner:
+
+`./build/tuinator-tests param_split` runs only matching tests.
+
+Examples: `tests/widgets/edge/test_edge_param.cpp`.
+
+### Negative / contrapositive tests (`tests/support/negative_test.hpp`)
+
+Assert what must **not** happen (`TUINATOR_CHECK_FALSE`), and meta-checks that wrong expectations **do** fail:
+
+```cpp
+#include "negative_test.hpp"
+
+TUINATOR_CHECK_FALSE(widget.handle_event(bad_event));
+TUINATOR_CHECK_EQ(widget.value(), unchanged);
+
+// Harness sanity (wrong assertion must register as failure):
+TUINATOR_EXPECT_CHECK_FAILS({ TUINATOR_CHECK_EQ(actual, wrong); });
+```
+
+Widget negatives: `tests/widgets/edge/test_edge_negative.cpp`. Harness meta: `tests/core/test_harness_meta.cpp`.
+
+Pair each positive edge/param test with a negative where it matters (no focus → no change, empty → no navigation, clamp ≠ raw index).
+
+### Mutation testing (MuCPP)
+
+External mutation runs: [docs/mutation-testing.md](mutation-testing.md). The test binary supports `TUINATOR_MUCPP_OUTPUT=tests_output.tmp` for MuCPP’s per-test `0`/`1` file.
+
+### Performance regression tests
+
+See [docs/performance-testing.md](performance-testing.md) — `tuinator-perf-tests`, parameterized suites in `tests/perf/perf_widgets.cpp` and `perf_app_driver.cpp`, filters, `TUINATOR_PERF_FACTOR`, JSON export.
+
+Isolated widget unit tests (layout + events + paint, no full app shell):
+
+- `tests/widgets/test_list_view.cpp` — ListView
+- `tests/widgets/test_table.cpp` — Table
+- `tests/widgets/test_tree_view.cpp` — TreeView
+- `tests/widgets/test_tabs.cpp` — Tabs
+- `tests/widgets/test_combo_box.cpp` — ComboBox
+- `tests/widgets/test_slider.cpp` — Slider
+- `tests/widgets/test_button.cpp` — Button
+- `tests/widgets/test_toggle.cpp` — Toggle
+- `tests/widgets/test_progress_bar.cpp` — ProgressBar layouts
+- `tests/widgets/test_spinner.cpp` — Spinner
+- `tests/widgets/test_text_input.cpp` — TextInput
+- `tests/widgets/test_menu_bar.cpp` — MenuBar (dropdown, submenu, shortcuts)
+- `tests/widgets/test_command_palette.cpp` — CommandPalette
+- `tests/widgets/test_context_menu.cpp` — ContextMenu
+- `tests/widgets/test_action_registry.cpp` — global action shortcuts
+- `tests/widgets/test_separator.cpp`, `test_status_bar.cpp`, `test_layout_box.cpp` — layout chrome
+- `tests/widgets/test_dialog.cpp`, `test_window.cpp`, `window/test_desktop.cpp` — dialogs & windows
+- `tests/widgets/test_panel.cpp`, `test_scroll_view.cpp` — container query/scroll behavior
+- `tests/widgets/chrome/test_shell_terminal.cpp` — ShellTerminal metadata (no PTY in unit tests)
+- `tests/widgets/test_widgets_app_driver.cpp` — ListView, Table, Tabs, Combo, Slider via AppDriver
+- `tests/widgets/test_list_view_app_driver.cpp` — ListView row background / hover via `analyze_selector`
+- `tests/scene/test_scene_views.cpp` — Scene JSON for ListView, Table, Nerd galleries
+- `tests/core/test_json_protocol_extended.cpp` — JSON agent hover, styles, type, errors
 
 ---
 

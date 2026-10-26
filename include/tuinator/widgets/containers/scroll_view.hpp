@@ -51,6 +51,7 @@ class ScrollView : public Widget, public Scrollable, public SingleChildContainer
     Widget* hit_test(Point point) override;
     Widget* hit_test_focusable(Point point) override;
     void for_each_child(const std::function<void(Widget*)>& visitor) override;
+    void for_each_descendant(const std::function<void(Widget*)>& visitor) override;
 
     const ScrollViewOptions& options() const { return options_; }
     void set_options(ScrollViewOptions options);

@@ -1,5 +1,6 @@
 set(TUINATOR_TEST_SOURCES
     core/test_main.cpp
+    core/test_harness_meta.cpp
     core/test_text.cpp
     core/test_memory_backend.cpp
     core/test_inline_backend.cpp
@@ -10,6 +11,8 @@ set(TUINATOR_TEST_SOURCES
     core/test_screen.cpp
     core/test_debug_paint.cpp
     core/test_testing_driver.cpp
+    core/test_json_protocol_extended.cpp
+    scene/test_scene_views.cpp
     render/test_glyphs.cpp
     render/test_border_style.cpp
     render/test_block_element.cpp
@@ -38,9 +41,42 @@ set(TUINATOR_TEST_SOURCES
     widgets/test_asciidoc_view.cpp
     widgets/test_video_view.cpp
     widgets/test_list_view.cpp
-    widgets/test_controls.cpp
+    widgets/test_list_view_app_driver.cpp
+    widgets/test_button.cpp
+    widgets/test_toggle.cpp
+    widgets/test_progress_bar.cpp
+    widgets/test_spinner.cpp
+    widgets/test_text_input.cpp
+    widgets/test_table.cpp
+    widgets/test_tree_view.cpp
+    widgets/test_tabs.cpp
+    widgets/test_combo_box.cpp
+    widgets/test_slider.cpp
+    widgets/test_separator.cpp
+    widgets/test_status_bar.cpp
+    widgets/test_layout_box.cpp
+    widgets/test_dialog.cpp
+    widgets/test_window.cpp
+    window/test_desktop.cpp
+    widgets/test_panel.cpp
+    widgets/test_scroll_view.cpp
+    widgets/test_widgets_app_driver.cpp
+    widgets/test_action_registry.cpp
+    widgets/test_command_palette.cpp
+    widgets/test_context_menu.cpp
     widgets/test_checkbox.cpp
     widgets/test_component_app_driver.cpp
+    widgets/test_panes_app_driver.cpp
+    integration/test_pane_nesting.cpp
+    integration/test_widget_nesting.cpp
+    widgets/edge/test_edge_views.cpp
+    widgets/edge/test_edge_controls.cpp
+    widgets/edge/test_edge_containers.cpp
+    widgets/edge/test_edge_display_menu.cpp
+    widgets/edge/test_edge_charts.cpp
+    widgets/edge/test_edge_misc.cpp
+    widgets/edge/test_edge_param.cpp
+    widgets/edge/test_edge_negative.cpp
     widgets/test_menu_bar.cpp
     widgets/test_text_area.cpp
     widgets/test_scrollbar.cpp
@@ -56,6 +92,7 @@ set(TUINATOR_TEST_SOURCES
     widgets/chrome/test_source_control_panel.cpp
     widgets/chrome/test_status_line.cpp
     widgets/chrome/test_terminal_frame.cpp
+    widgets/chrome/test_shell_terminal.cpp
 )
 
 add_executable(tuinator-tests ${TUINATOR_TEST_SOURCES})
@@ -78,6 +115,8 @@ set(TUINATOR_PERF_SOURCES
     perf/perf_charts.cpp
     perf/perf_nerd_glyph.cpp
     perf/perf_graphics.cpp
+    perf/perf_widgets.cpp
+    perf/perf_app_driver.cpp
 )
 
 add_executable(tuinator-perf-tests ${TUINATOR_PERF_SOURCES})

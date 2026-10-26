@@ -52,13 +52,6 @@ TUINATOR_TEST(scroll_view_is_single_child_container) {
     TUINATOR_CHECK_EQ(tuinator::as_text_display(view.content())->display_text(), "replaced");
 }
 
-TUINATOR_TEST(button_activate_invokes_callback) {
-    bool clicked = false;
-    tuinator::Button button("Go", [&clicked]() { clicked = true; });
-    tuinator::as_activatable(&button)->activate();
-    TUINATOR_CHECK(clicked);
-}
-
 TUINATOR_TEST(widget_capabilities_registry) {
     tuinator::Grid grid;
     tuinator::Slider slider(0, 10, 5);

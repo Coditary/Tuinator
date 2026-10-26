@@ -266,4 +266,13 @@ void Panel::for_each_child(const std::function<void(Widget*)>& visitor) {
     }
 }
 
+void Panel::for_each_descendant(const std::function<void(Widget*)>& visitor) {
+    visitor(this);
+    for_each_child([&](Widget* child) {
+        if (child != nullptr) {
+            child->for_each_descendant(visitor);
+        }
+    });
+}
+
 } // namespace tuinator

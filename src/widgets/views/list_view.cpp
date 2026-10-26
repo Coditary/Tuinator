@@ -84,17 +84,23 @@ void ListView::paint(PaintContext& ctx) const {
     const StyleResolver& styles = ctx.styles();
     const Style item_style = styles.text(*this, item_style_);
     const Style selected_style = styles.selected(*this, selected_style_);
-    paint_bounds_background(ctx, item_style);
-
     const int capacity = bounds_.height;
     for (int row = 0; row < capacity; ++row) {
         const int index = scroll_y_ + row;
         if (index < 0 || index >= static_cast<int>(items_.size())) {
+            canvas.fill_rect({0, row, bounds_.width, 1}, ' ', item_style);
             continue;
         }
 
         const bool selected = index == selected_index_;
-        const Style& style = selected ? selected_style : item_style;
+        const bool hovered = is_hovered() && index == hovered_row_;
+        Style row_style = selected ? selected_style : item_style;
+        if (hovered && !selected) {
+            row_style.reverse = !row_style.reverse;
+        }
+        canvas.fill_rect({0, row, bounds_.width, 1}, ' ', row_style);
+
+        const Style& style = row_style;
         const std::string prefix = selected ? "> " : "  ";
         const std::string& item = items_[static_cast<std::size_t>(index)];
 
@@ -106,6 +112,27 @@ void ListView::paint(PaintContext& ctx) const {
 
 bool ListView::handle_event(const Event& event) {
     if (const auto* mouse = std::get_if<MouseEvent>(&event)) {
+        if (mouse->action == MouseAction::Move) {
+            if (!contains_point(mouse->position)) {
+                if (hovered_row_ != -1) {
+                    hovered_row_ = -1;
+                    mark_dirty();
+                }
+                return false;
+            }
+
+            const Point local{
+                mouse->position.x - bounds_.x,
+                mouse->position.y - bounds_.y,
+            };
+            const int row = row_at(local);
+            if (row != hovered_row_) {
+                hovered_row_ = row;
+                mark_dirty();
+            }
+            return false;
+        }
+
         if (mouse->action != MouseAction::Click && mouse->action != MouseAction::Release) {
             return false;
         }

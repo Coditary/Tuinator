@@ -343,6 +343,15 @@ void ScrollView::for_each_child(const std::function<void(Widget*)>& visitor) {
     }
 }
 
+void ScrollView::for_each_descendant(const std::function<void(Widget*)>& visitor) {
+    visitor(this);
+    for_each_child([&](Widget* child) {
+        if (child != nullptr) {
+            child->for_each_descendant(visitor);
+        }
+    });
+}
+
 bool ScrollView::has_focused_descendant() const { return content_ && content_->has_focused_descendant(); }
 
 bool ScrollView::pointer_active() const { return scrollbar_state_.pointer_active(); }

@@ -38,6 +38,7 @@ class Tabs : public Widget, public TabHost {
     bool has_focused_descendant() const override;
     void collect_focusable(std::vector<Widget*>& out) override;
     void for_each_child(const std::function<void(Widget*)>& visitor) override;
+    void for_each_descendant(const std::function<void(Widget*)>& visitor) override;
 
   private:
     struct TabEntry {

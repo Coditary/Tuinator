@@ -1,13 +1,17 @@
 BUILD_DIR := build
+MUCpp_BUILD ?= build-mucpp
+MUCpp_CLANG_STD ?= c++20
 DEMO_DIR := $(BUILD_DIR)/examples
 CMAKE := cmake
 CMAKE_FLAGS := -DCMAKE_BUILD_TYPE=Release
+MUCpp_CMAKE_FLAGS := -DCMAKE_BUILD_TYPE=Debug -DTUINATOR_BUILD_TESTS=ON -DTUINATOR_ENABLE_TEST_IDS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 CMAKE_CACHE := $(BUILD_DIR)/CMakeCache.txt
+MUCpp_CACHE := $(MUCpp_BUILD)/CMakeCache.txt
 
 DEMOS := hello form colors layout counter buttons windows mouse-test scroll scroll-hover theme dashboard data controls menu image textarea throbber bigtext checkbox piechart charts diffview weather glyphs terminal-frame scene scene-runtime split-panes markdown markdown-image markdown-gif asciidoc video
 RUNNABLE := $(DEMOS) profile
 
-.PHONY: all build configure clean rebuild help demos test test-all unit-test perf-test profile profile-quick scene-codegen scene-runtime-codegen scene-validate format format-check lint quality $(RUNNABLE)
+.PHONY: all build configure clean rebuild help demos test test-all unit-test perf-test profile profile-quick scene-codegen scene-runtime-codegen scene-validate format format-check lint quality mucpp_clean mucpp_compilation mucpp_test mucpp_execute $(RUNNABLE)
 
 all: $(DEMOS:%=$(DEMO_DIR)/tuinator-%)
 
@@ -57,8 +61,33 @@ test test-all: build
 unit-test: $(BUILD_DIR)/tuinator-tests
 	@./$(BUILD_DIR)/tuinator-tests
 
+# --- MuCPP mutation testing (https://ucase.uca.es/mucpp/) ---
+mucpp_clean:
+	@rm -f tests_output.tmp tests_output.txt times_output.tmp times_output.txt comparison_results.txt
+	@rm -rf reports_analyze
+
+$(MUCpp_CACHE): CMakeLists.txt cmake/*.cmake tests/CMakeLists.txt
+	@mkdir -p $(MUCpp_BUILD)
+	$(CMAKE) -B $(MUCpp_BUILD) $(MUCpp_CMAKE_FLAGS)
+	@ln -sf $(MUCpp_BUILD)/compile_commands.json compile_commands.json
+
+mucpp_compilation: $(MUCpp_CACHE)
+	@$(CMAKE) --build $(MUCpp_BUILD) --target tuinator
+
+mucpp_test: $(MUCpp_CACHE)
+	@$(CMAKE) --build $(MUCpp_BUILD) --target tuinator-tests
+
+mucpp_execute: mucpp_test
+	@TUINATOR_MUCPP_OUTPUT=tests_output.tmp ./$(MUCpp_BUILD)/tuinator-tests
+
 perf-test: $(BUILD_DIR)/tuinator-perf-tests
 	@./$(BUILD_DIR)/tuinator-perf-tests
+
+perf-report: $(BUILD_DIR)/tuinator-perf-tests
+	@TUINATOR_PERF_REPORT_ONLY=1 ./$(BUILD_DIR)/tuinator-perf-tests
+
+perf-ci: $(BUILD_DIR)/tuinator-perf-tests
+	@TUINATOR_PERF_FACTOR=2 ./$(BUILD_DIR)/tuinator-perf-tests
 
 format:
 	@./scripts/quality/format.sh
@@ -90,8 +119,13 @@ help:
 	@echo ""
 	@echo "Test:"
 	@echo "  make unit-test  Run headless unit tests"
-	@echo "  make perf-test  Run performance regression tests"
+	@echo "  make perf-test    Run performance regression tests (strict)"
+	@echo "  make perf-report  Perf tests, log over-budget without failing"
+	@echo "  make perf-ci      Perf tests with 2x budget factor"
 	@echo "  make test       Run all smoke tests"
+	@echo ""
+	@echo "Mutation (MuCPP, use a git worktree — see docs/mutation-testing.md):"
+	@echo "  make mucpp_compilation mucpp_test mucpp_execute"
 	@echo ""
 	@echo "Quality:"
 	@echo "  make format       Apply clang-format to tracked sources"
