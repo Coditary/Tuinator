@@ -52,7 +52,7 @@ void Button::paint(PaintContext& ctx) const {
 
 bool Button::handle_event(const Event& event) {
     if (const auto* mouse = std::get_if<MouseEvent>(&event)) {
-        if (mouse->action != MouseAction::Click && mouse->action != MouseAction::Release) {
+        if (mouse->action != MouseAction::Click) {
             return false;
         }
 

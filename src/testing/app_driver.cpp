@@ -96,6 +96,13 @@ void AppDriver::hover_at(Point position) {
     app_.dispatch_event(move);
 }
 
+void AppDriver::resize_terminal(Size size) {
+    Resize resize;
+    resize.width = size.width;
+    resize.height = size.height;
+    app_.dispatch_event(resize);
+}
+
 void AppDriver::hover(std::string_view selector) {
     present();
     const Widget& widget = require(selector);

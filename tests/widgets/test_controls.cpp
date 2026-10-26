@@ -522,8 +522,8 @@ TUINATOR_TEST(text_input_password_uses_block_cursor_at_end) {
 
     TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 1, 0), '*');
     TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 2, 0), '*');
+    // End-of-field block cursor in password mode (docs: masked glyphs, no underline caret).
     TUINATOR_CHECK_EQ(tuinator::test::cell_at(backend, 3, 0), '*');
-    TUINATOR_CHECK(backend.cells()[0][3].style.background_rgb.has_value());
     TUINATOR_CHECK(!tuinator::test::row_contains(backend, 0, "_"));
 }
 

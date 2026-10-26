@@ -79,6 +79,9 @@ TUINATOR_CHECK(tuinator::test::row_contains(backend, 0, "expected text"));
 
 Run: `make unit-test` or `ctest --test-dir build`.
 
+Behavior-focused component suites that use fixed terminal sizes, `AppDriver`, clicks, and
+resize live in `tests/widgets/test_component_app_driver.cpp`.
+
 ---
 
 ## 2. `AppDriver` (integration, hover, colors)
@@ -112,6 +115,7 @@ TUINATOR_CHECK(style.left_background == style.right_background);
 | `ui_tree_json(options)` | Widget tree JSON |
 | `analyze_selector(id)` / `selector_styles_json(id)` | Color analysis in widget bounds |
 | `write_snapshot_png(path)` | Raster snapshot (layout/colors) |
+| `resize_terminal(size)` | Resize memory backend and re-layout (tests responsive TUIs) |
 
 ### Color analysis (`analyze_selector`)
 

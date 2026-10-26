@@ -629,7 +629,11 @@ void Application::focus_widget(Widget* widget) {
 
 void Application::handle_event(const Event& event) {
     if (const auto* resize = std::get_if<Resize>(&event)) {
-        (void)resize;
+        if (resize->width > 0 && resize->height > 0) {
+            if (auto* memory = dynamic_cast<MemoryTerminalBackend*>(backend_.get())) {
+                memory->resize({resize->width, resize->height});
+            }
+        }
         backend_->invalidate_graphics();
         needs_screen_clear_ = true;
         layout_root();

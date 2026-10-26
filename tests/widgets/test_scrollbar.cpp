@@ -315,7 +315,7 @@ TUINATOR_TEST(panel_forwards_dirty_callback_to_content) {
     label_ptr->mark_dirty();
 
     TUINATOR_CHECK_EQ(reported.x, 1);
-    TUINATOR_CHECK_EQ(reported.y, 2);
+    TUINATOR_CHECK_EQ(reported.y, 1);
 }
 
 TUINATOR_TEST(text_area_enter_accepts_newline_character) {

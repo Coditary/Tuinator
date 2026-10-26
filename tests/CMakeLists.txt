@@ -40,6 +40,7 @@ set(TUINATOR_TEST_SOURCES
     widgets/test_list_view.cpp
     widgets/test_controls.cpp
     widgets/test_checkbox.cpp
+    widgets/test_component_app_driver.cpp
     widgets/test_menu_bar.cpp
     widgets/test_text_area.cpp
     widgets/test_scrollbar.cpp
